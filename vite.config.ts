@@ -14,7 +14,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: parseInt(process.env.PORT || "3007"),
+    port: parseInt(process.env.PORT || "3008"),
   },
   build: {
     rollupOptions: {

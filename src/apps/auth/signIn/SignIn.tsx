@@ -23,7 +23,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../redux-action/store';
 import { CustomToast } from '../../../hooks/CustomToast';
-import { AuthRequest, User } from '@suleigolden/co-renting-api-client';
+import { AuthRequest, User } from '@suleigolden/sulber-api-client';
 import { useLogInNavigation } from '../../../hooks/use-login-navigation';
 import { authenticate } from '../../../redux-action/slices/auth-slice';
 import { LoginSchema, LoginSchemaType } from './schema';

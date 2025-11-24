@@ -16,21 +16,23 @@ import {
   useSteps,
 } from "@chakra-ui/react";
 import { useSearchParams } from "react-router-dom";
-import { GeneralInformation } from "./GeneralInformation";
-import { ManagingYourProperty } from "./ManagingYourProperty";
-import { StayingInYourProperty } from "./StayingInYourProperty";
-import { PropertyLocation } from "./PropertyLocation";
-import { PropertyPhotos } from "./PropertyPhotos";
+import { UserInformation } from "./UserInformation";
+// import { ManagingYourProperty } from "./ManagingYourProperty";
+// import { StayingInYourProperty } from "./StayingInYourProperty";
+// import { PropertyLocation } from "./PropertyLocation";
+// import { PropertyPhotos } from "./PropertyPhotos";
+
+
 
 const steps = [
-  { title: "General Info", Component: GeneralInformation },
-  { title: "Location", Component: PropertyLocation },
-  { title: "Stand Out", Component: StayingInYourProperty },
-  { title: "Photos", Component: PropertyPhotos },
-  { title: "Manage Your Property", Component: ManagingYourProperty },
+  { title: "User Information", Component: UserInformation },
+  // { title: "Location", Component: PropertyLocation },
+  // { title: "Stand Out", Component: StayingInYourProperty },
+  // { title: "Photos", Component: PropertyPhotos },
+  // { title: "Manage Your Property", Component: ManagingYourProperty },
 ];
 
-export const PropertyOnboard = () => {
+export const ProviderOnboarding = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   // const navigate = useNavigate();
 

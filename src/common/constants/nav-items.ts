@@ -1,4 +1,4 @@
-import { User } from "@suleigolden/co-renting-api-client";
+import { User } from "@suleigolden/sulber-api-client";
 
 
 type NavItem = {
@@ -10,7 +10,7 @@ type NavItem = {
   };
 
 export const getNavItems = (user: User) => {
-  const OWNER_NAV_ITEMS: Array<NavItem> = [
+  const PROVIDER_NAV_ITEMS: Array<NavItem> = [
     {
       label: "List your property",
       href: `/onboard/${user?.id}/property-onboard`,
@@ -32,7 +32,7 @@ export const getNavItems = (user: User) => {
       type: "button",
     },
   ];
-  const RENTER_NAV_ITEMS: Array<NavItem> = [
+  const CUSTOMER_NAV_ITEMS: Array<NavItem> = [
     {
       label: "Listings",
       href: `/renter/${user?.id}/listings`,
@@ -91,9 +91,9 @@ export const getNavItems = (user: User) => {
     },
   ];
 
-  return user?.role === "landlord"
-    ? OWNER_NAV_ITEMS
-    : user?.role === "renter"
-    ? RENTER_NAV_ITEMS
+  return user?.role === "provider"
+    ? PROVIDER_NAV_ITEMS
+    : user?.role === "customer"
+    ? CUSTOMER_NAV_ITEMS
     : PUBLIC_NAV_ITEMS;
 };

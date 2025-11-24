@@ -1,5 +1,5 @@
 import { Box } from "@chakra-ui/react";
-import { Address } from "@suleigolden/co-renting-api-client";
+import { Address } from "@suleigolden/sulber-api-client";
 
 type LocationMapProps = {
     address: Address

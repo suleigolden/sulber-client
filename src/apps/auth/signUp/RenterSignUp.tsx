@@ -18,7 +18,7 @@ import { RiEyeCloseLine } from 'react-icons/ri';
 import { RenterSignUpSchema } from './schema';
 import { CountrySelect } from '../../../components/fields/CountrySelect';
 import { registerUser } from '../../../redux-action/slices/auth-slice';
-import { RegisterRequest, User } from '@suleigolden/co-renting-api-client';
+import { RegisterRequest, User } from '@suleigolden/sulber-api-client';
 import { useDispatch } from 'react-redux';
 import { useLogInNavigation } from '../../../hooks/use-login-navigation';
 import { AppDispatch } from '../../../redux-action/store';

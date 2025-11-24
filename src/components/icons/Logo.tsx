@@ -17,17 +17,17 @@ export const Logo: FC<LogoProps> = ({ size = 32 }) => {
       ml={{ base: 0, sm: 1 }}
       mb={{ base: 0, sm: 4 }}
     >
-      Homi
+      Sul
       <Text
         as={'span'}
-        color={colorMode === 'light' ? '#675dff' : 'white'}
+        color={colorMode === 'light' ? 'brand.500' : 'white'}
         borderTop={colorMode === 'light' ? '2px #675dff solid' : '2px white solid'}
         borderBottom={colorMode === 'light' ? '2px #675dff solid' : '2px white solid'}
         borderRadius={9}
         fontWeight={700}
         p={'0 3px'}
       >
-        Share
+        Ber
       </Text>
       
     </Text>

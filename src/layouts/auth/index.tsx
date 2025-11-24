@@ -1,10 +1,10 @@
 import React from 'react';
 import { useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import {adminRoutes} from 'routes';
+import {adminRoutes} from '~/routes';
 import { Box, useColorModeValue } from '@chakra-ui/react';
-import { SidebarContext } from 'contexts/SidebarContext';
-import { User } from '@suleigolden/co-renting-api-client';
+import { SidebarContext } from '~/contexts/SidebarContext';
+import { User } from '@suleigolden/sulber-api-client';
 
 // Add type for routes
 type RoutesType = {

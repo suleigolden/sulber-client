@@ -7,7 +7,7 @@ import { useState } from "react";
 import { SidebarContext } from "../../contexts/SidebarContext";
 import { navBarRoutes } from "../../routes";
 import { Route, Routes } from "react-router-dom";
-import { PropertyOnboard } from "~/apps/provider-onboard";
+import { ProviderOnboarding } from "~/apps/provider-onboard";
 import { UserProfileSettings } from "~/apps/users/UserProfileSettings";
 import { Dashboard } from "~/apps/dashboard/Dashboard";
 
@@ -99,12 +99,11 @@ export const DashboardNavBar = (props: Record<string, unknown>) => {
           >
             <Routes>
               <Route
-                path={`/${user.id}/property-onboard`}
-                element={<PropertyOnboard />}
+                path={`/${user.id}/provider-onboarding`}
+                element={<ProviderOnboarding />}
               />
 
               <Route path={`/${user.id}/dashboard`} element={<Dashboard />} />
-              <Route path={`/${user.id}/listings`} element={<Dashboard />} />
               
               {/* User profile Settings */}
               <Route

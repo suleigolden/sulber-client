@@ -18,7 +18,7 @@ import {
   import { FaHome } from "react-icons/fa";
   import { BsFillHouseFill } from "react-icons/bs";
   
-  type GeneralInformationProps = {
+  type UserInformationProps = {
     onNext?: () => void;
   };
   
@@ -44,9 +44,9 @@ import {
     },
   ];
   
-  export const GeneralInformation = forwardRef<
+  export const UserInformation = forwardRef<
     { submitForm: () => Promise<void> },
-    GeneralInformationProps
+    UserInformationProps
   >(({ onNext }, ref) => {
     const { methods, handleSubmit } = usePropertyOnboarding();
     const {

@@ -1,6 +1,6 @@
 import { InferType, object, string } from "yup";
 
-export const RenterSignUpSchema = object({
+export const ProviderSignUpSchema = object({
   first_name: string().required().label("First Name"),
   last_name: string().required().label("Last Name"),
   email: string().required().email("Must be a valid email").label("Email"),
@@ -9,7 +9,7 @@ export const RenterSignUpSchema = object({
   acceptTerms: string().oneOf(["true"], "You must accept the terms and conditions").label("Accept Terms"),
 });
 
-export const LandlordSignUpSchema = object({
+export const CustomerSignUpSchema = object({
   first_name: string().required().label("First Name"),
   last_name: string().required().label("Last Name"),
   email: string().required().email("Must be a valid email").label("Email"),
@@ -19,9 +19,9 @@ export const LandlordSignUpSchema = object({
 });
 
  
-export type RenterSignUpSchema = InferType<typeof RenterSignUpSchema>;
+export type ProviderSignUpSchema = InferType<typeof ProviderSignUpSchema>;
 
  
-export type LandlordSignUpSchema = InferType<typeof LandlordSignUpSchema>;
+export type CustomerSignUpSchema = InferType<typeof CustomerSignUpSchema>;
 
 

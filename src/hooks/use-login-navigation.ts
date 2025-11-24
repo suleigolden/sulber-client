@@ -28,11 +28,11 @@ export const useLogInNavigation = (type?: 'login' | 'signup') => {
       showToast("Login", "Successfully Login", "success");
       
       switch (user.role) {
-        case 'renter':
-          window.location.href = `/renter/${user.id}/dashboard`;
+        case 'customer':
+          window.location.href = `/customer/${user.id}/dashboard`;
           break;
-        case 'landlord':
-          window.location.href = `/owner/${user.id}/dashboard`;
+        case 'provider':
+          window.location.href = `/provider/${user.id}/provider-onboarding`;
           break;
         default:
           break;

@@ -15,48 +15,40 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { MdOutlineRemoveRedEye } from 'react-icons/md';
 import { RiEyeCloseLine } from 'react-icons/ri';
-import { RenterSignUpSchema } from './schema';
+import { ProviderSignUpSchema } from './schema';
 import { CountrySelect } from '../../../components/fields/CountrySelect';
+import { RegisterRequest, User, Roles } from '@suleigolden/sulber-api-client';
 import { registerUser } from '../../../redux-action/slices/auth-slice';
-import { RegisterRequest, User } from '@suleigolden/sulber-api-client';
 import { useDispatch } from 'react-redux';
-import { useLogInNavigation } from '../../../hooks/use-login-navigation';
 import { AppDispatch } from '../../../redux-action/store';
+import { useLogInNavigation } from '../../../hooks/use-login-navigation';
 import { CustomToast } from '../../../hooks/CustomToast';
 import { TermsCheckbox } from '../../../components/fields/TermsCheckbox';
 
-export const RenterSignUp = () => {
+export const ProviderSignUp = () => {
   const [show, setShow] = useState<boolean>(false);
-  const handleClick = () => setShow(!show);
   const [isEmailExists, setIsEmailExists] = useState<string>('');
-  const dispatch = useDispatch<AppDispatch>();
+  const handleClick = () => setShow(!show);
   const { navigateToDashboard } = useLogInNavigation('signup');
+  const dispatch = useDispatch<AppDispatch>();
   const {
     handleSubmit,
     register,
-    formState: { errors, isSubmitting },
     control,
-  } = useForm<RenterSignUpSchema>({
+    formState: { errors, isSubmitting },
+  } = useForm<ProviderSignUpSchema>({
     mode: 'onChange',
-    defaultValues: {
-      first_name: '',
-      last_name: '',
-      email: '',
-      password: '',
-      country: '',
-    },
   });
   const showToast = CustomToast();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: ProviderSignUpSchema) => {
     try {
       const payload = {
         ...data,
-        role: 'renter',
+        role: 'provider' as Roles,
       };
-      const res = await dispatch(registerUser(payload as RegisterRequest));
-
+      const res = await dispatch(registerUser(payload as unknown as RegisterRequest));
+console.log("res: ", res);
       if (res.meta.requestStatus === 'fulfilled') {
         await navigateToDashboard(res.payload as User);
       } else {
@@ -79,7 +71,7 @@ export const RenterSignUp = () => {
   return (
     <Box as="form" onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={4}>
-        <FormControl isInvalid={!!errors.first_name}>
+      <FormControl isInvalid={!!errors.first_name}>
           <FormLabel>First Name</FormLabel>
           <Input
             type="text"
@@ -105,7 +97,6 @@ export const RenterSignUp = () => {
             {errors.last_name && errors.last_name.message}
           </FormErrorMessage>
         </FormControl>
-
         <FormControl isInvalid={!!errors.email}>
           <FormLabel>Email</FormLabel>
           <Input
@@ -158,6 +149,7 @@ export const RenterSignUp = () => {
             {errors.password && errors.password.message}
           </FormErrorMessage>
         </FormControl>
+
         <CountrySelect
           control={control}
           name="country"
@@ -179,7 +171,7 @@ export const RenterSignUp = () => {
           w="100%"
           mt={4}
         >
-          Create Renter Account
+          Create Provider Account
         </Button>
       </Stack>
     </Box>

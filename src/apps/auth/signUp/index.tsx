@@ -20,9 +20,9 @@ import {
   ModalCloseButton,
 } from "@chakra-ui/react";
 import { FaUser, FaBuilding } from "react-icons/fa";
-import { RenterSignUp } from "./RenterSignUp";
+import { CustomerSignUp } from "./CustomerSignUp";
 import { useState } from "react";
-import { LandlordSignUp } from "./LandlordSignUp";
+import { ProviderSignUp } from "./ProviderSignUp";
 
 const TabOption = ({
   icon,
@@ -52,33 +52,32 @@ const TabOption = ({
 const AccountTypeDescription = ({
   type,
 }: {
-  type: "owner" | "renter";
+  type: "customer" | "provider";
 }) => {
   const descriptions = {
-    owner: (
+    customer: (
       <VStack spacing={3} align="start" p={4} bg="gray.50" borderRadius="md">
         <Text fontSize="md" fontWeight="medium" color="gray.700">
-          As a owner, property manager or real estate professional you'll be able to:
+          As a SulBer Customer you'll be able to:
         </Text>
         <VStack spacing={2} align="start" pl={4}>
-          <Text color="gray.700">• List and manage your properties efficiently</Text>
-          <Text color="gray.700">• Screen and communicate with potential co-owners and co-renters</Text>
-          <Text color="gray.700">• Handle co-living and rental agreements and payments securely</Text>
-          <Text color="gray.700">• Access detailed analytics and reporting tools</Text>
+          <Text color="gray.700">• Request trusted DRIVEWAY_CAR_WASH, SNOW_SHOVELING, or PARKING_LOT_CLEANING services</Text>
+          <Text color="gray.700">• Compare providers, pricing, and availability in real time</Text>
+          <Text color="gray.700">• Track service progress and communicate with your provider</Text>
+          <Text color="gray.700">• Manage bookings, payments, and service history from one dashboard</Text>
         </VStack>
       </VStack>
     ),
-    renter: (
+    provider: (
       <VStack spacing={3} align="start" p={4} bg="gray.50" borderRadius="md">
         <Text fontSize="md" fontWeight="medium" color="gray.700">
-          As a Co-living Member, you'll be able to:
+          As a SulBer Provider you'll be able to:
         </Text>
         <VStack spacing={2} align="start" pl={4}>
-          <Text color="gray.700">• Find and connect with like-minded co-living partners</Text>
-          <Text color="gray.700">• Share rental costs and responsibilities fairly</Text>
-          <Text color="gray.700">• Access exclusive co-living properties and opportunities</Text>
-          <Text color="gray.700">• Manage shared expenses and household arrangements</Text>
-          <Text color="gray.700">• Build your co-living profile and references</Text>
+          <Text color="gray.700">• Offer driveway car wash, snow shoveling, and parking lot cleaning services</Text>
+          <Text color="gray.700">• Receive qualified job requests from nearby customers</Text>
+          <Text color="gray.700">• Manage schedules, dispatch crews, and confirm completion</Text>
+          <Text color="gray.700">• Get paid faster with built-in invoicing and payment tracking</Text>
         </VStack>
       </VStack>
     ),
@@ -133,10 +132,10 @@ export const SignUp = ({ onSignInClick }: SignUpProps) => {
                   mb={3}
                   fontWeight="700"
                 >
-                  Sign up to HomiShare 
+                  Sign up to SulBer 
                 </Heading>
                 <Text color="gray.700" fontSize="md">
-                 Sign up and discover a better way to share living spaces
+                 Connect customers with reliable outdoor service providers
                 </Text>
               </Box>
 
@@ -150,7 +149,7 @@ export const SignUp = ({ onSignInClick }: SignUpProps) => {
                   borderColor={borderColor}
                   mb={6}
                 >
-                   <Tab
+                  <Tab
                     py={4}
                     flex={1}
                     borderRadius="lg"
@@ -164,8 +163,8 @@ export const SignUp = ({ onSignInClick }: SignUpProps) => {
                   >
                     <TabOption
                       icon={FaUser}
-                      title="Co-living Member"
-                      description="Perfect for individuals looking to share homes and split costs with compatible housemates"
+                      title="Customer Account"
+                      description="Request driveway car washes, snow shoveling, or parking lot cleaning in minutes"
                     />
                   </Tab>
                   <Tab
@@ -182,26 +181,26 @@ export const SignUp = ({ onSignInClick }: SignUpProps) => {
                   >
                     <TabOption
                       icon={FaBuilding}
-                      title="Owner Account"
-                      description="For owners, property managers, and real estate professionals"
+                      title="Provider Account"
+                      description="Grow your service business by fulfilling SulBer customer requests"
                     />
                   </Tab>
                 </TabList>
 
                 <Box mb={6}>
                   {tabIndex === 0 ? (
-                    <AccountTypeDescription type="owner" />
+                    <AccountTypeDescription type="customer" />
                   ) : (
-                    <AccountTypeDescription type="renter" />
+                    <AccountTypeDescription type="provider" />
                   )}
                 </Box>
 
                 <TabPanels>
                   <TabPanel px={0}>
-                  <RenterSignUp />
+                  <CustomerSignUp />
                   </TabPanel>
                   <TabPanel px={0}>
-                  <LandlordSignUp />
+                  <ProviderSignUp />
                   </TabPanel>
                 </TabPanels>
               </Tabs>

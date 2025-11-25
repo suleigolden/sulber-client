@@ -17,6 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { useSearchParams } from "react-router-dom";
 import { UserInformation } from "./UserInformation";
+import { ProviderServices } from "./ProviderServices";
 // import { ManagingYourProperty } from "./ManagingYourProperty";
 // import { StayingInYourProperty } from "./StayingInYourProperty";
 import { ProviderLocation } from "./ProviderLocation";
@@ -29,7 +30,7 @@ import { CustomInputField } from "~/components/fields/CustomInputField";
 
 const steps = [
   { title: "Location", Component: ProviderLocation },
-  { title: "Services", Component: ProviderLocation },
+  { title: "Services", Component: ProviderServices },
 
   // { title: "Location", Component: PropertyLocation },
   // { title: "Stand Out", Component: StayingInYourProperty },
@@ -55,7 +56,9 @@ export const ProviderOnboarding = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [hasSelectedServices, setHasSelectedServices] = useState<boolean>(false);
   const formRef = useRef<{ submitForm: () => Promise<void> }>(null);
+  const SERVICES_STEP_INDEX = steps.findIndex((step) => step.title === "Services");
 
   // Update URL when step changes
   const goToNext = () => {
@@ -104,7 +107,19 @@ export const ProviderOnboarding = () => {
     }
   };
 
-  const StepComponent = steps[activeStep].Component;
+  const renderStepComponent = () => {
+    if (activeStep === SERVICES_STEP_INDEX) {
+      return (
+        <ProviderServices
+          ref={formRef}
+          onServicesSelectedChange={setHasSelectedServices}
+        />
+      );
+    }
+
+    const StepComponent = steps[activeStep].Component;
+    return <StepComponent ref={formRef} />;
+  };
 
   return (
     <Container
@@ -156,7 +171,7 @@ export const ProviderOnboarding = () => {
         
           {/* Make your place stand out */}
           {/* In this step, you'll add some of the amenities your place offers, plus 5 or more photos. Then, you'll create a title and description. */}
-          <StepComponent ref={formRef} />
+          {renderStepComponent()}
         </Box>
 
         <Flex
@@ -182,6 +197,9 @@ export const ProviderOnboarding = () => {
             // isDisabled={activeStep === steps.length - 1}
             colorScheme="brand"
             isLoading={isSubmitting}
+            isDisabled={
+              activeStep === SERVICES_STEP_INDEX ? !hasSelectedServices : false
+            }
             w={{ base: "full", sm: "auto" }}
           >
             {activeStep === steps.length - 1 ? "Publish" : "Next"}

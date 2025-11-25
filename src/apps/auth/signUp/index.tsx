@@ -149,7 +149,7 @@ export const SignUp = ({ onSignInClick }: SignUpProps) => {
                   borderColor={borderColor}
                   mb={6}
                 >
-                  <Tab
+                   <Tab
                     py={4}
                     flex={1}
                     borderRadius="lg"

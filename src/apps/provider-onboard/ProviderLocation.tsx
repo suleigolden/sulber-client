@@ -67,9 +67,9 @@ export const ProviderLocation = forwardRef(
       <FormProvider {...methods}>
           <VStack spacing={8} align="center" w="full">
             <Box
-              w="full"
+          w="full"
               maxW="720px"
-              bg="white"
+          bg="white"
               borderRadius="2xl"
               boxShadow="lg"
               p={{ base: 6, md: 10 }}
@@ -81,24 +81,24 @@ export const ProviderLocation = forwardRef(
                   </Circle>
                   <Heading size="lg">Earn with SulBer</Heading>
                 </HStack>
-                <Text fontSize="md" color="gray.600">
+            <Text fontSize="md" color="gray.600">
                   Decide where and how you want to offer driveway car washes, snow shoveling, and parking lot cleaning.
-                </Text>
+            </Text>
 
                 <VStack spacing={4} w="full">
                   {/* <CustomInputField
-                    type="text"
+              type="text"
                     label="Where would you like to earn?"
-                    registerName="address.city"
-                    isRequired={true}
+              registerName="address.city"
+              isRequired={true}
                     placeholder="e.g., London, ON"
-                    isError={errors?.address?.city}
+              isError={errors?.address?.city}
                   /> */}
                    <LocationSearchInput
                         onLocationSelect={(location) => setSelectedLocation(location)}
-                      />
-                  <CustomInputField
-                    type="text"
+            />
+            <CustomInputField
+              type="text"
                     label="Referral code (optional)"
                     registerName="referral_code"
                     placeholder="Enter your SulBer referral code"
@@ -112,7 +112,7 @@ export const ProviderLocation = forwardRef(
                 </Text>
               </VStack>
             </Box>
-          </VStack>
+        </VStack>
       </FormProvider>
     );
   }

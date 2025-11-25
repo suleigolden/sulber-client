@@ -14,7 +14,7 @@ import {
   import { AddIcon, MinusIcon } from "@chakra-ui/icons";
   import { forwardRef, useImperativeHandle } from "react";
   import { Controller, FormProvider } from "react-hook-form";
-  import { usePropertyOnboarding } from "~/hooks/use-property-onboarding";
+  import { useProviderOnboarding } from "~/hooks/use-provider-onboarding";
   import { FaHome } from "react-icons/fa";
   import { BsFillHouseFill } from "react-icons/bs";
   
@@ -48,7 +48,7 @@ import {
     { submitForm: () => Promise<void> },
     UserInformationProps
   >(({ onNext }, ref) => {
-    const { methods, handleSubmit } = usePropertyOnboarding();
+    const { methods, handleSubmit } = useProviderOnboarding();
     const {
       control,
       setValue,

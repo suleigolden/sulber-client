@@ -1281,10 +1281,10 @@
   resolved "https://registry.yarnpkg.com/@standard-schema/utils/-/utils-0.3.0.tgz#3d5e608f16c2390c10528e98e59aef6bf73cae7b"
   integrity sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==
 
-"@suleigolden/sulber-api-client@^0.24.0":
-  version "0.2.0"
-  resolved "https://npm.pkg.github.com/download/@suleigolden/sulber-api-client/0.2.0/dfaeaf26363e9c9d0e6cc8e73334dedabc347865#dfaeaf26363e9c9d0e6cc8e73334dedabc347865"
-  integrity sha512-dt5e4Z5adWBQDfzne72pFCOR/eELKHxvyEtEgT8p1s6amLW9DOxE2RlZEHcon/0Uu+/aD/vc85ZlrsOkRTYzMQ==
+"@suleigolden/sulber-api-client@^0.5.0":
+  version "0.5.0"
+  resolved "https://npm.pkg.github.com/download/@suleigolden/sulber-api-client/0.5.0/b7f0559307cb4391068eabe9f7860b4c63b6a5db#b7f0559307cb4391068eabe9f7860b4c63b6a5db"
+  integrity sha512-6EmmFVaeYmva1nUnSH1hDBPI6bCzME1NvdfFxx0EurA6eXz9huC6on2tgTd6Jm7cD1asfExRRLkaUE04YZw7IA==
   dependencies:
     axios "^0.27.2"
     bignumber.js "^9.0.2"
@@ -3356,6 +3356,11 @@ use-isomorphic-layout-effect@^1.2.0:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/use-isomorphic-layout-effect/-/use-isomorphic-layout-effect-1.2.1.tgz#2f11a525628f56424521c748feabc2ffcc962fce"
   integrity sha512-tpZZ+EX0gaghDAiFR37hj5MgY6ZN55kLiPkJsKxBMZ6GZdOSPJXiOzPM984oPYZ5AnehYx5WQp1+ME8I/P/pRA==
+
+use-places-autocomplete@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/use-places-autocomplete/-/use-places-autocomplete-4.0.1.tgz#a4e24c4210474559cef5f8b47c73382942d1e34f"
+  integrity sha512-AybOR/qzXcdaMCGSFveycfL3kztwseAOdagbYoJD8c3amll+gEiPmUkSNhYNUEBqbR+JmJG6/oBTRgihNbE+1A==
 
 use-sidecar@^1.1.3:
   version "1.1.3"

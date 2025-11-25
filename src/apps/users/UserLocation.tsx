@@ -8,15 +8,15 @@ import { forwardRef, useImperativeHandle } from "react";
 import {  FormProvider } from "react-hook-form";
 import { CountrySelect } from "~/components/fields/CountrySelect";
 import { CustomInputField } from "~/components/fields/CustomInputField";
-import { usePropertyOnboarding } from "~/hooks/use-property-onboarding";
+import { usePropertyOnboarding } from "~/hooks/use-provider-onboarding";
 
-type PropertyLocationProps = {
+type ProviderLocationProps = {
   onNext?: () => void;
 };
 
-export const PropertyLocation = forwardRef(
+export const ProviderLocation = forwardRef(
   (
-    props: PropertyLocationProps,
+    props: ProviderLocationProps,
     ref: React.ForwardedRef<{ submitForm: () => Promise<void> }>
   ) => {
     const { methods, handleSubmit } = usePropertyOnboarding();

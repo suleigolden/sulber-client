@@ -19,13 +19,18 @@ import { useSearchParams } from "react-router-dom";
 import { UserInformation } from "./UserInformation";
 // import { ManagingYourProperty } from "./ManagingYourProperty";
 // import { StayingInYourProperty } from "./StayingInYourProperty";
-// import { PropertyLocation } from "./PropertyLocation";
+import { ProviderLocation } from "./ProviderLocation";
+import { ChevronLeftIcon, ChevronDownIcon, ArrowForwardIcon } from "@chakra-ui/icons";
+import { FaRegMoneyBillAlt } from "react-icons/fa";
+import { CustomInputField } from "~/components/fields/CustomInputField";
 // import { PropertyPhotos } from "./PropertyPhotos";
 
 
 
 const steps = [
-  { title: "User Information", Component: UserInformation },
+  { title: "Location", Component: ProviderLocation },
+  { title: "Services", Component: ProviderLocation },
+
   // { title: "Location", Component: PropertyLocation },
   // { title: "Stand Out", Component: StayingInYourProperty },
   // { title: "Photos", Component: PropertyPhotos },
@@ -109,7 +114,7 @@ export const ProviderOnboarding = () => {
       bg="white"
     >
       <VStack spacing={{ base: 4, md: 8 }} w="full">
-        <Box w="full" overflowX="auto" px={{ base: 2, md: 0 }}>
+      <Box w="full" maxW="720px" bg="brand.500" color="white" borderRadius="lg" px={6} py={4}>
           <Stepper size={{ base: "sm", md: "lg" }} index={activeStep} gap="0">
             {steps.map((step, index) => (
               <Step key={index}>
@@ -120,8 +125,8 @@ export const ProviderOnboarding = () => {
                   <StepIndicator
                     style={
                       index < activeStep
-                        ? { backgroundColor: "#675dff", color: "white" }
-                        : { borderColor: "#675dff" }
+                        ? { backgroundColor: "white", color: "white" }
+                        : { borderColor: "white" }
                     }
                   >
                     <StepStatus
@@ -142,13 +147,13 @@ export const ProviderOnboarding = () => {
             ))}
           </Stepper>
         </Box>
-
+       
         <Box
           w="full"
           p={{ base: 4, md: 8 }}
           borderRadius="lg"
-          boxShadow={{ base: "md", md: "lg" }}
         >
+        
           {/* Make your place stand out */}
           {/* In this step, you'll add some of the amenities your place offers, plus 5 or more photos. Then, you'll create a title and description. */}
           <StepComponent ref={formRef} />
@@ -156,9 +161,10 @@ export const ProviderOnboarding = () => {
 
         <Flex
           w="full"
+          maxW="720px" 
           justify="space-between"
-          direction={{ base: "column", sm: "row" }}
-          gap={{ base: 4, sm: 0 }}
+          // direction={{ base: "column", sm: "row" }}
+          // gap={{ base: 4, sm: 0 }}
         >
           <Button
             variant="outline"

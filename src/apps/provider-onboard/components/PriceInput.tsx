@@ -13,14 +13,14 @@ import {
   Heading,
 } from "@chakra-ui/react";
 import { Control, Controller, FieldErrors } from "react-hook-form";
-import { PropertyOnboardingSchemaType } from "../schema";
+import { ProviderOnboardingSchemaType } from "../schema";
 import { useCallback } from "react";
 import { FaDollarSign } from "react-icons/fa";
 
 type PriceInputProps = {
-  control: Control<PropertyOnboardingSchemaType>;
+  control: Control<ProviderOnboardingSchemaType>;
   listingType: string;
-  errors: FieldErrors<PropertyOnboardingSchemaType>;
+  errors: FieldErrors<ProviderOnboardingSchemaType>;
 };
 
 const currencies = [

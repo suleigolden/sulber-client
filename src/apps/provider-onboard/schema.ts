@@ -1,21 +1,10 @@
-import { array, boolean, InferType, number, object, string } from "yup";
+import { array, InferType, object, string } from "yup";
 
-export const PropertyOnboardingSchema =  object().shape({
-  title: string().optional(),
-  description: string().optional(),
-
-  property_type: string().optional(),
-
-  listing_type: string().optional(),
-
-  building_type: string().optional(),
-
-  parking_type: array().of(string()).optional(),
-
-  age_of_property: number().optional(),
-
-  square_footage: string().optional(),
-
+export const ProviderOnboardingSchema =  object().shape({
+  date_of_birth: string().optional(),
+  phone_number: string().optional(),
+  gender: string().optional(),
+  services: array().of(string()).optional(),
   address: object().shape({
     street: string().optional(),
     city: string().optional(),
@@ -23,38 +12,17 @@ export const PropertyOnboardingSchema =  object().shape({
     country: string().optional(),
     postal_code: string().optional(),
   }).optional(),
-
-  monthly_rent_or_sell_amount: object().shape({
-    amount: number().optional(),
-    currency: string().optional(),
-  }).optional(),
-
-  num_of_tenants_or_owners_needed: number().optional(),
-
-  number_of_bedrooms: number().required('number_of_bedrooms is required'),
-
-  number_of_bathrooms: number().required('number_of_bathrooms is required'),
-
-  amenities: array().of(string()).optional(),
-
-  pets_allowed: boolean().optional(),
-
-  smoking_allowed: boolean().optional(),
-
-  is_active: boolean().optional(),
-
-  is_smoking_detector: boolean().optional(),
-
-  is_carbon_monoxide_detector: boolean().optional(),
-
-  is_steps_completed: boolean().optional(),
-
-  photo_galleries: array().of(object().shape({
-    url: string().required(),
-    is_cover_photo: boolean().optional(),
-  })).optional(),
+  referral_code: string().optional(),
+  avatar_url: string().optional(),
+  bio: string().optional(),
+  verification_status: string().optional(),
+  verification_provider: string().optional(),
+  verification_document_type: string().optional(),
+  verification_document_expiration_date: string().optional(),
+  verification_document_front_url: string().optional(),
+  verification_document_back_url: string().optional(),
 });
 
  
-export type PropertyOnboardingSchemaType = InferType<typeof PropertyOnboardingSchema>;
+export type ProviderOnboardingSchemaType = InferType<typeof ProviderOnboardingSchema>;
 

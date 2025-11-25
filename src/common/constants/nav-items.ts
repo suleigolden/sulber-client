@@ -12,40 +12,50 @@ type NavItem = {
 export const getNavItems = (user: User) => {
   const PROVIDER_NAV_ITEMS: Array<NavItem> = [
     {
-      label: "List your property",
+      label: "Complete Your Profile",
       href: `/onboard/${user?.id}/property-onboard`,
       type: "link",
     },
     {
-      label: "Listings",
-      href: `/owner/${user?.id}/listings`,
+      label: "Service Requests",
+      href: `/provider/${user?.id}/service-requests`,
       type: "link",
     },
     {
-      label: "Listing Requests",
-      href: `/owner/${user?.id}/accept-or-reject-listing-requests`,
+      label: "Manage Requests",
+      href: `/provider/${user?.id}/accept-or-reject-listing-requests`,
       type: "link",
     },
     {
-      label: "Sign In",
-      href: "/sign-in",
+      label: "Payment History",
+      href: `/provider/${user?.id}/payment-history`,
+      type: "link",
+    },
+    {
+      label: "Profile Settings",
+      href: `/customer/${user?.id}/profile-settings`,
+      type: "link",
+    },
+    {
+      label: "Log Out",
+      href: "/logout",
       type: "button",
     },
   ];
   const CUSTOMER_NAV_ITEMS: Array<NavItem> = [
     {
-      label: "Listings",
-      href: `/renter/${user?.id}/listings`,
+      label: "Service Requests",
+      href: `/customer/${user?.id}/service-requests`,
       type: "link",
     },
     {
-      label: "Listing Request",
-      href: `/renter/${user?.id}/listing-request`,
+      label: "Manage Requests",
+      href: `/customer/${user?.id}/manage-requests`,
       type: "link",
     },
     {
       label: "Profile Settings",
-      href: `/renter/${user?.id}/profile-settings`,
+      href: `/customer/${user?.id}/profile-settings`,
       type: "link",
     },
     {
@@ -66,12 +76,12 @@ export const getNavItems = (user: User) => {
       type: "link",
       isHandleNavigationLink: "how-it-works",
     },
-    {
-      label: "Pricing",
-      href: "/pricing",
-      type: "link",
-      isHandleNavigationLink: "pricing",
-    },
+    // {
+    //   label: "Pricing",
+    //   href: "/pricing",
+    //   type: "link",
+    //   isHandleNavigationLink: "pricing",
+    // },
     {
       label: "Use Cases",
       href: "/use-cases",

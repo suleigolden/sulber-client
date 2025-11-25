@@ -5,7 +5,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { forwardRef, useEffect, useImperativeHandle } from "react";
-import { usePropertyOnboarding } from "~/hooks/use-property-onboarding";
+import { useProviderOnboarding } from "~/hooks/use-provider-onboarding";
 import { FormProvider } from "react-hook-form";
 import { AmenitySelector } from "./AmenitySelector";
 
@@ -16,7 +16,7 @@ export const StayingInYourProperty = forwardRef(
     props: { onNext?: () => void },
     ref: React.ForwardedRef<{ submitForm: () => Promise<void> }>,
   ) => {
-    const { methods, handleSubmit, selectedAmenities, setSelectedAmenities, setValue } = usePropertyOnboarding();
+    const { methods, handleSubmit, selectedAmenities, setSelectedAmenities, setValue } = useProviderOnboarding();
     
     useImperativeHandle(ref, () => ({
       submitForm: handleSubmit,

@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { forwardRef, useImperativeHandle } from "react";
 import { Controller, FormProvider } from "react-hook-form";
-import { usePropertyOnboarding } from "~/hooks/use-property-onboarding";
+import { useProviderOnboarding } from "~/hooks/use-provider-onboarding";
 import SunEditor from "suneditor-react";
 import "suneditor/dist/css/suneditor.min.css";
 import { PriceInput } from './components/PriceInput';
@@ -24,7 +24,7 @@ export const ManagingYourProperty = forwardRef(
     props: { onNext?: () => void },
     ref: React.ForwardedRef<{ submitForm: () => Promise<void> }>,
   ) => {
-    const { methods, handleSubmit } = usePropertyOnboarding(true);
+    const { methods, handleSubmit } = useProviderOnboarding(true);
     const {
       control,
       formState: { errors },

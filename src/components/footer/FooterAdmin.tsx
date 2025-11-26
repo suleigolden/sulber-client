@@ -36,16 +36,7 @@ export default function Footer() {
                 fontSize="sm"
                 textAlign={{ base: 'center', md: 'left' }}
               >
-                &copy; {new Date().getFullYear()} HomiShare.
-              </Text>
-              <Text
-                color={textColor}
-                fontSize="sm"
-                display="flex"
-                alignItems="center"
-                gap={1}
-              >
-                Made with <Icon as={FaHeart} color="red.400" /> in London, UK
+                &copy; {new Date().getFullYear()} Sulber.
               </Text>
             </VStack>
 
@@ -105,7 +96,7 @@ export default function Footer() {
           </Flex>
 
           <Text fontSize="xs" color={textColor} textAlign="center">
-            All Rights Reserved. HomiShare is a registered trademark.
+            All Rights Reserved. Sulber is a registered trademark.
           </Text>
         </VStack>
       </Container>

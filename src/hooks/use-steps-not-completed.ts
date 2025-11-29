@@ -1,14 +1,12 @@
 import { api, UserProfile } from "@suleigolden/sulber-api-client";
 import { useEffect, useState } from "react";
 import { useUser } from "./use-user";
-import { useSignOut } from "./use-sign-out";
 import { ProviderProfile } from "@suleigolden/sulber-api-client";
 import { useProviderProfile } from "./use-provider-profile";
 import { useUserProfile } from "./use-user-profile";
 
 export const useStepsNotCompleted = () => {
   const { user } = useUser();
-  const signOut = useSignOut();
   const [stepsNotCompleted, setStepsNotCompleted] = useState<{ userProfile: UserProfile | undefined, providerProfile: ProviderProfile | undefined }>();
   const { userProfile, isLoading: isUserProfileLoading } = useUserProfile();
   const { providerProfile, isLoading: isProviderProfileLoading } = useProviderProfile();

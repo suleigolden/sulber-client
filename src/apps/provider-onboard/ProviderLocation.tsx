@@ -18,6 +18,7 @@ type ProviderLocationProps = {
   onNext?: () => void;
   activeStep: number;
   steps: any;
+  onLocationValidChange?: (isValid: boolean) => void;
 };
 
 export const ProviderLocation = forwardRef(
@@ -61,9 +62,22 @@ export const ProviderLocation = forwardRef(
           .join(', ')
       : '';
 
+    // Watch address fields to determine if location is valid
+    const addressCity = watch('address.city');
+    const addressState = watch('address.state');
+    const addressCountry = watch('address.country');
+    const hasFormAddress = !!(addressCity || addressState || addressCountry);
+    const hasSavedAddress = !!(savedAddress?.city || savedAddress?.state || savedAddress?.country);
+    const isLocationValid = hasFormAddress || hasSavedAddress;
+
     useImperativeHandle(ref, () => ({
       submitForm: submitOnboarding,
     }));
+
+    // Notify parent component about location validity
+    React.useEffect(() => {
+      _props.onLocationValidChange?.(isLocationValid);
+    }, [isLocationValid, _props]);
 
     // Initialize form with saved address when component mounts
     React.useEffect(() => {

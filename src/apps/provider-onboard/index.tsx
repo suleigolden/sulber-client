@@ -41,8 +41,10 @@ export const ProviderOnboarding = () => {
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [hasSelectedServices, setHasSelectedServices] = useState<boolean>(false);
+  const [isLocationValid, setIsLocationValid] = useState<boolean>(false);
   const formRef = useRef<{ submitForm: () => Promise<void> }>(null);
   const SERVICES_STEP_INDEX = steps.findIndex((step) => step.title === "Services");
+  const LOCATION_STEP_INDEX = steps.findIndex((step) => step.title === "Location");
 
   // Update URL when step changes
   const goToNext = () => {
@@ -104,7 +106,14 @@ export const ProviderOnboarding = () => {
     }
 
     const StepComponent = steps[activeStep].Component;
-    return <StepComponent ref={formRef} activeStep={activeStep} steps={steps} />;
+    return (
+      <StepComponent
+        ref={formRef}
+        activeStep={activeStep}
+        steps={steps}
+        onLocationValidChange={activeStep === LOCATION_STEP_INDEX ? setIsLocationValid : undefined}
+      />
+    );
   };
 
   return (
@@ -152,7 +161,11 @@ export const ProviderOnboarding = () => {
             colorScheme="brand"
             isLoading={isSubmitting}
             isDisabled={
-              activeStep === SERVICES_STEP_INDEX ? !hasSelectedServices : false
+              activeStep === SERVICES_STEP_INDEX
+                ? !hasSelectedServices
+                : activeStep === LOCATION_STEP_INDEX
+                ? !isLocationValid
+                : false
             }
             w={{ base: "full", sm: "auto" }}
             minW={{ base: "full", sm: "120px" }}

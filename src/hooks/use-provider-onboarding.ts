@@ -31,8 +31,6 @@ export const useProviderOnboarding = (isLastStep?: boolean) => {
 
   useEffect(() => {
     if (stepsNotCompleted) {
-      console.log("userProfile: ", userProfile);
-      console.log("providerProfile: ", providerProfile);
       reset({
         avatar_url: userProfile?.avatarUrl || '',
         date_of_birth: userProfile?.dateOfBirth || '',
@@ -81,9 +79,6 @@ export const useProviderOnboarding = (isLastStep?: boolean) => {
         services: data.services,
         businessName: data.business_name,
       };
-      console.log("userProfilePayload: ", userProfilePayload);
-      console.log("providerProfilePayload: ", providerProfilePayload);
-
 
       if (userProfile) {
         await api.service('user-profile').update(userProfile.id as string, userProfilePayload as UserProfile);

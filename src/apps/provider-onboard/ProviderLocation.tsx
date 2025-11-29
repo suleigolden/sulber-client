@@ -65,28 +65,28 @@ export const ProviderLocation = forwardRef(
 
     return (
       <FormProvider {...methods}>
-          <VStack spacing={8} align="center" w="full">
-            <Box
-          w="full"
-              maxW="720px"
-          bg="white"
-              borderRadius="2xl"
-              boxShadow="lg"
-              p={{ base: 6, md: 10 }}
-            >
-              <VStack align="start" spacing={6} w="full">
-                <HStack spacing={4} align="center">
-                  <Circle size="60px" bg="green.100" color="green.600">
-                    <FaRegMoneyBillAlt size="28px" />
-                  </Circle>
-                  <Heading size="lg">Earn with SulBer</Heading>
-                </HStack>
-            <Text fontSize="md" color="gray.600">
-                  Decide where and how you want to offer driveway car washes, snow shoveling, and parking lot cleaning.
-            </Text>
+        <VStack spacing={8} align="center" w="full">
+          <Box
+            w="full"
+            maxW="720px"
+            bg="white"
+            borderRadius="2xl"
+            boxShadow="lg"
+            p={{ base: 6, md: 10 }}
+          >
+            <VStack align="start" spacing={6} w="full">
+              <HStack spacing={4} align="center">
+                <Circle size="60px" bg="green.100" color="green.600">
+                  <FaRegMoneyBillAlt size="28px" />
+                </Circle>
+                <Heading size="lg">Earn with SulBer</Heading>
+              </HStack>
+              <Text fontSize="md" color="gray.600">
+                Decide where and how you want to offer driveway car washes, snow shoveling, and parking lot cleaning.
+              </Text>
 
-                <VStack spacing={4} w="full">
-                  {/* <CustomInputField
+              <VStack spacing={4} w="full">
+                {/* <CustomInputField
               type="text"
                     label="Where would you like to earn?"
               registerName="address.city"
@@ -94,24 +94,24 @@ export const ProviderLocation = forwardRef(
                     placeholder="e.g., London, ON"
               isError={errors?.address?.city}
                   /> */}
-                   <LocationSearchInput
-                        onLocationSelect={(location) => setSelectedLocation(location)}
-            />
-            <CustomInputField
-              type="text"
-                    label="Referral code (optional)"
-                    registerName="referral_code"
-                    placeholder="Enter your SulBer referral code"
-                    isError={errors?.referral_code}
-                  />
-                </VStack>
-
-                <Text fontSize="sm" color="gray.600" lineHeight="tall">
-                  By proceeding, I agree that SulBer, its customers, and its representatives may contact me by
-                  email, phone, or SMS for service requests at this location.
-                </Text>
+                <LocationSearchInput
+                  onLocationSelect={(location) => setSelectedLocation(location)}
+                />
+                <CustomInputField
+                  type="text"
+                  label="Referral code (optional)"
+                  registerName="referral_code"
+                  placeholder="Enter your SulBer referral code"
+                  isError={errors?.referral_code}
+                />
               </VStack>
-            </Box>
+
+              <Text fontSize="sm" color="gray.600" lineHeight="tall">
+                By proceeding, I agree that SulBer, its customers, and its representatives may contact me by
+                email, phone, or SMS for service requests at this location.
+              </Text>
+            </VStack>
+          </Box>
         </VStack>
       </FormProvider>
     );

@@ -31,6 +31,8 @@ import { CustomInputField } from "~/components/fields/CustomInputField";
 const steps = [
   { title: "Location", Component: ProviderLocation },
   { title: "Services", Component: ProviderServices },
+  { title: "User Information", Component: UserInformation },
+
 
   // { title: "Location", Component: PropertyLocation },
   // { title: "Stand Out", Component: StayingInYourProperty },

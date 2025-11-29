@@ -42,9 +42,11 @@ export const ProviderOnboarding = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [hasSelectedServices, setHasSelectedServices] = useState<boolean>(false);
   const [isLocationValid, setIsLocationValid] = useState<boolean>(false);
+  const [isUserInfoValid, setIsUserInfoValid] = useState<boolean>(false);
   const formRef = useRef<{ submitForm: () => Promise<void> }>(null);
   const SERVICES_STEP_INDEX = steps.findIndex((step) => step.title === "Services");
   const LOCATION_STEP_INDEX = steps.findIndex((step) => step.title === "Location");
+  const USER_INFO_STEP_INDEX = steps.findIndex((step) => step.title === "User");
 
   // Update URL when step changes
   const goToNext = () => {
@@ -112,6 +114,7 @@ export const ProviderOnboarding = () => {
         activeStep={activeStep}
         steps={steps}
         onLocationValidChange={activeStep === LOCATION_STEP_INDEX ? setIsLocationValid : undefined}
+        onUserInfoValidChange={activeStep === USER_INFO_STEP_INDEX ? setIsUserInfoValid : undefined}
       />
     );
   };
@@ -133,6 +136,13 @@ export const ProviderOnboarding = () => {
         >
           {renderStepComponent()}
         </Box>
+        <VStack spacing={8} align="center" w="full">
+        <Box
+          w="full"
+          maxW="720px"
+          bg="white"
+          borderRadius="2xl"
+        >
 
         <Flex
           w="full"
@@ -165,6 +175,8 @@ export const ProviderOnboarding = () => {
                 ? !hasSelectedServices
                 : activeStep === LOCATION_STEP_INDEX
                 ? !isLocationValid
+                : activeStep === USER_INFO_STEP_INDEX
+                ? !isUserInfoValid
                 : false
             }
             w={{ base: "full", sm: "auto" }}
@@ -174,6 +186,8 @@ export const ProviderOnboarding = () => {
             {activeStep === steps.length - 1 ? "Publish" : "Next"}
           </Button>
         </Flex>
+        </Box>
+        </VStack>
       </VStack>
     </Container>
   );

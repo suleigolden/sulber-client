@@ -16,17 +16,24 @@ import { useProviderOnboarding } from "~/hooks/use-provider-onboarding";
 import { CustomInputField } from "~/components/fields/CustomInputField";
 import { useAvatarUpload } from "~/hooks/useAvatarUpload";
 import { useUserProfile } from "~/hooks/use-user-profile";
-import { Gender } from "@suleigolden/sulber-api-client";
+import { Gender, UserProfile } from "@suleigolden/sulber-api-client";
 import { AvatarUploadModal } from "./components/AvatarUploadModal";
 import { useUser } from "~/hooks/use-user";
+import { OnboardingStepper } from "./OnboardingStepper";
 
 type UserInformationProps = {
   onNext?: () => void;
+  activeStep: number;
+  steps: any;
+  onUserInfoValidChange?: (isValid: boolean) => void;
 };
 
-const AvatarUploadSection = () => {
+type AvatarUploadSectionProps = {
+  userProfile: UserProfile;
+};
+
+const AvatarUploadSection = ({ userProfile }: AvatarUploadSectionProps) => {
   const { watch, setValue } = useFormContext();
-  const { userProfile } = useUserProfile();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const avatarUrl = watch("avatar_url") || userProfile?.avatarUrl || "";
   const { uploadAvatar, isUploading } = useAvatarUpload((url) => {
@@ -65,9 +72,7 @@ const AvatarUploadSection = () => {
 export const UserInformation = forwardRef<
   { submitForm: () => Promise<void> },
   UserInformationProps
->(({ onNext }, ref) => {
-  const { user } = useUser();
-  console.log("user", user);
+>(({ onNext, activeStep, steps, onUserInfoValidChange }, ref) => {
   const { methods, handleSubmit } = useProviderOnboarding();
   const { userProfile } = useUserProfile();
   const {
@@ -76,6 +81,24 @@ export const UserInformation = forwardRef<
     watch,
     formState: { errors },
   } = methods;
+
+  // Watch required fields to determine if user info is valid
+  const avatarUrl = watch("avatar_url");
+  const dateOfBirth = watch("date_of_birth");
+  const phoneNumber = watch("phone_number");
+  const gender = watch("gender");
+
+  const isUserInfoValid = !!(
+    avatarUrl &&
+    dateOfBirth &&
+    phoneNumber &&
+    gender
+  );
+
+  // Notify parent component about validation state
+  useEffect(() => {
+    onUserInfoValidChange?.(isUserInfoValid);
+  }, [isUserInfoValid, onUserInfoValidChange]);
 
   // Initialize form with existing user profile data
   useEffect(() => {
@@ -106,6 +129,7 @@ export const UserInformation = forwardRef<
           borderRadius="2xl"
           boxShadow="lg"
         >
+          <OnboardingStepper activeStep={activeStep} steps={steps} />
           <Box
             w="full"
             bg="brand.500"
@@ -115,14 +139,14 @@ export const UserInformation = forwardRef<
             p={{ base: 6, md: 10 }}
           >
             <Heading size="lg" mb={2}>
-              Hi {user?.profile?.firstName}! Tell us about yourself
+              Hi {userProfile?.firstName}! Tell us about yourself
             </Heading>
             <Text fontSize="md">
               Share some information to help customers get to know you better.
             </Text>
           </Box>
           <VStack spacing={6} w="full" align="stretch" p={{ base: 6, md: 10 }}>
-            <AvatarUploadSection />
+            <AvatarUploadSection userProfile={userProfile as UserProfile} />
 
             <CustomInputField
               type="date"

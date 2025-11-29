@@ -22,20 +22,19 @@ const getMapQuery = (location: Address) => {
 };
 
   return (
-    <>
-      <Box h="400px"
-        w="100%"
+        <Box 
+        w="full"
+        h="full"
         overflow="hidden"
         boxShadow="lg"
       >
         <iframe
           width="100%"
-          height="450px"
+          height="1050px"
           style={{ border: 0 }}
           loading="lazy"
           src={getMapQuery(address)}
         ></iframe>
       </Box>
-    </>
   );
 };

@@ -36,6 +36,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { formatCurrency } from "~/common/utils/helperFuntions";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { useRef, useState } from "react";
+import { ReserveACarService } from "../car-service/ReserveACarService";
 
 export const ProviderDashboard = () => {
   const { user } = useUser();
@@ -43,21 +44,7 @@ export const ProviderDashboard = () => {
   return (
     <Container maxW="1500px" px={[4, 8]} py={8}>
       <VStack align="start" spacing={8} w="full" mt={10}>
-        {/* Header */}
-        <Flex justify="space-between" align="center" w="full">
-          <Heading size="lg">Listed Properties</Heading>
-          <Button
-            as={RouterLink}
-            to={`/onboard/${user.id}/property-onboard`}
-            colorScheme="brand"
-            size="md"
-          >
-            <Icon as={FaPlus} />
-            <Text ml={2}>Add New Listing</Text>
-          </Button>
-        </Flex>
-
-      
+        <ReserveACarService />
       </VStack>
    
     </Container>

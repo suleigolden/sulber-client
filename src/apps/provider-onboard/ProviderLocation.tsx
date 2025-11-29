@@ -52,14 +52,14 @@ export const ProviderLocation = forwardRef(
     const savedAddress = userProfile?.address;
     const addressString = savedAddress
       ? [
-          savedAddress.street,
-          savedAddress.city,
-          savedAddress.state,
-          savedAddress.country,
-          savedAddress.postalCode,
-        ]
-          .filter(Boolean)
-          .join(', ')
+        savedAddress.street,
+        savedAddress.city,
+        savedAddress.state,
+        savedAddress.country,
+        savedAddress.postalCode,
+      ]
+        .filter(Boolean)
+        .join(', ')
       : '';
 
     // Watch address fields to determine if location is valid
@@ -137,7 +137,7 @@ export const ProviderLocation = forwardRef(
               boxShadow="lg"
               p={{ base: 6, md: 10 }}
             >
-              
+
               <HStack spacing={4} align="center" >
                 <Circle size="60px" bg="green.100" color="green.600">
                   <FaRegMoneyBillAlt size="28px" />
@@ -145,11 +145,10 @@ export const ProviderLocation = forwardRef(
                 <Heading size="lg">Earn with SulBer</Heading>
               </HStack>
             </Box>
-            <VStack align="start" spacing={6} w="full" p={{ base: 6, md: 10 }}  boxShadow="lg">
+            <VStack align="start" spacing={6} w="full" p={{ base: 6, md: 10 }} boxShadow="lg">
 
-
-              <Text fontSize="md" color="gray.600">
-                Decide where and how you want to offer driveway car washes, snow shoveling, and parking lot cleaning.
+              <Text fontSize="md" color="gray.600" mt={-7}>
+                Primary earning location? Decide where and how you want to offer driveway car washes, snow shoveling, and parking lot cleaning.
               </Text>
 
               <VStack spacing={4} w="full">

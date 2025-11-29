@@ -11,16 +11,16 @@ type NavItem = {
 
 export const getNavItems = (user: User) => {
   const PROVIDER_NAV_ITEMS: Array<NavItem> = [
-    {
-      label: "Complete Your Profile",
-      href: `/onboard/${user?.id}/property-onboard`,
-      type: "link",
-    },
-    {
-      label: "Service Requests",
-      href: `/provider/${user?.id}/service-requests`,
-      type: "link",
-    },
+    // {
+    //   label: "Complete Your Profile",
+    //   href: `/onboard/${user?.id}/property-onboard`,
+    //   type: "link",
+    // },
+    // {
+    //   label: "Service Requests",
+    //   href: `/provider/${user?.id}/service-requests`,
+    //   type: "link",
+    // },
     {
       label: "Manage Requests",
       href: `/provider/${user?.id}/accept-or-reject-listing-requests`,
@@ -32,11 +32,6 @@ export const getNavItems = (user: User) => {
       type: "link",
     },
     {
-      label: "Profile Settings",
-      href: `/customer/${user?.id}/profile-settings`,
-      type: "link",
-    },
-    {
       label: "Log Out",
       href: "/logout",
       type: "button",
@@ -44,18 +39,8 @@ export const getNavItems = (user: User) => {
   ];
   const CUSTOMER_NAV_ITEMS: Array<NavItem> = [
     {
-      label: "Service Requests",
-      href: `/customer/${user?.id}/service-requests`,
-      type: "link",
-    },
-    {
       label: "Manage Requests",
       href: `/customer/${user?.id}/manage-requests`,
-      type: "link",
-    },
-    {
-      label: "Profile Settings",
-      href: `/customer/${user?.id}/profile-settings`,
       type: "link",
     },
     {

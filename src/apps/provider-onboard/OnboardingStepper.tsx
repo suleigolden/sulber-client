@@ -26,7 +26,7 @@ const marginLeftStyle = (steps: number) => ({
 
 export const OnboardingStepper = ({ activeStep, steps }: OnboardingStepperProps) => {
   return (
-    <Box w="full" mt={{ base: 5, sm: 2, md: 5 }}>
+    <Box w="full" mt={{ base: 5, sm: 2, md: 5 }} px={{ base: 4, sm: 4, md: 4 }}>
     <Stepper size="sm" index={activeStep} gap="0" colorScheme="whiteAlpha" mb={4} mt="-9px">
     {steps.map((step: Step, index: number) => (
       <Step key={index}>

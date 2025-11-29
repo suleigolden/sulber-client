@@ -17,15 +17,19 @@ import { api, DocumentType } from "@suleigolden/sulber-api-client";
 import { useUser } from "~/hooks/use-user";
 import { CustomToast } from "~/hooks/CustomToast";
 import { FaShieldAlt, FaCheckCircle } from "react-icons/fa";
+import { OnboardingStepper } from "./OnboardingStepper";
 
 type ProviderVerificationProps = {
   onNext?: () => void;
+  activeStep: number;
+  steps: any;
+  onVerificationStatusChange?: (isVerified: boolean) => void;
 };
 
 export const ProviderVerification = forwardRef<
   { submitForm: () => Promise<void> },
   ProviderVerificationProps
->(({ onNext }, ref) => {
+>(({ onNext, activeStep, steps, onVerificationStatusChange }, ref) => {
   const { user } = useUser();
   const showToast = CustomToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -42,6 +46,11 @@ export const ProviderVerification = forwardRef<
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [verificationSessionId]);
+
+  // Notify parent component about verification status
+  useEffect(() => {
+    onVerificationStatusChange?.(isVerified);
+  }, [isVerified, onVerificationStatusChange]);
 
   // Check existing verification status on mount
   useEffect(() => {
@@ -154,7 +163,6 @@ export const ProviderVerification = forwardRef<
       if (!isVerified) {
         throw new Error("Please complete identity verification first");
       }
-      // Verification is complete, allow form submission
     },
   }));
 
@@ -165,8 +173,8 @@ export const ProviderVerification = forwardRef<
         maxW="720px"
         bg="white"
         borderRadius="2xl"
-        boxShadow="lg"
       >
+        <OnboardingStepper activeStep={activeStep} steps={steps} />
         <Box
           w="full"
           bg="brand.500"

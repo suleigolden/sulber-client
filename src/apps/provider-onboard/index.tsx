@@ -7,11 +7,12 @@ import {
   VStack,
   useSteps,
 } from "@chakra-ui/react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { UserInformation } from "./UserInformation";
 import { ProviderServices } from "./ProviderServices";
 import { ProviderLocation } from "./ProviderLocation";
 import { ProviderVerification } from "./ProviderVerification";
+import { useUser } from "~/hooks/use-user";
 
 
 
@@ -24,7 +25,8 @@ const steps = [
 
 export const ProviderOnboarding = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { user } = useUser();
 
   // Get initial step from URL or default to 0
   const initialStep = parseInt(searchParams.get("step") || "0");
@@ -43,10 +45,12 @@ export const ProviderOnboarding = () => {
   const [hasSelectedServices, setHasSelectedServices] = useState<boolean>(false);
   const [isLocationValid, setIsLocationValid] = useState<boolean>(false);
   const [isUserInfoValid, setIsUserInfoValid] = useState<boolean>(false);
+  const [isVerified, setIsVerified] = useState<boolean>(false);
   const formRef = useRef<{ submitForm: () => Promise<void> }>(null);
   const SERVICES_STEP_INDEX = steps.findIndex((step) => step.title === "Services");
   const LOCATION_STEP_INDEX = steps.findIndex((step) => step.title === "Location");
   const USER_INFO_STEP_INDEX = steps.findIndex((step) => step.title === "User");
+  const VERIFICATION_STEP_INDEX = steps.findIndex((step) => step.title === "Verification");
 
   // Update URL when step changes
   const goToNext = () => {
@@ -81,9 +85,17 @@ export const ProviderOnboarding = () => {
       try {
         setIsSubmitting(true);
         await formRef.current.submitForm();
-        if (activeStep !== 4) {
+        
+        // If it's the last step (Publish button), redirect to dashboard
+        if (activeStep === steps.length - 1) {
+          if (user?.id) {
+            navigate(`/provider/${user.id}/dashboard`);
+          } else {
+            console.error("User ID not found, cannot redirect to dashboard");
+          }
+        } else {
           goToNext();
-        } 
+        }
       } catch (error) {
         console.error("Form submission error:", error);
         // You might want to show an error toast here
@@ -91,7 +103,14 @@ export const ProviderOnboarding = () => {
         setIsSubmitting(false);
       }
     } else {
-      goToNext(); // If no form ref, just go to next step
+      // If no form ref, just go to next step (shouldn't happen on last step)
+      if (activeStep === steps.length - 1) {
+        if (user?.id) {
+          navigate(`/provider/${user.id}/dashboard`);
+        }
+      } else {
+        goToNext();
+      }
     }
   };
 
@@ -115,6 +134,7 @@ export const ProviderOnboarding = () => {
         steps={steps}
         onLocationValidChange={activeStep === LOCATION_STEP_INDEX ? setIsLocationValid : undefined}
         onUserInfoValidChange={activeStep === USER_INFO_STEP_INDEX ? setIsUserInfoValid : undefined}
+        onVerificationStatusChange={activeStep === VERIFICATION_STEP_INDEX ? setIsVerified : undefined}
       />
     );
   };
@@ -177,6 +197,8 @@ export const ProviderOnboarding = () => {
                 ? !isLocationValid
                 : activeStep === USER_INFO_STEP_INDEX
                 ? !isUserInfoValid
+                : activeStep === VERIFICATION_STEP_INDEX
+                ? !isVerified
                 : false
             }
             w={{ base: "full", sm: "auto" }}

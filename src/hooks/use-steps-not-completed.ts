@@ -1,33 +1,33 @@
-import { api } from "@suleigolden/sulber-api-client";
+import { api, UserProfile } from "@suleigolden/sulber-api-client";
 import { useEffect, useState } from "react";
 import { useUser } from "./use-user";
 import { useSignOut } from "./use-sign-out";
 import { ProviderProfile } from "@suleigolden/sulber-api-client";
+import { useProviderProfile } from "./use-provider-profile";
+import { useUserProfile } from "./use-user-profile";
 
 export const useStepsNotCompleted = () => {
   const { user } = useUser();
   const signOut = useSignOut();
-  const [stepsNotCompleted, setStepsNotCompleted] = useState<ProviderProfile>();
+  const [stepsNotCompleted, setStepsNotCompleted] = useState<{ userProfile: UserProfile | undefined, providerProfile: ProviderProfile | undefined }>();
+  const { userProfile, isLoading: isUserProfileLoading } = useUserProfile();
+  const { providerProfile, isLoading: isProviderProfileLoading } = useProviderProfile();
   const [isLoading, setIsLoading] = useState(true);
   const urlParams = window.location.href;
  
   useEffect(() => {
+    // Wait for both profiles to finish loading before processing
+    if (isUserProfileLoading || isProviderProfileLoading) {
+      return;
+    }
+
     const fetchStepsNotCompleted = async () => {
       setIsLoading(true);
       try {
-        const result = await api.service("provider-profile").get(user?.id);
-        if (!result && urlParams.includes("step")) {
+        if (!userProfile && !providerProfile && urlParams.includes("step")) {
           window.location.href = `/provider/${user?.id}/provider-onboard`;
         } else {
-          setStepsNotCompleted(result);
-        }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        // Check if it's a 401 error user is not authenticated
-        if (error?.response?.status === 401 || 
-            error?.response?.data?.statusCode === 401 ||
-            error?.response?.data?.statusCode === "401") {
-          signOut();
+          setStepsNotCompleted({ userProfile: userProfile || undefined, providerProfile: providerProfile || undefined });
         }
       } finally {
         setIsLoading(false);
@@ -35,8 +35,7 @@ export const useStepsNotCompleted = () => {
     };
 
     fetchStepsNotCompleted();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [isUserProfileLoading, isProviderProfileLoading, userProfile, providerProfile, urlParams, user?.id]);
 
   return { stepsNotCompleted, isLoading };
 };

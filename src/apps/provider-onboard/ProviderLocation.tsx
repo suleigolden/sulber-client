@@ -30,7 +30,9 @@ export const ProviderLocation = forwardRef(
       handleSubmit: submitOnboarding,
       isSubmitting,
       setValue,
+      stepsNotCompleted,
     } = useProviderOnboarding();
+    const userProfile = stepsNotCompleted?.userProfile;
     const [selectedLocation, setSelectedLocation] = useState<{
       lat: number;
       lng: number;
@@ -42,11 +44,47 @@ export const ProviderLocation = forwardRef(
     } | null>(null);
     const {
       formState: { errors },
+      watch,
     } = methods;
+
+    // Build address string from saved address
+    const savedAddress = userProfile?.address;
+    const addressString = savedAddress
+      ? [
+          savedAddress.street,
+          savedAddress.city,
+          savedAddress.state,
+          savedAddress.country,
+          savedAddress.postalCode,
+        ]
+          .filter(Boolean)
+          .join(', ')
+      : '';
 
     useImperativeHandle(ref, () => ({
       submitForm: submitOnboarding,
     }));
+
+    // Initialize form with saved address when component mounts
+    React.useEffect(() => {
+      if (savedAddress) {
+        if (savedAddress.street) {
+          setValue('address.street', savedAddress.street);
+        }
+        if (savedAddress.city) {
+          setValue('address.city', savedAddress.city);
+        }
+        if (savedAddress.state) {
+          setValue('address.state', savedAddress.state);
+        }
+        if (savedAddress.country) {
+          setValue('address.country', savedAddress.country);
+        }
+        if (savedAddress.postalCode) {
+          setValue('address.postal_code', savedAddress.postalCode);
+        }
+      }
+    }, [savedAddress, setValue]);
 
     // Update form values when location is selected
     React.useEffect(() => {
@@ -103,6 +141,7 @@ export const ProviderLocation = forwardRef(
               <VStack spacing={4} w="full">
                 <LocationSearchInput
                   onLocationSelect={(location) => setSelectedLocation(location)}
+                  initialValue={addressString}
                 />
                 <CustomInputField
                   type="text"

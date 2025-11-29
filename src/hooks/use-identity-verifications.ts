@@ -5,14 +5,25 @@ import { useUser } from "./use-user";
 
 export const useIdentityVerifications = () => {
     const { user } = useUser();
-    const [identityVerification, setIdentityVerification] = useState<IdentityVerification>();
+    const [identityVerification, setIdentityVerification] = useState<IdentityVerification[]>();
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchIdentityVerifications = async () => {
-            const result = await api.service("identity-verification").findByUserId(user?.id as string);
-            setIdentityVerification(result);
-        }
+            if (!user?.id) {
+                setIsLoading(false);
+                return;
+            }
+            setIsLoading(true);
+            try {
+                const result = await api.service("identity-verification").findByUserId(user.id);
+                setIdentityVerification(result);
+            } catch (error) {
+                console.error("Error fetching identity verifications:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
         fetchIdentityVerifications();
     }, [user]);
 

@@ -26,9 +26,10 @@ type LocationSearchInputProps = {
     country?: string;
     postalCode?: string;
   } | null) => void;
+  initialValue?: string;
 };
 
-export const LocationSearchInput: FC<LocationSearchInputProps> = ({ onLocationSelect }) => {
+export const LocationSearchInput: FC<LocationSearchInputProps> = ({ onLocationSelect, initialValue }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const bgDropdown = useColorModeValue('white', 'navy.800');
   const hoverBg = useColorModeValue('gray.100', 'navy.700');
@@ -62,6 +63,13 @@ export const LocationSearchInput: FC<LocationSearchInputProps> = ({ onLocationSe
     cache: 24 * 60 * 60,
     initOnMount: isScriptLoaded,
   });
+
+  // Set initial value when component mounts or initialValue changes
+  useEffect(() => {
+    if (initialValue && ready && isScriptLoaded && !value) {
+      setValue(initialValue, false);
+    }
+  }, [initialValue, ready, isScriptLoaded, setValue, value]);
 
   const handleSelect = async (suggestion: any) => {
     setValue(suggestion.description, false);

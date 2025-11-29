@@ -110,7 +110,7 @@ export const ProviderVerification = forwardRef<
     }
     setIsLoading(true);
     try {
-      const returnUrl = `${window.location.origin}/provider/${user.id}/provider-onboard?step=4`;
+      const returnUrl = `${window.location.origin}/provider/${user.id}/provider-onboard?step=3`;
 
       const response = await api
         .service("identity-verification")
@@ -166,16 +166,26 @@ export const ProviderVerification = forwardRef<
         bg="white"
         borderRadius="2xl"
         boxShadow="lg"
-        p={{ base: 6, md: 10 }}
       >
-        <VStack spacing={6} align="start" w="full">
+        <Box
+          w="full"
+          bg="brand.500"
+          color="white"
+          borderRadius="8px 8px 0 0"
+          boxShadow="lg"
+          p={{ base: 6, md: 10 }}
+        >
+          <HStack spacing={3} mb={3}>
+            <Icon as={FaShieldAlt} color="white" boxSize={6} />
+            <Heading size="lg" fontWeight="700">
+              Verify your identity to earn with SulBer
+            </Heading>
+          </HStack>
+        </Box>
+
+        <VStack spacing={6} align="start" w="full" p={{ base: 6, md: 10 }}>
           <Box>
-            <HStack spacing={3} mb={3}>
-              <Icon as={FaShieldAlt} color="brand.500" boxSize={6} />
-              <Heading size="lg" fontWeight="700">
-                Verify your identity to earn with SulBer
-              </Heading>
-            </HStack>
+
             <Text fontSize="md" color="gray.600">
               We need to verify your identity to ensure you are a legitimate
               service provider. This helps us maintain trust and safety on our

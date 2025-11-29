@@ -72,28 +72,31 @@ export const ProviderLocation = forwardRef(
             bg="white"
             borderRadius="2xl"
             boxShadow="lg"
-            p={{ base: 6, md: 10 }}
+
           >
-            <VStack align="start" spacing={6} w="full">
-              <HStack spacing={4} align="center">
+            <Box
+              w="full"
+              bg="brand.500"
+              color="white"
+              borderRadius="8px 8px 0 0"
+              boxShadow="lg"
+              p={{ base: 6, md: 10 }}
+            >
+              <HStack spacing={4} align="center" >
                 <Circle size="60px" bg="green.100" color="green.600">
                   <FaRegMoneyBillAlt size="28px" />
                 </Circle>
                 <Heading size="lg">Earn with SulBer</Heading>
               </HStack>
+            </Box>
+            <VStack align="start" spacing={6} w="full" p={{ base: 6, md: 10 }}>
+
+
               <Text fontSize="md" color="gray.600">
                 Decide where and how you want to offer driveway car washes, snow shoveling, and parking lot cleaning.
               </Text>
 
               <VStack spacing={4} w="full">
-                {/* <CustomInputField
-              type="text"
-                    label="Where would you like to earn?"
-              registerName="address.city"
-              isRequired={true}
-                    placeholder="e.g., London, ON"
-              isError={errors?.address?.city}
-                  /> */}
                 <LocationSearchInput
                   onLocationSelect={(location) => setSelectedLocation(location)}
                 />

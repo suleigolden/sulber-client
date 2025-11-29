@@ -4,7 +4,6 @@ import {
   Text,
   VStack,
   HStack,
-  IconButton,
   Badge,
   Flex,
 } from "@chakra-ui/react";
@@ -13,7 +12,6 @@ import { FormProvider } from "react-hook-form";
 import { useProviderOnboarding } from "~/hooks/use-provider-onboarding";
 import { ProviderServiceType } from "@suleigolden/sulber-api-client";
 import { FaCar, FaParking, FaSnowflake } from "react-icons/fa";
-import { CloseIcon } from "@chakra-ui/icons";
 
 type ServiceConfig = {
   type: ProviderServiceType;
@@ -73,7 +71,7 @@ type ServiceCardProps = {
 
 const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
   const Icon = service.icon;
-  
+
   return (
     <Box
       onClick={onToggle}
@@ -105,11 +103,11 @@ const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
               Service
             </Badge>
           </HStack>
-          
+
           <Heading size="md" fontWeight="600">
             {service.title}
           </Heading>
-          
+
           <VStack align="start" spacing={1}>
             {service.requirements.equipment && (
               <Text fontSize="sm" color="gray.700">
@@ -138,7 +136,7 @@ const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
             )}
           </VStack>
         </VStack>
-        
+
         <Box ml={4}>
           <Icon size={32} color={isSelected ? "#6868f7" : "#999"} />
         </Box>
@@ -164,7 +162,7 @@ export const ProviderServices = forwardRef(
 
     const selectedServices = (watch("services") || []) as ProviderServiceType[];
     const { onServicesSelectedChange } = props;
-    
+
     const toggleService = (serviceType: ProviderServiceType) => {
       const currentServices = selectedServices || [];
       if (currentServices.includes(serviceType)) {
@@ -188,45 +186,42 @@ export const ProviderServices = forwardRef(
     return (
       <FormProvider {...methods}>
         <VStack spacing={8} align="center" w="full">
-        <Box
-          w="full"
-          maxW="720px"
-          bg="white"
-          borderRadius="2xl"
-          boxShadow="lg"
-          p={{ base: 6, md: 10 }}
-        >
-          <IconButton
-            aria-label="Close"
-            icon={<CloseIcon />}
-            variant="ghost"
-            position="absolute"
-            top={4}
-            right={4}
-            size="sm"
-            onClick={() => window.history.back()}
-          />
+          <Box
+            w="full"
+            maxW="720px"
+            bg="white"
+            borderRadius="2xl"
+            boxShadow="lg"
 
-          <VStack align="start" spacing={6} w="full">
-            <Box>
-              <Heading size="lg" mb={2} fontWeight="700">
+          >
+            <Box
+              w="full"
+              bg="brand.500"
+              color="white"
+              borderRadius="8px 8px 0 0"
+              boxShadow="lg"
+              p={{ base: 6, md: 10 }}
+            >
+              <Heading size="md" mb={2} fontWeight="700">
                 Now, choose how you want to earn with SulBer?
               </Heading>
               <Text fontSize="lg">You can choose multiple services to offer.</Text>
             </Box>
 
-            <VStack spacing={4} w="full">
-              {SERVICE_CONFIGS.map((service) => (
-                <ServiceCard
-                  key={service.type}
-                  service={service}
-                  isSelected={selectedServices.includes(service.type)}
-                  onToggle={() => toggleService(service.type)}
-                />
-              ))}
+            <VStack align="start" spacing={6} w="full">
+
+              <VStack spacing={4} w="full" p={{ base: 6, md: 10 }}>
+                {SERVICE_CONFIGS.map((service) => (
+                  <ServiceCard
+                    key={service.type}
+                    service={service}
+                    isSelected={selectedServices.includes(service.type)}
+                    onToggle={() => toggleService(service.type)}
+                  />
+                ))}
+              </VStack>
             </VStack>
-          </VStack>
-        </Box>
+          </Box>
         </VStack>
       </FormProvider>
     );

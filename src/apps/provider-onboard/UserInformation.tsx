@@ -105,18 +105,23 @@ export const UserInformation = forwardRef<
           bg="white"
           borderRadius="2xl"
           boxShadow="lg"
-          p={{ base: 6, md: 10 }}
         >
-          <Box>
+          <Box
+            w="full"
+            bg="brand.500"
+            color="white"
+            borderRadius="8px 8px 0 0"
+            boxShadow="lg"
+            p={{ base: 6, md: 10 }}
+          >
             <Heading size="lg" mb={2}>
               Hi {user?.profile?.firstName}! Tell us about yourself
             </Heading>
-            <Text fontSize="md" color="gray.600">
+            <Text fontSize="md">
               Share some information to help customers get to know you better.
             </Text>
           </Box>
-
-          <VStack spacing={6} w="full" align="stretch">
+          <VStack spacing={6} w="full" align="stretch" p={{ base: 6, md: 10 }}>
             <AvatarUploadSection />
 
             <CustomInputField

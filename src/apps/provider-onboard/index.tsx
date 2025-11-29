@@ -18,15 +18,8 @@ import {
 import { useSearchParams } from "react-router-dom";
 import { UserInformation } from "./UserInformation";
 import { ProviderServices } from "./ProviderServices";
-// import { ManagingYourProperty } from "./ManagingYourProperty";
-// import { StayingInYourProperty } from "./StayingInYourProperty";
 import { ProviderLocation } from "./ProviderLocation";
-import { ChevronLeftIcon, ChevronDownIcon, ArrowForwardIcon } from "@chakra-ui/icons";
-import { FaRegMoneyBillAlt } from "react-icons/fa";
-import { CustomInputField } from "~/components/fields/CustomInputField";
 import { ProviderVerification } from "./ProviderVerification";
-import { ProviderPublish } from "./ProviderPublish";
-// import { PropertyPhotos } from "./PropertyPhotos";
 
 
 
@@ -35,13 +28,6 @@ const steps = [
   { title: "Services", Component: ProviderServices },
   { title: "User Information", Component: UserInformation },
   { title: "Verification", Component: ProviderVerification },
-  { title: "Publish", Component: ProviderPublish },
-
-
-  // { title: "Location", Component: PropertyLocation },
-  // { title: "Stand Out", Component: StayingInYourProperty },
-  // { title: "Photos", Component: PropertyPhotos },
-  // { title: "Manage Your Property", Component: ManagingYourProperty },
 ];
 
 export const ProviderOnboarding = () => {
@@ -135,39 +121,7 @@ export const ProviderOnboarding = () => {
       bg="white"
     >
       <VStack spacing={{ base: 4, md: 8 }} w="full">
-      <Box w="full" maxW="720px" bg="brand.500" color="white" borderRadius="lg" px={6} py={4}>
-          <Stepper size={{ base: "sm", md: "lg" }} index={activeStep} gap="0">
-            {steps.map((step, index) => (
-              <Step key={index}>
-                <VStack
-                  spacing={{ base: 1, md: 2 }}
-                  width={{ base: "150px", md: "250px" }}
-                >
-                  <StepIndicator
-                    style={
-                      index < activeStep
-                        ? { backgroundColor: "white", color: "white" }
-                        : { borderColor: "white" }
-                    }
-                  >
-                    <StepStatus
-                      complete={<StepIcon />}
-                      incomplete={<StepNumber />}
-                      active={<StepNumber />}
-                    />
-                  </StepIndicator>
-                  <StepTitle
-                    fontSize={{ base: "xs", md: "16px" }}
-                    display={{ base: "none", sm: "block" }}
-                  >
-                    {/* {step.title} */}
-                  </StepTitle>
-                </VStack>
-                <StepSeparator mt={{ base: 6, md: 9 }} />
-              </Step>
-            ))}
-          </Stepper>
-        </Box>
+       
        
         <Box
           w="full"

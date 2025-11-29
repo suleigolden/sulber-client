@@ -110,50 +110,53 @@ export const ProviderOnboarding = () => {
   return (
     <Container
       maxW="container.2xl"
-      py={{ base: 4, md: 10 }}
-      px={{ base: 2, md: 4 }}
+      py={{ base: 2, sm: 4, md: 10 }}
+      px={{ base: 2, sm: 3, md: 4 }}
       bg="white"
+      minH="100vh"
     >
-      <VStack spacing={{ base: 4, md: 8 }} w="full">
-       
-       
+      <VStack spacing={{ base: 3, sm: 4, md: 8 }} w="full" align="stretch">
         <Box
           w="full"
-          p={{ base: 4, md: 8 }}
+          p={{ base: 2, sm: 3, md: 4, lg: 8 }}
           borderRadius="lg"
+          overflow="hidden"
         >
-          {/* Make your place stand out */}
-          {/* In this step, you'll add some of the amenities your place offers, plus 5 or more photos. Then, you'll create a title and description. */}
           {renderStepComponent()}
         </Box>
 
         <Flex
           w="full"
-          maxW="720px" 
+          maxW={{ base: "100%", sm: "720px" }}
           justify="space-between"
-          // direction={{ base: "column", sm: "row" }}
-          // gap={{ base: 4, sm: 0 }}
+          direction={{ base: "column", sm: "row" }}
+          gap={{ base: 3, sm: 4 }}
+          align="stretch"
+          px={{ base: 2, sm: 0 }}
         >
           <Button
             variant="outline"
-            size={{ base: "md", md: "lg" }}
+            size={{ base: "md", sm: "md", md: "lg" }}
             colorScheme="brand"
             onClick={goToPrevious}
             isDisabled={activeStep === 0}
             w={{ base: "full", sm: "auto" }}
+            minW={{ base: "full", sm: "120px" }}
+            order={{ base: 2, sm: 1 }}
           >
             Previous
           </Button>
           <Button
             onClick={handleNext}
-            size={{ base: "md", md: "lg" }}
-            // isDisabled={activeStep === steps.length - 1}
+            size={{ base: "md", sm: "md", md: "lg" }}
             colorScheme="brand"
             isLoading={isSubmitting}
             isDisabled={
               activeStep === SERVICES_STEP_INDEX ? !hasSelectedServices : false
             }
             w={{ base: "full", sm: "auto" }}
+            minW={{ base: "full", sm: "120px" }}
+            order={{ base: 1, sm: 2 }}
           >
             {activeStep === steps.length - 1 ? "Publish" : "Next"}
           </Button>

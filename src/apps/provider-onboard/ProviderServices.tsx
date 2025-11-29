@@ -6,6 +6,7 @@ import {
   HStack,
   Badge,
   Flex,
+  Spacer,
 } from "@chakra-ui/react";
 import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { FormProvider } from "react-hook-form";
@@ -79,67 +80,90 @@ const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
       cursor="pointer"
       borderWidth={isSelected ? "2px" : "1px"}
       borderColor={isSelected ? "brand.500" : "gray.200"}
-      borderRadius="lg"
+      borderRadius={{ base: "md", md: "lg" }}
       bg="white"
-      p={5}
+      p={{ base: 3, sm: 4, md: 5 }}
       transition="all 0.2s"
       _hover={{
         borderColor: isSelected ? "brand.500" : "gray.400",
-        transform: "translateY(-2px)",
-        boxShadow: "md",
+        transform: { base: "none", md: "translateY(-2px)" },
+        boxShadow: { base: "sm", md: "md" },
       }}
       position="relative"
+      w="full"
     >
-      <Flex justify="space-between" align="start">
-        <VStack align="start" spacing={3} flex={1}>
-          <HStack spacing={2}>
-            <Badge
-              colorScheme="blue"
-              borderRadius="full"
-              px={3}
-              py={1}
-              fontSize="xs"
-              fontWeight="medium"
-            >
-              Service
-            </Badge>
-          </HStack>
+      <Flex
+        justify="space-between"
+        align="start"
+        direction={{ base: "column", sm: "row" }}
+        gap={{ base: 3, sm: 4 }}
+      >
+        <VStack align="start" spacing={{ base: 2, sm: 3 }} flex={1} w="full">
 
-          <Heading size="md" fontWeight="600">
+          <Flex px="4" mb="6" justifyContent="space-between" align="center" w="full">
+            <HStack spacing={2} flexWrap="wrap">
+              <Badge
+                colorScheme="blue"
+                borderRadius="full"
+                px={{ base: 2, sm: 3 }}
+                py={1}
+                fontSize="xs"
+                fontWeight="medium"
+              >
+                Service
+              </Badge>
+            </HStack>
+            <Spacer />
+            <Box
+              ml={"90px"}
+              alignSelf={{ base: "flex-start", sm: "flex-start" }}
+              flexShrink={0}
+              display={{ base: "block", sm: "none" }}
+            >
+              <Icon size={24} color={isSelected ? "#6868f7" : "#999"} />
+            </Box>
+          </Flex>
+
+          <Heading size={{ base: "sm", sm: "md" }} fontWeight="600">
             {service.title}
           </Heading>
 
-          <VStack align="start" spacing={1}>
+          <VStack align="start" spacing={{ base: 0.5, sm: 1 }} w="full">
             {service.requirements.equipment && (
-              <Text fontSize="sm" color="gray.700">
-                <Text as="span" fontSize="sm" fontWeight="bold"> Equipment:</Text> {service.requirements.equipment}
+              <Text fontSize={{ base: "xs", sm: "sm" }} color="gray.700" lineHeight="tall">
+                <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> Equipment:</Text> {service.requirements.equipment}
               </Text>
             )}
             {service.requirements.experience && (
-              <Text fontSize="sm" color="gray.700">
-                <Text as="span" fontSize="sm" fontWeight="bold"> Experience:</Text> {service.requirements.experience}
+              <Text fontSize={{ base: "xs", sm: "sm" }} color="gray.700" lineHeight="tall">
+                <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> Experience:</Text> {service.requirements.experience}
               </Text>
             )}
             {service.requirements.license && (
-              <Text fontSize="sm" color="gray.700">
-                <Text as="span" fontSize="sm" fontWeight="bold"> License:</Text> {service.requirements.license}
+              <Text fontSize={{ base: "xs", sm: "sm" }} color="gray.700" lineHeight="tall">
+                <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> License:</Text> {service.requirements.license}
               </Text>
             )}
             {service.requirements.physical && (
-              <Text fontSize="sm" color="gray.700">
-                <Text as="span" fontSize="sm" fontWeight="bold"> Physical:</Text> {service.requirements.physical}
+              <Text fontSize={{ base: "xs", sm: "sm" }} color="gray.700" lineHeight="tall">
+                <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> Physical:</Text> {service.requirements.physical}
               </Text>
             )}
             {service.requirements.availability && (
-              <Text fontSize="sm" color="gray.700">
-                <Text as="span" fontSize="sm" fontWeight="bold"> Availability:</Text> {service.requirements.availability}
+              <Text fontSize={{ base: "xs", sm: "sm" }} color="gray.700" lineHeight="tall">
+                <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> Availability:</Text> {service.requirements.availability}
               </Text>
             )}
           </VStack>
         </VStack>
 
-        <Box ml={4}>
-          <Icon size={32} color={isSelected ? "#6868f7" : "#999"} />
+        <Box
+          ml={{ base: 0, sm: 4 }}
+          alignSelf={{ base: "flex-start", sm: "flex-start" }}
+          flexShrink={0}
+          display={{ base: "none", sm: "block" }}
+        >
+          <Icon size={24} color={isSelected ? "#6868f7" : "#999"} />
         </Box>
       </Flex>
     </Box>
@@ -189,32 +213,39 @@ export const ProviderServices = forwardRef(
 
     return (
       <FormProvider {...methods}>
-        <VStack spacing={8} align="center" w="full">
+        <VStack spacing={{ base: 4, sm: 6, md: 8 }} align="center" w="full">
           <Box
             w="full"
-            maxW="720px"
+            maxW={{ base: "100%", sm: "720px" }}
             bg="white"
-            borderRadius="2xl"
-
+            borderRadius={{ base: "xl", md: "2xl" }}
+            overflow="hidden"
           >
             <OnboardingStepper activeStep={props.activeStep} steps={props.steps} />
             <Box
               w="full"
               bg="brand.500"
               color="white"
-              borderRadius="8px 8px 0 0"
+              borderRadius={{ base: "0", md: "8px 8px 0 0" }}
               boxShadow="lg"
-              p={{ base: 6, md: 10 }}
+              p={{ base: 4, sm: 5, md: 6, lg: 10 }}
             >
-              <Heading size="md" mb={2} fontWeight="700">
+              <Heading size={{ base: "sm", sm: "md" }} mb={{ base: 1, md: 2 }} fontWeight="700">
                 Now, choose how you want to earn with SulBer?
               </Heading>
-              <Text fontSize="lg">You can choose multiple services to offer.</Text>
+              <Text fontSize={{ base: "sm", sm: "md", md: "lg" }}>
+                You can choose multiple services to offer.
+              </Text>
             </Box>
 
-            <VStack align="start" spacing={6} w="full" p={{ base: 6, md: 10 }} boxShadow="lg">
-
-              <VStack spacing={4} w="full" p={{ base: 6, md: 10 }}>
+            <VStack
+              align="start"
+              spacing={{ base: 4, sm: 5, md: 6 }}
+              w="full"
+              p={{ base: 3, sm: 4, md: 6, lg: 10 }}
+              boxShadow="lg"
+            >
+              <VStack spacing={{ base: 3, sm: 4 }} w="full" p={{ base: 0, sm: 2, md: 4, lg: 6 }}>
                 {SERVICE_CONFIGS.map((service) => (
                   <ServiceCard
                     key={service.type}

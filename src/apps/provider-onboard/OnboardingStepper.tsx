@@ -7,7 +7,8 @@ import {
     StepIcon, 
     StepNumber, 
     StepTitle, 
-    StepSeparator } from "@chakra-ui/react";
+    StepSeparator,
+    Box } from "@chakra-ui/react";
 
 type Step = {
   title: string;
@@ -25,6 +26,7 @@ const marginLeftStyle = (steps: number) => ({
 
 export const OnboardingStepper = ({ activeStep, steps }: OnboardingStepperProps) => {
   return (
+    <Box w="full" mt={{ base: 5, sm: 2, md: 5 }}>
     <Stepper size="sm" index={activeStep} gap="0" colorScheme="whiteAlpha" mb={4} mt="-9px">
     {steps.map((step: Step, index: number) => (
       <Step key={index}>
@@ -76,5 +78,6 @@ export const OnboardingStepper = ({ activeStep, steps }: OnboardingStepperProps)
       </Step>
     ))}
     </Stepper>
+    </Box>
   );
 };

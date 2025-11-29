@@ -4,14 +4,6 @@ import {
   Button,
   Container,
   Flex,
-  Step,
-  StepIcon,
-  StepIndicator,
-  StepNumber,
-  StepSeparator,
-  StepStatus,
-  StepTitle,
-  Stepper,
   VStack,
   useSteps,
 } from "@chakra-ui/react";
@@ -26,7 +18,7 @@ import { ProviderVerification } from "./ProviderVerification";
 const steps = [
   { title: "Location", Component: ProviderLocation },
   { title: "Services", Component: ProviderServices },
-  { title: "User Information", Component: UserInformation },
+  { title: "User", Component: UserInformation },
   { title: "Verification", Component: ProviderVerification },
 ];
 
@@ -105,12 +97,14 @@ export const ProviderOnboarding = () => {
         <ProviderServices
           ref={formRef}
           onServicesSelectedChange={setHasSelectedServices}
+          activeStep={activeStep}
+          steps={steps}
         />
       );
     }
 
     const StepComponent = steps[activeStep].Component;
-    return <StepComponent ref={formRef} />;
+    return <StepComponent ref={formRef} activeStep={activeStep} steps={steps} />;
   };
 
   return (
@@ -128,7 +122,6 @@ export const ProviderOnboarding = () => {
           p={{ base: 4, md: 8 }}
           borderRadius="lg"
         >
-        
           {/* Make your place stand out */}
           {/* In this step, you'll add some of the amenities your place offers, plus 5 or more photos. Then, you'll create a title and description. */}
           {renderStepComponent()}

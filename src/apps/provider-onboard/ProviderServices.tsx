@@ -12,6 +12,7 @@ import { FormProvider } from "react-hook-form";
 import { useProviderOnboarding } from "~/hooks/use-provider-onboarding";
 import { ProviderServiceType } from "@suleigolden/sulber-api-client";
 import { FaCar, FaParking, FaSnowflake } from "react-icons/fa";
+import { OnboardingStepper } from "./OnboardingStepper";
 
 type ServiceConfig = {
   type: ProviderServiceType;
@@ -145,13 +146,16 @@ const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
   );
 };
 
+type ProviderServicesProps = {
+  onNext?: () => void;
+  onServicesSelectedChange?: (hasSelection: boolean) => void;
+  activeStep: number;
+  steps: any;
+};
 export const ProviderServices = forwardRef(
   (
-    props: {
-      onNext?: () => void;
-      onServicesSelectedChange?: (hasSelection: boolean) => void;
-    },
-    ref: React.ForwardedRef<{ submitForm: () => Promise<void> }>,
+    props: ProviderServicesProps,
+    ref: React.ForwardedRef<{ submitForm: () => Promise<void> }>
   ) => {
     const { methods, handleSubmit } = useProviderOnboarding();
     const {
@@ -191,9 +195,9 @@ export const ProviderServices = forwardRef(
             maxW="720px"
             bg="white"
             borderRadius="2xl"
-            boxShadow="lg"
 
           >
+            <OnboardingStepper activeStep={props.activeStep} steps={props.steps} />
             <Box
               w="full"
               bg="brand.500"
@@ -208,7 +212,7 @@ export const ProviderServices = forwardRef(
               <Text fontSize="lg">You can choose multiple services to offer.</Text>
             </Box>
 
-            <VStack align="start" spacing={6} w="full">
+            <VStack align="start" spacing={6} w="full" p={{ base: 6, md: 10 }} boxShadow="lg">
 
               <VStack spacing={4} w="full" p={{ base: 6, md: 10 }}>
                 {SERVICE_CONFIGS.map((service) => (

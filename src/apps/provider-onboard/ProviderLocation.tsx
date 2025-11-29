@@ -12,9 +12,12 @@ import { FormProvider } from "react-hook-form";
 import { CustomInputField } from "~/components/fields/CustomInputField";
 import { useProviderOnboarding } from "~/hooks/use-provider-onboarding";
 import { LocationSearchInput } from "./components/LocationSearchInput";
+import { OnboardingStepper } from "./OnboardingStepper";
 
 type ProviderLocationProps = {
   onNext?: () => void;
+  activeStep: number;
+  steps: any;
 };
 
 export const ProviderLocation = forwardRef(
@@ -71,9 +74,9 @@ export const ProviderLocation = forwardRef(
             maxW="720px"
             bg="white"
             borderRadius="2xl"
-            boxShadow="lg"
 
           >
+            <OnboardingStepper activeStep={_props.activeStep} steps={_props.steps} />
             <Box
               w="full"
               bg="brand.500"
@@ -82,6 +85,7 @@ export const ProviderLocation = forwardRef(
               boxShadow="lg"
               p={{ base: 6, md: 10 }}
             >
+              
               <HStack spacing={4} align="center" >
                 <Circle size="60px" bg="green.100" color="green.600">
                   <FaRegMoneyBillAlt size="28px" />
@@ -89,7 +93,7 @@ export const ProviderLocation = forwardRef(
                 <Heading size="lg">Earn with SulBer</Heading>
               </HStack>
             </Box>
-            <VStack align="start" spacing={6} w="full" p={{ base: 6, md: 10 }}>
+            <VStack align="start" spacing={6} w="full" p={{ base: 6, md: 10 }}  boxShadow="lg">
 
 
               <Text fontSize="md" color="gray.600">

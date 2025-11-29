@@ -12,11 +12,12 @@ import {
   Icon,
   Heading,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaCalendarAlt } from "react-icons/fa";
 import { LocationSearchInput } from "../provider-onboard/components/LocationSearchInput";
 import { ProviderServiceType } from "@suleigolden/sulber-api-client";
 import { LocationMap } from "~/components/location-map/LocationMap";
+import { useCurrentLocation } from "~/hooks/use-current-location";
 
 const SERVICE_TYPES: { label: string; value: ProviderServiceType }[] = [
   { label: "Driveway Car Wash", value: "DRIVEWAY_CAR_WASH" },
@@ -25,10 +26,35 @@ const SERVICE_TYPES: { label: string; value: ProviderServiceType }[] = [
 ];
 
 export const ReserveACarService = () => {
+  const { currentLocation, isLoadingLocation, locationError } = useCurrentLocation();
   const [serviceLocation, setServiceLocation] = useState<string>("");
   const [serviceDate, setServiceDate] = useState<string>("");
   const [serviceTime, setServiceTime] = useState<string>("");
   const [serviceType, setServiceType] = useState<ProviderServiceType | "">("");
+
+  // Initialize service location with current location address when available
+  useEffect(() => {
+    if (currentLocation && !serviceLocation) {
+      setServiceLocation(currentLocation.address);
+    }
+  }, [currentLocation, serviceLocation]);
+
+  // Convert current location to LocationMap address format
+  const mapAddress = currentLocation
+    ? {
+        street: currentLocation.street || "",
+        city: currentLocation.city || "",
+        state: currentLocation.state || "",
+        country: currentLocation.country || "",
+        postal_code: currentLocation.postalCode || "",
+      }
+    : {
+        street: "",
+        city: "",
+        state: "",
+        country: "",
+        postal_code: "",
+      };
 
   const handleSearch = () => {
     // TODO: Implement search functionality
@@ -135,30 +161,62 @@ export const ReserveACarService = () => {
         </Box>
 
         {/* Right Section - Map */}
-        <Box flex={1} bg="gray.100" position="relative">
-          {/* Placeholder for map - Replace with actual map component */}
-          <Box
-            w="full"
-            h="full"
-            bg="gray.200"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-              
-              <LocationMap
-              address={
-                 {
-                  street: "",
-                  city: "ON",
-                  state: "ON",
-                  country: "Canada",
-                  postal_code: "M5A 0J5",
-                }
-              }
-            />
-          </Box>
-        </Box>
+        {/* <Box flex={1} bg="gray.100" position="relative">
+          {isLoadingLocation ? (
+            <Box
+              w="full"
+              h="full"
+              bg="gray.200"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <VStack spacing={2}>
+                <Text color="gray.500" fontSize="lg">
+                  Getting your current location...
+                </Text>
+                <Text color="gray.400" fontSize="sm">
+                  Please allow location access
+                </Text>
+              </VStack>
+            </Box>
+          ) : locationError ? (
+            <Box
+              w="full"
+              h="full"
+              bg="gray.200"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <VStack spacing={2}>
+                <Text color="red.500" fontSize="lg" fontWeight="medium">
+                  {locationError}
+                </Text>
+                <Text color="gray.500" fontSize="sm">
+                  You can still search for a location manually
+                </Text>
+              </VStack>
+            </Box>
+          ) : currentLocation ? (
+            <Box w="full" h="full">
+              <LocationMap address={mapAddress} />
+            </Box>
+          ) : (
+            <Box
+              w="full"
+              h="full"
+              bg="gray.200"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Text color="gray.500" fontSize="lg">
+                No location available
+              </Text>
+            </Box>
+          )}
+        </Box> */}
       </Flex>
     </Box>
   );

@@ -40,12 +40,12 @@ export const useProviderOnboarding = (isLastStep?: boolean) => {
         gender: userProfile?.gender || '',
         services: stepsNotCompleted?.services || [],
         bio: stepsNotCompleted?.bio || '',
-        verification_status: identityVerification?.status || '',
-        verification_provider: identityVerification?.provider || '',
-        verification_document_type: identityVerification?.documentType || '',
-        verification_document_expiration_date: identityVerification?.documentExpirationDate || '',
-        verification_document_front_url: identityVerification?.meta?.documentFrontUrl || '',
-        verification_document_back_url: identityVerification?.meta?.documentBackUrl || '',
+        // verification_status: identityVerification?.status || '',
+        // verification_provider: identityVerification?.provider || '',
+        // verification_document_type: identityVerification?.documentType || '',
+        // verification_document_expiration_date: identityVerification?.documentExpirationDate || '',
+        // verification_document_front_url: identityVerification?.meta?.documentFrontUrl || '',
+        // verification_document_back_url: identityVerification?.meta?.documentBackUrl || '',
     });
     }
   }, [reset, userProfile]);

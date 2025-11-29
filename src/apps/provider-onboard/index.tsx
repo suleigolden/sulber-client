@@ -24,6 +24,8 @@ import { ProviderLocation } from "./ProviderLocation";
 import { ChevronLeftIcon, ChevronDownIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 import { FaRegMoneyBillAlt } from "react-icons/fa";
 import { CustomInputField } from "~/components/fields/CustomInputField";
+import { ProviderVerification } from "./ProviderVerification";
+import { ProviderPublish } from "./ProviderPublish";
 // import { PropertyPhotos } from "./PropertyPhotos";
 
 
@@ -32,6 +34,8 @@ const steps = [
   { title: "Location", Component: ProviderLocation },
   { title: "Services", Component: ProviderServices },
   { title: "User Information", Component: UserInformation },
+  { title: "Verification", Component: ProviderVerification },
+  { title: "Publish", Component: ProviderPublish },
 
 
   // { title: "Location", Component: PropertyLocation },

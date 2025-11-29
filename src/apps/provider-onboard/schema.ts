@@ -15,12 +15,12 @@ export const ProviderOnboardingSchema =  object().shape({
   referral_code: string().optional(),
   avatar_url: string().optional(),
   bio: string().optional(),
-  verification_status: string().optional(),
-  verification_provider: string().optional(),
-  verification_document_type: string().optional(),
-  verification_document_expiration_date: string().optional(),
-  verification_document_front_url: string().optional(),
-  verification_document_back_url: string().optional(),
+  // verification_status: string().optional(),
+  // verification_provider: string().optional(),
+  // verification_document_type: string().optional(),
+  // verification_document_expiration_date: string().optional(),
+  // verification_document_front_url: string().optional(),
+  // verification_document_back_url: string().optional(),
 });
 
  

@@ -11,6 +11,12 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -25,6 +31,7 @@ import { AvatarUploadModal } from "~/apps/provider-onboard/components/AvatarUplo
 import { LocationSearchInput } from "~/apps/provider-onboard/components/LocationSearchInput";
 import { api } from "@suleigolden/sulber-api-client";
 import { CustomToast } from "~/hooks/CustomToast";
+import { Vehicles } from "~/apps/vehicles";
 
 type AvatarUploadSectionProps = {
   userProfile: UserProfile;
@@ -132,7 +139,7 @@ export const CustomerProfileSettings = () => {
       setValue("gender", userProfile.gender || "");
       setValue("bio", userProfile.bio || "");
       setValue("avatar_url", userProfile.avatarUrl || "");
-      
+
       // Set address fields
       if (userProfile.address) {
         setValue("address.street", userProfile.address.street || "");
@@ -188,156 +195,227 @@ export const CustomerProfileSettings = () => {
 
   return (
     <Container maxW="1500px" px={[4, 8]} py={8}>
-      <FormProvider {...methods}>
-        <VStack align="start" spacing={8} w="full" mt={10}>
-          <Box w="full" maxW="720px">
-            <Heading size="lg" mb={2}>
-              Customer Profile Settings
-            </Heading>
-            <Text color="gray.600" mb={6}>
-              Update your profile information to help us serve you better.
-            </Text>
+      <VStack align="start" spacing={8} w="full" mt={10}>
+        <Box w="full">
+          <Heading size="lg" mb={2}>
+            Customer Profile Settings
+          </Heading>
+          <Text color="gray.600" mb={6}>
+            Manage your profile information and vehicles.
+          </Text>
 
-            <Box
-              w="full"
-              bg="white"
-              borderRadius="2xl"
-              boxShadow="lg"
-              p={{ base: 4, sm: 6, md: 8 }}
+          <Tabs colorScheme="brand" variant="enclosed" w="full">
+            <TabList
+              mb={6}
+              overflowX={{ base: "auto", md: "visible" }}
             >
-              <VStack spacing={6} align="stretch">
-                {/* Email (Read-only) */}
-                <Box>
-                  <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
-                    Email
+              <Tab
+                _selected={{
+                  bg: "brand.500",
+                  color: "white",
+                  borderRadius: "lg",
+                  boxShadow: "0 4px 12px rgba(242, 107, 58, 0.3)",
+                  transform: "translateY(-2px)",
+                }}
+                _hover={{
+                  bg: useColorModeValue("gray.50", "gray.900"),
+                  color: "brand.500",
+                  borderRadius: "lg",
+                  transform: "translateY(-1px)",
+                }}
+                transition="all 0.3s ease"
+                fontWeight="semibold"
+                w="full"
+                borderRadius="lg"
+                color={useColorModeValue("gray.600", "gray.300")}
+              >
+                <VStack spacing={1}>
+                  <Text fontSize="sm" fontWeight="inherit">
+                    Profile
                   </Text>
-                  <Input
-                    type="text"
-                    value={user?.email || ""}
-                    isDisabled={true}
-                    placeholder="Email address"
-                    bg="gray.50"
-                    borderColor="gray.200"
-                    _disabled={{
-                      opacity: 0.7,
-                      cursor: "not-allowed",
-                    }}
-                  />
-                </Box>
-
-                {/* Profile Photo */}
-                <AvatarUploadSection userProfile={userProfile as UserProfile} />
-
-                {/* First Name */}
-                <CustomInputField
-                  type="text"
-                  label="First Name"
-                  registerName="first_name"
-                  isError={errors?.first_name}
-                  placeholder="Enter your first name"
-                  isRequired={true}
-                />
-
-                {/* Last Name */}
-                <CustomInputField
-                  type="text"
-                  label="Last Name"
-                  registerName="last_name"
-                  isError={errors?.last_name}
-                  placeholder="Enter your last name"
-                  isRequired={true}
-                />
-
-                {/* Phone Number */}
-                <CustomInputField
-                  type="text"
-                  label="Phone Number"
-                  registerName="phone_number"
-                  isError={errors?.phone_number}
-                  placeholder="Enter your phone number"
-                  autoComplete="tel"
-                  isRequired={true}
-                />
-
-                {/* Date of Birth */}
-                <CustomInputField
-                  type="date"
-                  label="Date of Birth"
-                  registerName="date_of_birth"
-                  isError={errors?.date_of_birth}
-                  placeholder="Select your date of birth"
-                  isRequired={true}
-                />
-
-                {/* Gender */}
-                <CustomInputField
-                  type="select"
-                  label="Gender"
-                  registerName="gender"
-                  options={Gender.map((gender) => ({ label: gender, value: gender }))}
-                  isError={errors?.gender}
-                  placeholder="Select your gender"
-                  isRequired={true}
-                />
-
-                {/* Address */}
-                <Box>
-                  <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
-                    Address <Text as="span" fontSize="sm" color="red">*</Text>
+                </VStack>
+              </Tab>
+              <Tab
+                _selected={{
+                  bg: "brand.500",
+                  color: "white",
+                  borderRadius: "lg",
+                  boxShadow: "0 4px 12px rgba(242, 107, 58, 0.3)",
+                  transform: "translateY(-2px)",
+                }}
+                _hover={{
+                  bg: useColorModeValue("gray.50", "gray.900"),
+                  color: "brand.500",
+                  borderRadius: "lg",
+                  transform: "translateY(-1px)",
+                }}
+                transition="all 0.3s ease"
+                fontWeight="semibold"
+                w="full"
+                borderRadius="lg"
+                color={useColorModeValue("gray.600", "gray.300")}
+              >
+                <VStack spacing={1}>
+                  <Text fontSize="sm" fontWeight="inherit">
+                    Vehicles
                   </Text>
-                  <LocationSearchInput
-                    onLocationSelect={(location) => {
-                      if (location) {
-                        setValue("address.street", location.address || "");
-                        if (location.city) setValue("address.city", location.city);
-                        if (location.state) setValue("address.state", location.state);
-                        if (location.country) setValue("address.country", location.country);
-                        if (location.postalCode) setValue("address.postal_code", location.postalCode);
-                      }
-                    }}
-                    initialValue={
-                      userProfile?.address
-                        ? [
-                            userProfile.address.street,
-                            userProfile.address.city,
-                            userProfile.address.state,
-                            userProfile.address.country,
-                            userProfile.address.postalCode,
-                          ]
-                            .filter(Boolean)
-                            .join(", ")
-                        : ""
-                    }
-                  />
-                </Box>
+                </VStack>
+              </Tab>
+            </TabList>
 
-                {/* Bio */}
-                <CustomInputField
-                  type="textarea"
-                  label="Bio"
-                  registerName="bio"
-                  isError={errors?.bio}
-                  placeholder="Tell us about yourself..."
-                  isOptional={true}
-                />
+            <TabPanels>
+              {/* Profile Tab */}
+              <TabPanel px={0}>
+                <FormProvider {...methods}>
+                  <Box
+                    w="full"
+                    maxW="720px"
+                    bg="white"
+                    borderRadius="2xl"
+                    boxShadow="lg"
+                    p={{ base: 4, sm: 6, md: 8 }}
+                  >
+                    <VStack spacing={6} align="stretch">
+                      {/* Email (Read-only) */}
+                      <Box>
+                        <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
+                          Email
+                        </Text>
+                        <Input
+                          type="text"
+                          value={user?.email || ""}
+                          isDisabled={true}
+                          placeholder="Email address"
+                          bg="gray.50"
+                          borderColor="gray.200"
+                          _disabled={{
+                            opacity: 0.7,
+                            cursor: "not-allowed",
+                          }}
+                        />
+                      </Box>
 
-                {/* Submit Button */}
-                <Button
-                  colorScheme="brand"
-                  size="lg"
-                  w="full"
-                  onClick={handleSubmit(onSubmit)}
-                  isLoading={isSubmitting}
-                  isDisabled={!isFormValid}
-                  mt={4}
-                >
-                  Save Changes
-                </Button>
-              </VStack>
-            </Box>
-          </Box>
-        </VStack>
-      </FormProvider>
+                      {/* Profile Photo */}
+                      <AvatarUploadSection userProfile={userProfile as UserProfile} />
+
+                      {/* First Name */}
+                      <CustomInputField
+                        type="text"
+                        label="First Name"
+                        registerName="first_name"
+                        isError={errors?.first_name}
+                        placeholder="Enter your first name"
+                        isRequired={true}
+                      />
+
+                      {/* Last Name */}
+                      <CustomInputField
+                        type="text"
+                        label="Last Name"
+                        registerName="last_name"
+                        isError={errors?.last_name}
+                        placeholder="Enter your last name"
+                        isRequired={true}
+                      />
+
+                      {/* Phone Number */}
+                      <CustomInputField
+                        type="text"
+                        label="Phone Number"
+                        registerName="phone_number"
+                        isError={errors?.phone_number}
+                        placeholder="Enter your phone number"
+                        autoComplete="tel"
+                        isRequired={true}
+                      />
+
+                      {/* Date of Birth */}
+                      <CustomInputField
+                        type="date"
+                        label="Date of Birth"
+                        registerName="date_of_birth"
+                        isError={errors?.date_of_birth}
+                        placeholder="Select your date of birth"
+                        isRequired={true}
+                      />
+
+                      {/* Gender */}
+                      <CustomInputField
+                        type="select"
+                        label="Gender"
+                        registerName="gender"
+                        options={Gender.map((gender) => ({ label: gender, value: gender }))}
+                        isError={errors?.gender}
+                        placeholder="Select your gender"
+                        isRequired={true}
+                      />
+
+                      {/* Address */}
+                      <Box>
+                        <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
+                          Address <Text as="span" fontSize="sm" color="red">*</Text>
+                        </Text>
+                        <LocationSearchInput
+                          onLocationSelect={(location) => {
+                            if (location) {
+                              setValue("address.street", location.address || "");
+                              if (location.city) setValue("address.city", location.city);
+                              if (location.state) setValue("address.state", location.state);
+                              if (location.country) setValue("address.country", location.country);
+                              if (location.postalCode) setValue("address.postal_code", location.postalCode);
+                            }
+                          }}
+                          initialValue={
+                            userProfile?.address
+                              ? [
+                                userProfile.address.street,
+                                userProfile.address.city,
+                                userProfile.address.state,
+                                userProfile.address.country,
+                                userProfile.address.postalCode,
+                              ]
+                                .filter(Boolean)
+                                .join(", ")
+                              : ""
+                          }
+                        />
+                      </Box>
+
+                      {/* Bio */}
+                      <CustomInputField
+                        type="textarea"
+                        label="Bio"
+                        registerName="bio"
+                        isError={errors?.bio}
+                        placeholder="Tell us about yourself..."
+                        isOptional={true}
+                      />
+
+                      {/* Submit Button */}
+                      <Button
+                        colorScheme="brand"
+                        size="lg"
+                        w="full"
+                        onClick={handleSubmit(onSubmit)}
+                        isLoading={isSubmitting}
+                        isDisabled={!isFormValid}
+                        mt={4}
+                      >
+                        Save Changes
+                      </Button>
+                    </VStack>
+                  </Box>
+                </FormProvider>
+              </TabPanel>
+
+              {/* Vehicles Tab */}
+              <TabPanel px={0}>
+                <Vehicles />
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        </Box>
+      </VStack>
     </Container>
   );
 };

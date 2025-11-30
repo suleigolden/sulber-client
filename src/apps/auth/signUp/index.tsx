@@ -23,6 +23,7 @@ import { FaUser, FaBuilding } from "react-icons/fa";
 import { CustomerSignUp } from "./CustomerSignUp";
 import { useState } from "react";
 import { ProviderSignUp } from "./ProviderSignUp";
+import { ProviderServiceTypes } from "@suleigolden/sulber-api-client";
 
 const TabOption = ({
   icon,
@@ -43,8 +44,8 @@ const TabOption = ({
         {title}
       </Text>
     </Flex>
-    <Text color="gray.500" fontSize="sm" pl={10} maxW="400px">
-      {description}
+    <Text color="gray.900" fontSize="xs" pl={10} maxW="400px">
+      {/* {description} */}
     </Text>
   </VStack>
 );
@@ -54,30 +55,26 @@ const AccountTypeDescription = ({
 }: {
   type: "customer" | "provider";
 }) => {
+  const serviceTypes = ProviderServiceTypes.map((service) => service.charAt(0).toUpperCase() + service.slice(1).replace(/_/g, ' '));
+  
   const descriptions = {
     customer: (
       <VStack spacing={3} align="start" p={4} bg="gray.50" borderRadius="md">
-        <Text fontSize="md" fontWeight="medium" color="gray.700">
-          As a SulBer Customer you'll be able to:
-        </Text>
         <VStack spacing={2} align="start" pl={4}>
-          <Text color="gray.700">• Request trusted DRIVEWAY_CAR_WASH, SNOW_SHOVELING, or PARKING_LOT_CLEANING services</Text>
-          <Text color="gray.700">• Compare providers, pricing, and availability in real time</Text>
-          <Text color="gray.700">• Track service progress and communicate with your provider</Text>
-          <Text color="gray.700">• Manage bookings, payments, and service history from one dashboard</Text>
+          <Text color="gray.700">
+            <Text as="span" color="brand.500" fontWeight="bold">Request for trusted</Text> 
+            {" "}<Text as="span" fontWeight="bold">{serviceTypes.join(', ')}</Text> 
+           {" "}services</Text>
         </VStack>
       </VStack>
     ),
     provider: (
       <VStack spacing={3} align="start" p={4} bg="gray.50" borderRadius="md">
-        <Text fontSize="md" fontWeight="medium" color="gray.700">
-          As a SulBer Provider you'll be able to:
-        </Text>
         <VStack spacing={2} align="start" pl={4}>
-          <Text color="gray.700">• Offer driveway car wash, snow shoveling, and parking lot cleaning services</Text>
-          <Text color="gray.700">• Receive qualified job requests from nearby customers</Text>
-          <Text color="gray.700">• Manage schedules, dispatch crews, and confirm completion</Text>
-          <Text color="gray.700">• Get paid faster with built-in invoicing and payment tracking</Text>
+          <Text color="gray.700"> 
+            <Text as="span" color="brand.500" fontWeight="bold">Earn money with SulBer by offering trusted</Text> 
+            {" "}<Text as="span" fontWeight="bold">{serviceTypes.join(', ')}</Text> 
+            {" "}services.</Text>
         </VStack>
       </VStack>
     ),
@@ -96,6 +93,7 @@ export const SignUp = ({ onSignInClick }: SignUpProps) => {
   const borderColor = useColorModeValue("gray.200", "gray.700");
   const tabBg = useColorModeValue("gray.50", "gray.800");
   const activeTabBg = useColorModeValue("white", "gray.700");
+  const serviceTypes = ProviderServiceTypes.map((service) => service.charAt(0).toUpperCase() + service.slice(1).replace(/_/g, ' '));
 
   return (
     <Box>
@@ -134,9 +132,6 @@ export const SignUp = ({ onSignInClick }: SignUpProps) => {
                 >
                   Sign up to SulBer 
                 </Heading>
-                <Text color="gray.700" fontSize="md">
-                 Connect customers with reliable outdoor service providers
-                </Text>
               </Box>
 
               <Tabs index={tabIndex} onChange={setTabIndex} isLazy>
@@ -164,7 +159,7 @@ export const SignUp = ({ onSignInClick }: SignUpProps) => {
                     <TabOption
                       icon={FaUser}
                       title="Customer Account"
-                      description="Request driveway car washes, snow shoveling, or parking lot cleaning in minutes"
+                      description={`Request for ${serviceTypes.join(', ')} services in minutes`}
                     />
                   </Tab>
                   <Tab
@@ -182,7 +177,7 @@ export const SignUp = ({ onSignInClick }: SignUpProps) => {
                     <TabOption
                       icon={FaBuilding}
                       title="Provider Account"
-                      description="Grow your service business by fulfilling SulBer customer requests"
+                      description={`Earn money with SulBer by offering trusted ${serviceTypes.join(', ')} services`}
                     />
                   </Tab>
                 </TabList>

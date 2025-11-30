@@ -1,9 +1,12 @@
-import { Container, Text } from "@chakra-ui/react";
+import { Container, Text, VStack } from "@chakra-ui/react";
+import { ReserveACarService } from "../car-service/ReserveACarService";
 
 export const CustomerDashboard = () => {
   return (
     <Container maxW="1500px" px={[4, 8]} py={8}>
-      <Text>Customer Dashboard</Text>
+      <VStack align="start" spacing={8} w="full" mt={10}>
+        <ReserveACarService />
+      </VStack>
     </Container>
   );
 };

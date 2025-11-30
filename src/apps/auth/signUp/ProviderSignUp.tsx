@@ -48,7 +48,6 @@ export const ProviderSignUp = () => {
         role: 'provider' as Roles,
       };
       const res = await dispatch(registerUser(payload as unknown as RegisterRequest));
-console.log("res: ", res);
       if (res.meta.requestStatus === 'fulfilled') {
         await navigateToDashboard(res.payload as User);
       } else {

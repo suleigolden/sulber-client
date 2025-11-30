@@ -11,14 +11,21 @@ import {
     Flex,
     Icon,
     Heading,
+    Radio,
+    RadioGroup,
+    Stack,
+    Alert,
+    AlertIcon,
+    AlertDescription,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-import { FaCalendarAlt } from "react-icons/fa";
+import { FaCalendarAlt, FaInfoCircle } from "react-icons/fa";
 import { LocationSearchInput } from "../provider-onboard/components/LocationSearchInput";
 import { ProviderServiceType, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
 import { LocationMap } from "~/components/location-map/LocationMap";
 import { useCurrentLocation } from "~/hooks/use-current-location";
 
+type ServiceRequestType = "one-time" | "monthly";
 
 export const RequestACarService = () => {
     const { currentLocation, isLoadingLocation, locationError } = useCurrentLocation();
@@ -26,6 +33,7 @@ export const RequestACarService = () => {
     const [serviceDate, setServiceDate] = useState<string>("");
     const [serviceTime, setServiceTime] = useState<string>("");
     const [serviceType, setServiceType] = useState<ProviderServiceType | "">("");
+    const [serviceRequestType, setServiceRequestType] = useState<ServiceRequestType>("one-time");
 
     // Initialize service location with current location address when available
     useEffect(() => {
@@ -53,7 +61,13 @@ export const RequestACarService = () => {
 
     const handleSearch = () => {
         // TODO: Implement search functionality
-        console.log({ serviceLocation, serviceDate, serviceTime, serviceType });
+        console.log({ 
+            serviceLocation, 
+            serviceDate, 
+            serviceTime, 
+            serviceType, 
+            serviceRequestType 
+        });
     };
 
     const isSearchDisabled = !serviceLocation || !serviceDate || !serviceTime || !serviceType;
@@ -148,6 +162,59 @@ export const RequestACarService = () => {
                                     </option>
                                 ))}
                             </Select>
+                        </Box>
+                        {/* Service Request Type */}
+                        <Box>
+                            <Text fontSize={{ base: "xs", sm: "sm" }} fontWeight="medium" mb={2} color="gray.700">
+                                Service Request Type
+                            </Text>
+                            <RadioGroup
+                                value={serviceRequestType}
+                                onChange={(value) => setServiceRequestType(value as ServiceRequestType)}
+                            >
+                                <Stack 
+                                    direction={{ base: "column", sm: "row" }} 
+                                    spacing={{ base: 3, sm: 4 }}
+                                    align={{ base: "start", sm: "center" }}
+                                >
+                                    <Radio 
+                                        value="one-time" 
+                                        colorScheme="brand"
+                                        size={{ base: "sm", sm: "md" }}
+                                        whiteSpace={{ base: "normal", sm: "nowrap" }}
+                                    >
+                                        One time service
+                                    </Radio>
+                                    <Radio 
+                                        value="monthly" 
+                                        colorScheme="brand"
+                                        size={{ base: "sm", sm: "md" }}
+                                        whiteSpace={{ base: "normal", sm: "nowrap" }}
+                                    >
+                                        Monthly service (4 times a month)
+                                    </Radio>
+                                </Stack>
+                            </RadioGroup>
+                            
+                            {/* Monthly Subscription Info */}
+                            {serviceRequestType === "monthly" && (
+                                <Alert
+                                    status="info"
+                                    variant="subtle"
+                                    borderRadius="md"
+                                    mt={3}
+                                    fontSize={{ base: "xs", sm: "sm" }}
+                                    flexDirection={{ base: "column", sm: "row" }}
+                                >
+                                    <AlertIcon as={FaInfoCircle} boxSize={{ base: "16px", sm: "20px" }} />
+                                    <AlertDescription 
+                                        fontSize={{ base: "xs", sm: "sm" }}
+                                        lineHeight={{ base: "1.4", sm: "1.5" }}
+                                    >
+                                        This is a monthly subscription. You will only be charged based on how many times the service is completed over 4 visits per month.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
                         </Box>
 
                         {/* Search Button */}

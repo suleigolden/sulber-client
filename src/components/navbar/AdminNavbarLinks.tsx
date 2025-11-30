@@ -30,7 +30,6 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
   const { secondary } = props;
   const { userProfile } = useUserProfile();
   const {user} = useUser();
-  console.log("user: ", user);
   const signOut = useSignOut();
   const { colorMode, toggleColorMode } = useColorMode();
   const isLightMode = colorMode === 'light';

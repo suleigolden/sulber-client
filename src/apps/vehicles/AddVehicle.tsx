@@ -8,15 +8,19 @@ import {
   Button,
   VStack,
   FormControl,
+  HStack,
+  Link,
 } from "@chakra-ui/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { VehicleSchema, VehicleSchemaType } from "./schema";
 import { CustomInputField } from "~/components/fields/CustomInputField";
-import { api } from "@suleigolden/sulber-api-client";
+import { api, VehicleTypesList, VehicleType } from "@suleigolden/sulber-api-client";
 import { useUser } from "~/hooks/use-user";
 import { CustomToast } from "~/hooks/CustomToast";
 import { useEffect } from "react";
+import { VehicleTypeDetails } from "./VehicleTypeDetails";
+import { useDisclosure } from "@chakra-ui/react";
 
 type AddVehicleProps = {
   isOpen: boolean;
@@ -24,6 +28,7 @@ type AddVehicleProps = {
   onSuccess: () => void;
   vehicleToEdit?: {
     id: string;
+    type?: VehicleType | null;
     make?: string | null;
     model?: string | null;
     year?: number | null;
@@ -42,13 +47,18 @@ export const AddVehicle = ({
   const { user } = useUser();
   const showToast = CustomToast();
   const isEditing = !!vehicleToEdit;
+  const {
+    isOpen: isDetailsOpen,
+    onOpen: onDetailsOpen,
+    onClose: onDetailsClose,
+  } = useDisclosure();
 
   const methods = useForm<VehicleSchemaType>({
     resolver: yupResolver<VehicleSchemaType, any, any>(VehicleSchema),
     defaultValues: {
+      vehicleType: "",
       make: "",
       model: "",
-      // year: undefined,
       color: "",
       licensePlate: "",
       notes: "",
@@ -64,16 +74,18 @@ export const AddVehicle = ({
   } = methods;
 
   // Watch required fields to determine if form is valid
+  const vehicleType = watch("vehicleType");
   const make = watch("make");
   const model = watch("model");
   const color = watch("color");
   const licensePlate = watch("licensePlate");
 
   const isFormValid = !!(make && model && color && licensePlate);
-
+ 
   // Initialize form with vehicle data when editing
   useEffect(() => {
     if (vehicleToEdit && isOpen) {
+      setValue("vehicleType", vehicleToEdit.type || "");
       setValue("make", vehicleToEdit.make || "");
       setValue("model", vehicleToEdit.model || "");
       // setValue("year", vehicleToEdit.year || undefined);
@@ -90,10 +102,15 @@ export const AddVehicle = ({
       showToast("Error", "User not found", "error");
       return;
     }
+    if (!data.vehicleType) {
+      showToast("Error", "Vehicle type is required", "error");
+      return;
+    }
 
     try {
       if (isEditing && vehicleToEdit) {
         await api.service("customer-vehicle").update(vehicleToEdit.id, {
+          type: data.vehicleType as VehicleType || null,
           make: data.make || null,
           model: data.model || null,
           // year: data.year || undefined,
@@ -105,6 +122,7 @@ export const AddVehicle = ({
       } else {
         await api.service("customer-vehicle").create({
           userId: user.id,
+          type: data.vehicleType as VehicleType || null,
           make: data.make || null,
           model: data.model || null,
           // year: data.year || null,
@@ -131,11 +149,39 @@ export const AddVehicle = ({
       <ModalContent>
         <ModalHeader>
           {isEditing ? "Edit Vehicle" : "Add Vehicle"}
+          {" "}
+          <Link
+            fontSize="md"
+            color="brand.500"
+            onClick={onDetailsOpen}
+            _hover={{ textDecoration: "underline" }}
+            cursor="pointer"
+          >
+            Learn more
+          </Link>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody pb={6}>
           <FormProvider {...methods}>
             <VStack spacing={4} align="stretch">
+              <FormControl>
+                <HStack justify="space-between" mb={2}>
+
+                </HStack>
+                <CustomInputField
+                  type="select"
+                  label="Vehicle Type"
+                  registerName="vehicleType"
+                  options={VehicleTypesList.map((vt) => ({
+                    label: `${vt.title}`,
+                    value: vt.type,
+                  }))}
+                  placeholder="Select vehicle type"
+                  isError={methods.formState.errors?.vehicleType}
+                  isRequired
+                />
+              </FormControl>
+
               <FormControl>
                 <CustomInputField
                   type="text"
@@ -216,6 +262,9 @@ export const AddVehicle = ({
           </FormProvider>
         </ModalBody>
       </ModalContent>
+
+      {/* Vehicle Type Details Modal */}
+      <VehicleTypeDetails isOpen={isDetailsOpen} onClose={onDetailsClose} />
     </Modal>
   );
 };

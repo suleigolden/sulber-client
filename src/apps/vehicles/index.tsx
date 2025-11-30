@@ -26,7 +26,7 @@ import { FaPlus, FaExclamationTriangle, FaEllipsisV } from "react-icons/fa";
 import { useCustomerVehicles } from "~/hooks/use-customer-vehicles";
 import { AddVehicle } from "./AddVehicle";
 import { useState, useRef } from "react";
-import { api, CustomerVehicle } from "@suleigolden/sulber-api-client";
+import { api, CustomerVehicle, VehicleTypesList } from "@suleigolden/sulber-api-client";
 import { CustomToast } from "~/hooks/CustomToast";
 
 
@@ -91,6 +91,12 @@ export const Vehicles = () => {
         if (vehicle.model) parts.push(vehicle.model);
         if (vehicle.color) parts.push(vehicle.color);
         return parts.length > 0 ? parts.join(" ") : "Unnamed Vehicle";
+    };
+
+    const getVehicleTypeTitle = (vehicleType?: string | null) => {
+        if (!vehicleType) return null;
+        const vehicleTypeData = VehicleTypesList.find((vt) => vt.type === vehicleType);
+        return vehicleTypeData?.title || vehicleType;
     };
 
     return (
@@ -170,6 +176,18 @@ export const Vehicles = () => {
                                         <Heading size={{ base: "sm", sm: "md" }} fontWeight="semibold">
                                             {formatVehicleLabel(vehicle)}
                                         </Heading>
+                                        {vehicle.type && (
+                                            <Badge
+                                                colorScheme="purple"
+                                                variant="subtle"
+                                                fontSize={{ base: "xs", sm: "sm" }}
+                                                px={2}
+                                                py={1}
+                                                borderRadius="md"
+                                            >
+                                                {getVehicleTypeTitle(vehicle.type)}
+                                            </Badge>
+                                        )}
                                         {vehicle.licensePlate && (
                                             <Badge
                                                 colorScheme="blue"

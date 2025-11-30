@@ -10,34 +10,35 @@ import {
   Spinner,
   useDisclosure,
   Badge,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+  Icon,
 } from "@chakra-ui/react";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import { useCustomerVehicles } from "~/hooks/use-customer-vehicles";
 import { AddVehicle } from "./AddVehicle";
-import { useState } from "react";
-import { api } from "@suleigolden/sulber-api-client";
+import { useState, useRef } from "react";
+import { api, CustomerVehicle } from "@suleigolden/sulber-api-client";
 import { CustomToast } from "~/hooks/CustomToast";
 
-// Type definition for CustomerVehicle
-type CustomerVehicle = {
-  id: string;
-  userId: string;
-  make?: string | null;
-  model?: string | null;
-  year?: number | null;
-  color?: string | null;
-  licensePlate?: string | null;
-  notes?: string | null;
-  imageUrl?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
+
 
 export const Vehicles = () => {
   const { vehicles, isLoading, refetch } = useCustomerVehicles();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isDeleteOpen,
+    onOpen: onDeleteOpen,
+    onClose: onDeleteClose,
+  } = useDisclosure();
   const [vehicleToEdit, setVehicleToEdit] = useState<CustomerVehicle | null>(null);
+  const [vehicleToDelete, setVehicleToDelete] = useState<CustomerVehicle | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
   const showToast = CustomToast();
 
   const handleAddClick = () => {
@@ -50,16 +51,21 @@ export const Vehicles = () => {
     onOpen();
   };
 
-  const handleDeleteClick = async (vehicleId: string) => {
-    if (!window.confirm("Are you sure you want to delete this vehicle?")) {
-      return;
-    }
+  const handleDeleteClick = (vehicle: CustomerVehicle) => {
+    setVehicleToDelete(vehicle);
+    onDeleteOpen();
+  };
 
-    setIsDeleting(vehicleId);
+  const handleConfirmDelete = async () => {
+    if (!vehicleToDelete) return;
+
+    setIsDeleting(vehicleToDelete.id);
     try {
-      await api.service("customer-vehicle").delete(vehicleId);
+      await api.service("customer-vehicle").delete(vehicleToDelete.id);
       showToast("Success", "Vehicle deleted successfully", "success");
       refetch();
+      onDeleteClose();
+      setVehicleToDelete(null);
     } catch (error: unknown) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } })?.response
@@ -199,7 +205,7 @@ export const Vehicles = () => {
                     size={{ base: "sm", sm: "md" }}
                     colorScheme="red"
                     variant="outline"
-                    onClick={() => handleDeleteClick(vehicle.id)}
+                    onClick={() => handleDeleteClick(vehicle)}
                     isLoading={isDeleting === vehicle.id}
                   />
                 </HStack>
@@ -218,6 +224,74 @@ export const Vehicles = () => {
         onSuccess={handleSuccess}
         vehicleToEdit={vehicleToEdit}
       />
+
+      {/* Delete Confirmation Modal */}
+      <AlertDialog
+        isOpen={isDeleteOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onDeleteClose}
+        isCentered
+        motionPreset="slideInBottom"
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent mx={{ base: 4, sm: 0 }}>
+            <AlertDialogHeader fontSize={{ base: "lg", sm: "xl" }} fontWeight="bold">
+              <HStack spacing={3}>
+                <Icon as={FaExclamationTriangle} color="red.500" boxSize={5} />
+                <Text>Delete Vehicle</Text>
+              </HStack>
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              <VStack align="start" spacing={3}>
+                <Text fontSize={{ base: "sm", sm: "md" }} color="gray.600">
+                  Are you sure you want to delete this vehicle? This action cannot be undone.
+                </Text>
+                {vehicleToDelete && (
+                  <Box
+                    p={3}
+                    bg="gray.50"
+                    borderRadius="md"
+                    borderLeft="4px solid"
+                    borderColor="red.500"
+                    w="full"
+                  >
+                    <Text fontSize={{ base: "sm", sm: "md" }} fontWeight="semibold" color="gray.800">
+                      {formatVehicleLabel(vehicleToDelete)}
+                    </Text>
+                    {vehicleToDelete.licensePlate && (
+                      <Text fontSize="xs" color="gray.600" mt={1}>
+                        License Plate: {vehicleToDelete.licensePlate}
+                      </Text>
+                    )}
+                  </Box>
+                )}
+              </VStack>
+            </AlertDialogBody>
+
+            <AlertDialogFooter gap={3}>
+              <Button
+                ref={cancelRef}
+                onClick={onDeleteClose}
+                variant="outline"
+                size={{ base: "sm", sm: "md" }}
+                flex={{ base: 1, sm: "none" }}
+              >
+                Cancel
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={handleConfirmDelete}
+                isLoading={isDeleting === vehicleToDelete?.id}
+                size={{ base: "sm", sm: "md" }}
+                flex={{ base: 1, sm: "none" }}
+              >
+                Delete
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Box>
   );
 };

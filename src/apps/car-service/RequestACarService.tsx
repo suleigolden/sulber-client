@@ -17,6 +17,7 @@ import {
     Alert,
     AlertIcon,
     AlertDescription,
+    useDisclosure,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { FaCalendarAlt, FaInfoCircle } from "react-icons/fa";
@@ -24,11 +25,13 @@ import { LocationSearchInput } from "../provider-onboard/components/LocationSear
 import { ProviderServiceType, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
 import { LocationMap } from "~/components/location-map/LocationMap";
 import { useCurrentLocation } from "~/hooks/use-current-location";
+import { ConfirmServiceRequest } from "./ConfirmServiceRequest";
 
 type ServiceRequestType = "one-time" | "monthly";
 
 export const RequestACarService = () => {
     const { currentLocation, isLoadingLocation, locationError } = useCurrentLocation();
+    const { isOpen, onOpen, onClose } = useDisclosure();
     const [serviceLocation, setServiceLocation] = useState<string>("");
     const [serviceDate, setServiceDate] = useState<string>("");
     const [serviceTime, setServiceTime] = useState<string>("");
@@ -60,14 +63,8 @@ export const RequestACarService = () => {
         };
 
     const handleSearch = () => {
-        // TODO: Implement search functionality
-        console.log({ 
-            serviceLocation, 
-            serviceDate, 
-            serviceTime, 
-            serviceType, 
-            serviceRequestType 
-        });
+        // Open the confirmation modal
+        onOpen();
     };
 
     const isSearchDisabled = !serviceLocation || !serviceDate || !serviceTime || !serviceType;
@@ -297,6 +294,17 @@ export const RequestACarService = () => {
                     )}
                 </Box>
             </Flex>
+
+            {/* Confirm Service Request Modal */}
+            <ConfirmServiceRequest
+                isOpen={isOpen}
+                onClose={onClose}
+                serviceLocation={serviceLocation}
+                serviceDate={serviceDate}
+                serviceTime={serviceTime}
+                serviceType={serviceType}
+                serviceRequestType={serviceRequestType}
+            />
         </Box>
     );
 };

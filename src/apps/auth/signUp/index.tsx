@@ -23,7 +23,7 @@ import { FaUser, FaBuilding } from "react-icons/fa";
 import { CustomerSignUp } from "./CustomerSignUp";
 import { useState } from "react";
 import { ProviderSignUp } from "./ProviderSignUp";
-import { ProviderServiceTypes } from "@suleigolden/sulber-api-client";
+import { ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
 
 const TabOption = ({
   icon,
@@ -55,7 +55,7 @@ const AccountTypeDescription = ({
 }: {
   type: "customer" | "provider";
 }) => {
-  const serviceTypes = ProviderServiceTypes.map((service) => service.charAt(0).toUpperCase() + service.slice(1).replace(/_/g, ' '));
+  const serviceTypes = ProviderServiceTypesList.services.map((service: { title: string }) => service.title);
   
   const descriptions = {
     customer: (
@@ -93,7 +93,7 @@ export const SignUp = ({ onSignInClick }: SignUpProps) => {
   const borderColor = useColorModeValue("gray.200", "gray.700");
   const tabBg = useColorModeValue("gray.50", "gray.800");
   const activeTabBg = useColorModeValue("white", "gray.700");
-  const serviceTypes = ProviderServiceTypes.map((service) => service.charAt(0).toUpperCase() + service.slice(1).replace(/_/g, ' '));
+  const serviceTypes = ProviderServiceTypesList.services.map((service: { title: string }) => service.title);
 
   return (
     <Box>

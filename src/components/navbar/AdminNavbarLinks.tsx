@@ -14,6 +14,7 @@ import {
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { useSignOut } from '~/hooks/use-sign-out';
 import { useUserProfile } from '~/hooks/use-user-profile';
+import { useUser } from '~/hooks/use-user';
 
 type AdminNavbarLinksProps = {
   variant: string;
@@ -28,7 +29,8 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
 }) => {
   const { secondary } = props;
   const { userProfile } = useUserProfile();
-  // const {newCredits} = useCredits();
+  const {user} = useUser();
+  console.log("user: ", user);
   const signOut = useSignOut();
   const { colorMode, toggleColorMode } = useColorMode();
   const isLightMode = colorMode === 'light';
@@ -185,7 +187,7 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
               borderRadius="8px"
               px="14px"
               as={"a"}
-              href={`/${userProfile?.userId}/my-vehicles`}
+              href={`/${user?.role}/${userProfile?.userId}/my-vehicles`}
             >
               <Text fontSize="sm">My Vehicles</Text>
             </MenuItem>
@@ -195,7 +197,7 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
               borderRadius="8px"
               px="14px"
               as={"a"}
-              href={`/${userProfile?.userId}/profile-settings`}
+              href={`/${user?.role}/${userProfile?.userId}/profile-settings`}
             >
               <Text fontSize="sm">Profile Settings</Text>
             </MenuItem>

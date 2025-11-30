@@ -17,6 +17,7 @@ type CustomInputFieldProps = {
   registerName: string;
   isReadOnly?: boolean;
   isRequired?: boolean;
+  isOptional?: boolean;
   isError?: FieldError | undefined;
   autoComplete?: string;
   options?: { label: string; value: string }[];
@@ -32,6 +33,7 @@ export const CustomInputField: FC<CustomInputFieldProps> = ({
   registerName,
   isReadOnly,
   isRequired = false,
+  isOptional = false,
   isError,
   autoComplete,
   options,
@@ -99,7 +101,7 @@ export const CustomInputField: FC<CustomInputFieldProps> = ({
           fontWeight="500"
           mb={2}
         >
-          {label}
+          {label} {isOptional ? "(Optional)" : ""}
         </FormLabel>
       )}
 

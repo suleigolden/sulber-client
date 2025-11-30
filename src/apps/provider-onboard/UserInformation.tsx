@@ -18,7 +18,6 @@ import { useAvatarUpload } from "~/hooks/useAvatarUpload";
 import { useUserProfile } from "~/hooks/use-user-profile";
 import { Gender, UserProfile } from "@suleigolden/sulber-api-client";
 import { AvatarUploadModal } from "./components/AvatarUploadModal";
-import { useUser } from "~/hooks/use-user";
 import { OnboardingStepper } from "./OnboardingStepper";
 
 type UserInformationProps = {

@@ -39,6 +39,11 @@ export const getNavItems = (user: User) => {
   ];
   const CUSTOMER_NAV_ITEMS: Array<NavItem> = [
     {
+      label: "Requests a Service",
+      href: `/customer/${user?.id}/dashboard`,
+      type: "link",
+    },
+    {
       label: "Manage Requests",
       href: `/customer/${user?.id}/manage-requests`,
       type: "link",

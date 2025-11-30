@@ -20,7 +20,7 @@ import { LocationMap } from "~/components/location-map/LocationMap";
 import { useCurrentLocation } from "~/hooks/use-current-location";
 
 
-export const ReserveACarService = () => {
+export const RequestACarService = () => {
     const { currentLocation, isLoadingLocation, locationError } = useCurrentLocation();
     const [serviceLocation, setServiceLocation] = useState<string>("");
     const [serviceDate, setServiceDate] = useState<string>("");
@@ -81,7 +81,7 @@ export const ReserveACarService = () => {
                         p={{ base: 4, sm: 5, md: 6 }}
                     >
                         <Heading size={{ base: "sm", sm: "md" }} fontWeight="bold" mb={2}>
-                            Reserve a service
+                            Request a service
                         </Heading>
 
                         {/* Service Location */}

@@ -9,7 +9,7 @@ import {
   Icon,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { ReserveACarService } from "../car-service/ReserveACarService";
+import { RequestACarService } from "../car-service/RequestACarService";
 import { useUserProfile } from "~/hooks/use-user-profile";
 import { useUser } from "~/hooks/use-user";
 import { FaUser, FaArrowRight } from "react-icons/fa";
@@ -139,7 +139,7 @@ export const CustomerDashboard = () => {
   return (
     <Container maxW="1500px" px={[4, 8]} py={8}>
       <VStack align="start" spacing={8} w="full" mt={10}>
-        <ReserveACarService />
+        <RequestACarService />
       </VStack>
     </Container>
   );

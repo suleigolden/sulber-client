@@ -15,7 +15,7 @@ import {
 import { useState, useEffect } from "react";
 import { FaCalendarAlt } from "react-icons/fa";
 import { LocationSearchInput } from "../provider-onboard/components/LocationSearchInput";
-import { ProviderServiceType, ProviderServiceTypes } from "@suleigolden/sulber-api-client";
+import { ProviderServiceType, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
 import { LocationMap } from "~/components/location-map/LocationMap";
 import { useCurrentLocation } from "~/hooks/use-current-location";
 
@@ -142,9 +142,9 @@ export const RequestACarService = () => {
                                 borderColor="gray.300"
                                 _focus={{ borderColor: "brand.500", boxShadow: "0 0 0 1px brand.500" }}
                             >
-                                {ProviderServiceTypes.map((service: ProviderServiceType) => (
-                                    <option key={service} value={service}>
-                                        {service.charAt(0).toUpperCase() + service.slice(1).replace(/_/g, ' ')}
+                                {ProviderServiceTypesList.services.map((service: { type: ProviderServiceType; title: string }) => (
+                                    <option key={service.type} value={service.type}>
+                                        {service.title}
                                     </option>
                                 ))}
                             </Select>

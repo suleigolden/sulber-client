@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { useSignOut } from '~/hooks/use-sign-out';
-import { useUser } from '~/hooks/use-user';
+import { useUserProfile } from '~/hooks/use-user-profile';
 
 type AdminNavbarLinksProps = {
   variant: string;
@@ -27,7 +27,7 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
   secondary: boolean;
 }) => {
   const { secondary } = props;
-  const { user } = useUser();
+  const { userProfile } = useUserProfile();
   // const {newCredits} = useCredits();
   const signOut = useSignOut();
   const { colorMode, toggleColorMode } = useColorMode();
@@ -148,7 +148,7 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
           <Avatar
             _hover={{ cursor: 'pointer' }}
             color="white"
-            name={`${user?.first_name} ${user?.last_name}`}
+            name={`${userProfile?.firstName} ${userProfile?.lastName}`}
             bg="#11047A"
             size="sm"
             w="40px"
@@ -175,7 +175,7 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
               fontWeight="700"
               color={textColor}
             >
-              👋&nbsp; {` ${user?.first_name}`}
+              👋&nbsp; {` ${userProfile?.firstName}`}
             </Text>
           </Flex>
           <Flex flexDirection="column" p="10px">
@@ -185,7 +185,17 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
               borderRadius="8px"
               px="14px"
               as={"a"}
-              href={`/owner/${user?.id}/profile-settings`}
+              href={`/${userProfile?.userId}/my-vehicles`}
+            >
+              <Text fontSize="sm">My Vehicles</Text>
+            </MenuItem>
+            <MenuItem
+              _hover={{ bg: 'none' }}
+              _focus={{ bg: 'none' }}
+              borderRadius="8px"
+              px="14px"
+              as={"a"}
+              href={`/${userProfile?.userId}/profile-settings`}
             >
               <Text fontSize="sm">Profile Settings</Text>
             </MenuItem>

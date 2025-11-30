@@ -1,13 +1,16 @@
-import { Box, Text } from '@chakra-ui/react';
+import { Box, Text, VStack } from '@chakra-ui/react';
 import SystemThemeToggle from '../../components/SystemThemeToggle';
 import { Navbar } from './Navbar';
+import { ReserveACarService } from '../car-service/ReserveACarService';
 
 export const LandingPage = () => {
   return (
     <Box>
       <Navbar />
       <SystemThemeToggle />
-      <Text>Landing Page</Text>
+      <VStack align="start" spacing={8} w="full" mt={20}>
+        <ReserveACarService />
+      </VStack>
     </Box>
   );
 };

@@ -10,6 +10,7 @@ import { Route, Routes } from "react-router-dom";
 import { ProviderOnboarding } from "~/apps/provider-onboard";
 import { UserProfileSettings } from "~/apps/users/UserProfileSettings";
 import { Dashboard } from "~/apps/dashboard/Dashboard";
+import { Vehicles } from "~/apps/vehicles";
 
 // Add type definition at the top
 type RoutesType = {
@@ -109,6 +110,10 @@ export const DashboardNavBar = (props: Record<string, unknown>) => {
               <Route
                 path={`/${user.id}/profile-settings`}
                 element={<UserProfileSettings />}
+              />
+              <Route
+                path={`/${user.id}/my-vehicles`}
+                element={<Vehicles />}
               />
 
             </Routes>

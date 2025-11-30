@@ -12,7 +12,7 @@ import { FC } from "react";
 import { FieldError, useFormContext } from "react-hook-form";
 
 type CustomInputFieldProps = {
-  type: "text" | "email" | "password" | "textarea" | "date" | "select" | "hidden";
+  type: "text" | "email" | "password" | "textarea" | "date" | "select" | "hidden" | "number";
   label: string;
   registerName: string;
   isReadOnly?: boolean;
@@ -25,6 +25,7 @@ type CustomInputFieldProps = {
   onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   description?: string;
   isNumeric?: boolean;
+  maxLength?: number;
 };
 
 export const CustomInputField: FC<CustomInputFieldProps> = ({
@@ -41,6 +42,7 @@ export const CustomInputField: FC<CustomInputFieldProps> = ({
   onChange,
   description,
   isNumeric,
+  maxLength = 255,
 }) => {
   const { register, setValue } = useFormContext();
   
@@ -116,7 +118,8 @@ export const CustomInputField: FC<CustomInputFieldProps> = ({
           minH="120px"
           {...commonStyles}
           border={"1px solid #000"}
-        />
+          maxLength={maxLength}
+          />
       ) : type === "select" ? (
         <Select
           placeholder={placeholder || `Select ${label.toLowerCase()}`}
@@ -134,6 +137,21 @@ export const CustomInputField: FC<CustomInputFieldProps> = ({
             </option>
           ))}
         </Select>
+      ) : 
+      type === "number" ? (
+        <Input
+          type="number"
+          placeholder={placeholder || `Enter ${label.toLowerCase()}`}
+          {...register(registerName)}
+          data-testid={registerName}
+          isDisabled={isReadOnly}
+          required={isRequired}
+          onChange={handleChange}
+          h="40px"
+          {...commonStyles}
+          border={"1px solid #000"}
+          maxLength={maxLength}
+        />
       ) : (
         <Input
           type={type}
@@ -148,6 +166,7 @@ export const CustomInputField: FC<CustomInputFieldProps> = ({
           h="40px"
           {...commonStyles}
           border={"1px solid #000"}
+          maxLength={maxLength}
         />
       )}
 

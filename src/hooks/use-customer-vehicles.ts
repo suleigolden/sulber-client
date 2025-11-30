@@ -1,5 +1,5 @@
 import { api, CustomerVehicle } from "@suleigolden/sulber-api-client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useUser } from "./use-user";
 
 export const useCustomerVehicles = () => {
@@ -7,28 +7,28 @@ export const useCustomerVehicles = () => {
   const [vehicles, setVehicles] = useState<CustomerVehicle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchVehicles = async () => {
-      if (!user?.id) {
-        setIsLoading(false);
-        return;
-      }
+  const fetchVehicles = useCallback(async () => {
+    if (!user?.id) {
+      setIsLoading(false);
+      return;
+    }
 
-      setIsLoading(true);
-      try {
-        const result = await api.service("customer-vehicle").findByUserId(user.id);
-        setVehicles(result);
-      } catch (error) {
-        console.error("Error fetching customer vehicles:", error);
-        setVehicles([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchVehicles();
+    setIsLoading(true);
+    try {
+      const result = await api.service("customer-vehicle").findByUserId(user.id);
+      setVehicles(result);
+    } catch (error) {
+      console.error("Error fetching customer vehicles:", error);
+      setVehicles([]);
+    } finally {
+      setIsLoading(false);
+    }
   }, [user?.id]);
 
-  return { vehicles, isLoading };
+  useEffect(() => {
+    fetchVehicles();
+  }, [fetchVehicles]);
+
+  return { vehicles, isLoading, refetch: fetchVehicles };
 };
 

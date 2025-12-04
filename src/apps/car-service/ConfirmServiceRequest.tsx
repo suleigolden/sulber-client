@@ -29,6 +29,7 @@ import { useUser } from "~/hooks/use-user";
 import { useState, useEffect } from "react";
 import { CustomToast } from "~/hooks/CustomToast";
 import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
+import { useNavigate } from "react-router-dom";
 
 
 type ServiceRequestType = "one-time" | "monthly";
@@ -66,6 +67,7 @@ export const ConfirmServiceRequest = ({
 }: ConfirmServiceRequestProps) => {
   const { vehicles, isLoading: isLoadingVehicles } = useCustomerVehicles();
   const { user } = useUser();
+  const navigate = useNavigate();
   const showToast = CustomToast();
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -142,7 +144,7 @@ export const ConfirmServiceRequest = ({
         scheduledEnd = endDateTime.toISOString();
       }
 
-      // Calculate price in cents
+      // Calculate price in cents (as string to match API)
       const selectedService = ProviderServiceTypesList.services.find(
         (s) => s.type === serviceType
       );
@@ -180,6 +182,11 @@ export const ConfirmServiceRequest = ({
 
       showToast("Success", "Service request created successfully!", "success");
       onClose();
+      
+      // Redirect to waiting page with job ID
+      if (user?.id && user?.role) {
+        navigate(`/${user.role}/${user.id}/waiting-to-connect-with-provider?jobId=${job.id}`);
+      }
     } catch (error: any) {
       console.error("Error creating job:", error);
       const errorMessage =

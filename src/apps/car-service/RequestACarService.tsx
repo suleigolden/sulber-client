@@ -33,6 +33,16 @@ export const RequestACarService = () => {
     const { currentLocation, isLoadingLocation, locationError } = useCurrentLocation();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [serviceLocation, setServiceLocation] = useState<string>("");
+    const [serviceLocationData, setServiceLocationData] = useState<{
+        lat: number;
+        lng: number;
+        address: string;
+        city?: string;
+        state?: string;
+        country?: string;
+        postalCode?: string;
+        street?: string;
+    } | null>(null);
     const [serviceDate, setServiceDate] = useState<string>("");
     const [serviceTime, setServiceTime] = useState<string>("");
     const [serviceType, setServiceType] = useState<ProviderServiceType | "">("");
@@ -42,6 +52,16 @@ export const RequestACarService = () => {
     useEffect(() => {
         if (currentLocation && !serviceLocation) {
             setServiceLocation(currentLocation.address);
+            setServiceLocationData({
+                lat: currentLocation.lat,
+                lng: currentLocation.lng,
+                address: currentLocation.address,
+                city: currentLocation.city,
+                state: currentLocation.state,
+                country: currentLocation.country,
+                postalCode: currentLocation.postalCode,
+                street: currentLocation.street,
+            });
         }
     }, [currentLocation, serviceLocation]);
 
@@ -103,6 +123,7 @@ export const RequestACarService = () => {
                             <LocationSearchInput
                                 onLocationSelect={(location) => {
                                     setServiceLocation(location?.address || "");
+                                    setServiceLocationData(location);
                                 }}
                                 initialValue={serviceLocation}
                             />
@@ -153,7 +174,7 @@ export const RequestACarService = () => {
                                 borderColor="gray.300"
                                 _focus={{ borderColor: "brand.500", boxShadow: "0 0 0 1px brand.500" }}
                             >
-                                {ProviderServiceTypesList.services.map((service: { type: ProviderServiceType; title: string }) => (
+                                {ProviderServiceTypesList.services.map((service) => (
                                     <option key={service.type} value={service.type}>
                                         {service.title}
                                     </option>
@@ -296,15 +317,16 @@ export const RequestACarService = () => {
             </Flex>
 
             {/* Confirm Service Request Modal */}
-            <ConfirmServiceRequest
-                isOpen={isOpen}
-                onClose={onClose}
-                serviceLocation={serviceLocation}
-                serviceDate={serviceDate}
-                serviceTime={serviceTime}
-                serviceType={serviceType}
-                serviceRequestType={serviceRequestType}
-            />
+                    <ConfirmServiceRequest
+                        isOpen={isOpen}
+                        onClose={onClose}
+                        serviceLocation={serviceLocation}
+                        serviceLocationData={serviceLocationData}
+                        serviceDate={serviceDate}
+                        serviceTime={serviceTime}
+                        serviceType={serviceType}
+                        serviceRequestType={serviceRequestType}
+                    />
         </Box>
     );
 };

@@ -16,28 +16,16 @@ import {
   FormLabel,
   Button,
   Badge,
-  Flex,
   Wrap,
   WrapItem,
 } from "@chakra-ui/react";
-import { ProviderServiceType, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
+import { api, CustomerVehicle, ProviderServiceType, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
 import { useCustomerVehicles } from "~/hooks/use-customer-vehicles";
+import { useUser } from "~/hooks/use-user";
 import { useState, useEffect } from "react";
+import { CustomToast } from "~/hooks/CustomToast";
+import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
 
-// Type definition for CustomerVehicle (until API client is rebuilt)
-type CustomerVehicle = {
-  id: string;
-  userId: string;
-  make?: string | null;
-  model?: string | null;
-  year?: number | null;
-  color?: string | null;
-  licensePlate?: string | null;
-  notes?: string | null;
-  imageUrl?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
 
 type ServiceRequestType = "one-time" | "monthly";
 
@@ -45,6 +33,16 @@ type ConfirmServiceRequestProps = {
   isOpen: boolean;
   onClose: () => void;
   serviceLocation: string;
+  serviceLocationData: {
+    lat: number;
+    lng: number;
+    address: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+    street?: string;
+  } | null;
   serviceDate: string;
   serviceTime: string;
   serviceType: ProviderServiceType | "";
@@ -56,13 +54,17 @@ export const ConfirmServiceRequest = ({
   isOpen,
   onClose,
   serviceLocation,
+  serviceLocationData,
   serviceDate,
   serviceTime,
   serviceType,
   serviceRequestType,
 }: ConfirmServiceRequestProps) => {
   const { vehicles, isLoading: isLoadingVehicles } = useCustomerVehicles();
+  const { user } = useUser();
+  const showToast = CustomToast();
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const requiresVehicle = Boolean(serviceType && serviceType.includes("CAR"));
 
   // Reset vehicle selection when modal closes or service type changes
@@ -88,17 +90,102 @@ export const ConfirmServiceRequest = ({
     return parts.length > 0 ? parts.join(" ") : "Unnamed Vehicle";
   };
 
-  const handleConfirm = () => {
-    // TODO: Implement confirmation logic
-    console.log({
-      serviceLocation,
-      serviceDate,
-      serviceTime,
-      serviceType,
-      serviceRequestType,
-      vehicleId: requiresVehicle ? selectedVehicleId : undefined,
-    });
-    onClose();
+  const handleConfirm = async () => {
+    if (!user?.id) {
+      showToast("Error", "User not authenticated", "error");
+      return;
+    }
+
+    if (!serviceType) {
+      showToast("Error", "Service type is required", "error");
+      return;
+    }
+
+    if (!serviceLocationData) {
+      showToast("Error", "Service location is required", "error");
+      return;
+    }
+
+    // Validate address fields
+    if (!serviceLocationData.city && !serviceLocationData.state && !serviceLocationData.country) {
+      showToast("Error", "Please provide a complete address", "error");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Parse address from location data
+      const address = {
+        street: serviceLocationData.street || serviceLocationData.address || "",
+        city: serviceLocationData.city || "",
+        state: serviceLocationData.state || "",
+        country: serviceLocationData.country || "",
+        postal_code: serviceLocationData.postalCode || "",
+      };
+
+      // Combine date and time for scheduledStart
+      let scheduledStart: string | undefined;
+      let scheduledEnd: string | undefined;
+
+      if (serviceDate && serviceTime) {
+        const startDateTime = new Date(`${serviceDate}T${serviceTime}`);
+        scheduledStart = startDateTime.toISOString();
+        
+        // Set end time to 2 hours after start (default duration)
+        const endDateTime = new Date(startDateTime);
+        endDateTime.setHours(endDateTime.getHours() + 2);
+        scheduledEnd = endDateTime.toISOString();
+      }
+
+      // Calculate price in cents
+      const selectedService = ProviderServiceTypesList.services.find(
+        (s) => s.type === serviceType
+      );
+      const priceCents = formatNumberWithCommas(selectedService?.price || 0);
+
+      // Build notes
+      const notesParts: string[] = [];
+      if (serviceRequestType === "monthly") {
+        notesParts.push("Monthly subscription service (4 times per month)");
+      }
+      if (requiresVehicle && selectedVehicleId) {
+        const vehicle = vehicles.find((v) => v.id === selectedVehicleId);
+        if (vehicle) {
+          notesParts.push(`Vehicle: ${formatVehicleLabel(vehicle)}`);
+        }
+      }
+
+      // Create job
+      const jobData = {
+        customerId: user.id,
+        serviceType: serviceType as ProviderServiceType,
+        address,
+        scheduledStart,
+        scheduledEnd,
+        totalPriceCents: priceCents,
+        currency: "CAD",
+        notes: notesParts.length > 0 ? notesParts.join(". ") : undefined,
+      };
+
+      // Create job using the API client
+      const job = await api.service('job').create(jobData);
+      if (!job) {
+        throw new Error("Failed to create job");
+      }
+
+      showToast("Success", "Service request created successfully!", "success");
+      onClose();
+    } catch (error: any) {
+      console.error("Error creating job:", error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to create service request. Please try again.";
+      showToast("Error", errorMessage, "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const isConfirmDisabled = requiresVehicle && !selectedVehicleId;
@@ -115,9 +202,6 @@ export const ConfirmServiceRequest = ({
           <VStack spacing={4} align="stretch">
             {/* Service Details */}
             <Box>
-              <Text fontSize="sm" fontWeight="bold" color="gray.700" mb={2}>
-                Service Details
-              </Text>
               <VStack align="start" spacing={2} pl={2}>
                 <HStack>
                   <Text fontSize="sm" fontWeight="medium" color="gray.600" minW="120px">
@@ -141,16 +225,6 @@ export const ConfirmServiceRequest = ({
                   </Text>
                   <Text fontSize="sm" color="gray.800" flex={1}>
                     {serviceLocation || "Not specified"}
-                  </Text>
-                </HStack>
-                <HStack>
-                  <Text fontSize="sm" fontWeight="medium" color="gray.600" minW="120px">
-                    Date & Time:
-                  </Text>
-                  <Text fontSize="sm" color="gray.800">
-                    {serviceDate && serviceTime
-                      ? `${new Date(serviceDate).toLocaleDateString()} at ${serviceTime}`
-                      : "Not specified"}
                   </Text>
                 </HStack>
               </VStack>
@@ -188,7 +262,7 @@ export const ConfirmServiceRequest = ({
             {selectedService?.requirements_for_customer && selectedService.requirements_for_customer.length > 0 && (
               <Box>
                 <Text fontSize="sm" fontWeight="bold" color="gray.700" mb={3}>
-                  Requirements
+                  Customer Requirements
                 </Text>
                 <Wrap spacing={2}>
                   {selectedService.requirements_for_customer.map((requirement, index) => (
@@ -271,7 +345,7 @@ export const ConfirmServiceRequest = ({
               {/* Service Price */}
               <Box>
                 <Text fontSize="sm" fontWeight="bold" color="gray.700" mb={3}>
-                  Price: $100.00
+                  Price: ${selectedService?.price || 0}
                 </Text>
               </Box>
 
@@ -284,7 +358,9 @@ export const ConfirmServiceRequest = ({
                 colorScheme="brand"
                 onClick={handleConfirm}
                 flex={1}
-                isDisabled={isConfirmDisabled}
+                isDisabled={isConfirmDisabled || isSubmitting}
+                isLoading={isSubmitting}
+                loadingText="Creating..."
               >
                 Confirm Request
               </Button>

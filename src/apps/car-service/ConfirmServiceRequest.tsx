@@ -19,7 +19,11 @@ import {
   Wrap,
   WrapItem,
 } from "@chakra-ui/react";
-import { api, CustomerVehicle, ProviderServiceType, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
+import { api, 
+    CustomerVehicle, 
+    ProviderServiceType, 
+    ProviderServiceTypesList,
+   } from "@suleigolden/sulber-api-client";
 import { useCustomerVehicles } from "~/hooks/use-customer-vehicles";
 import { useUser } from "~/hooks/use-user";
 import { useState, useEffect } from "react";

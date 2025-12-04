@@ -11,6 +11,7 @@ import { ProviderOnboarding } from "~/apps/provider-onboard";
 import { UserProfileSettings } from "~/apps/users/UserProfileSettings";
 import { Dashboard } from "~/apps/dashboard/Dashboard";
 import { Vehicles } from "~/apps/vehicles";
+import { WaitingToConnectWithProvider } from "~/apps/car-service/WaitingToConnectWithProvider";
 
 // Add type definition at the top
 type RoutesType = {
@@ -98,15 +99,13 @@ export const DashboardNavBar = (props: Record<string, unknown>) => {
             minH="100vh"
             pt="50px"
           >
+            {/* Provider and Customer Routes */}
             <Routes>
               <Route
                 path={`/${user.id}/provider-onboarding`}
                 element={<ProviderOnboarding />}
               />
-
               <Route path={`/${user.id}/dashboard`} element={<Dashboard />} />
-              
-              {/* User profile Settings */}
               <Route
                 path={`/${user.id}/profile-settings`}
                 element={<UserProfileSettings />}
@@ -115,7 +114,11 @@ export const DashboardNavBar = (props: Record<string, unknown>) => {
                 path={`/${user.id}/my-vehicles`}
                 element={<Vehicles />}
               />
-
+              <Route
+                path={`/${user.id}/waiting-to-connect-with-provider`}
+                element={<WaitingToConnectWithProvider />}
+              />
+              
             </Routes>
           </Box>
 

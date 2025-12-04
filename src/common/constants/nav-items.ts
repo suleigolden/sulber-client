@@ -23,7 +23,7 @@ export const getNavItems = (user: User) => {
     // },
     {
       label: "Manage Requests",
-      href: `/provider/${user?.id}/accept-or-reject-listing-requests`,
+      href: `/provider/${user?.id}/manage-requests`,
       type: "link",
     },
     {

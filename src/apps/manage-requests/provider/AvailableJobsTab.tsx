@@ -1,7 +1,6 @@
 import { Box, VStack, Text, Icon, useColorModeValue, Badge, Button, Flex, HStack } from "@chakra-ui/react";
 import { Job, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
 import { FaMapMarkerAlt, FaCalendarAlt, FaCheck, FaStar } from "react-icons/fa";
-import { JobCard } from "./JobCard";
 import { useState, useEffect } from "react";
 import { fullAddress } from "~/common/utils/address";
 import { formatNumberWithCommas } from "~/common/utils/currency-formatter";

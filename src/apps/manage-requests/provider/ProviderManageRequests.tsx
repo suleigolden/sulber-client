@@ -39,6 +39,7 @@ export const ProviderManageRequests = () => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [actionType, setActionType] = useState<"accept" | "update">("accept");
   const [newStatus, setNewStatus] = useState<string>("");
+  const [tabIndex, setTabIndex] = useState(0); // 0: Available, 1: Active, 2: Completed
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
@@ -145,12 +146,45 @@ export const ProviderManageRequests = () => {
     mutationFn: async ({ jobId, updates }: { jobId: string; updates: Partial<Job> }) => {
       return await api.service("job").update(jobId, updates);
     },
-    onSuccess: (_, variables) => {
+    onMutate: async ({ jobId, updates }) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      await queryClient.cancelQueries({ queryKey: ["customerJobs", user?.id] });
+      await queryClient.cancelQueries({ queryKey: ["availableJobs"] });
+      
+      // Snapshot the previous values
+      const previousJobs = queryClient.getQueryData<Job[]>(["customerJobs", user?.id]);
+      const previousAvailableJobs = queryClient.getQueryData<Job[]>(["availableJobs", user?.id, userProfile?.address]);
+      
+      // Optimistically update the cache
+      if (actionType === "accept" && selectedJob) {
+        // Add the accepted job to provider jobs list
+        const updatedProviderJobs = previousJobs ? [...previousJobs, { ...selectedJob, ...updates, status: "ACCEPTED" as any, providerId: user?.id }] : [{ ...selectedJob, ...updates, status: "ACCEPTED" as any, providerId: user?.id }];
+        queryClient.setQueryData<Job[]>(["customerJobs", user?.id], updatedProviderJobs);
+        
+        // Remove the job from available jobs list
+        if (previousAvailableJobs) {
+          const updatedAvailableJobs = previousAvailableJobs.filter((job) => job.id !== jobId);
+          queryClient.setQueryData<Job[]>(["availableJobs", user?.id, userProfile?.address], updatedAvailableJobs);
+        }
+      } else if (previousJobs) {
+        // For status updates, just update the existing job
+        const updatedJobs = previousJobs.map((job) =>
+          job.id === jobId ? { ...job, ...updates } : job
+        );
+        queryClient.setQueryData<Job[]>(["customerJobs", user?.id], updatedJobs);
+      }
+      
+      return { previousJobs, previousAvailableJobs };
+    },
+    onSuccess: async (updatedJob, variables) => {
       // Invalidate and refetch relevant queries
-      queryClient.invalidateQueries({ queryKey: ["availableJobs"] });
-      queryClient.invalidateQueries({ queryKey: ["providerJobs"] });
+      await queryClient.invalidateQueries({ queryKey: ["availableJobs"] });
+      await queryClient.invalidateQueries({ queryKey: ["customerJobs", user?.id] });
       
       if (actionType === "accept") {
+        // Switch to Active tab when a job is accepted
+        setTabIndex(1);
+        
         toast({
           title: "Job accepted",
           description: "You have successfully accepted this service request.",
@@ -169,7 +203,15 @@ export const ProviderManageRequests = () => {
       }
       onClose();
     },
-    onError: (error: any) => {
+    onError: (error: any, variables, context) => {
+      // Rollback to previous values on error
+      if (context?.previousJobs) {
+        queryClient.setQueryData(["customerJobs", user?.id], context.previousJobs);
+      }
+      if (context?.previousAvailableJobs) {
+        queryClient.setQueryData(["availableJobs", user?.id, userProfile?.address], context.previousAvailableJobs);
+      }
+      
       toast({
         title: "Error",
         description:
@@ -222,7 +264,7 @@ export const ProviderManageRequests = () => {
           Manage Requests
         </Heading>
 
-        <Tabs colorScheme="brand" w="full">
+        <Tabs colorScheme="brand" w="full" index={tabIndex} onChange={setTabIndex}>
           <TabList>
             <Tab>
               Available ({availableJobs.length})

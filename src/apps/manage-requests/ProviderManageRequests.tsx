@@ -35,37 +35,8 @@ import { fullAddress } from "~/common/utils/address";
 import { useState, useRef, useMemo, useEffect } from "react";
 import { useUser } from "~/hooks/use-user";
 import { getStatusColor } from "~/common/utils/status-color";
+import { formatDateToStringWithoutTime, formatDateToStringWithTime } from "~/common/utils/date-time";
 
-
-
-const formatDate = (date: Date | string | null | undefined) => {
-  if (!date) return "Not scheduled";
-  try {
-    const d = typeof date === "string" ? new Date(date) : date;
-    return d.toLocaleDateString("en-US", {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return "Invalid date";
-  }
-};
-
-const formatTime = (date: Date | string | null | undefined) => {
-  if (!date) return "Not scheduled";
-  try {
-    const d = typeof date === "string" ? new Date(date) : date;
-    return d.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-  } catch {
-    return "Invalid time";
-  }
-};
 
 export const ProviderManageRequests = () => {
   const { jobs: providerJobs, isLoading: isLoadingProviderJobs } = useProviderJobs();
@@ -300,7 +271,7 @@ export const ProviderManageRequests = () => {
                     Schedule
                   </Text>
                   <Text fontSize="sm" color="gray.800" fontWeight="medium">
-                    {formatDate(job.scheduledStart)} at {formatTime(job.scheduledStart)}
+                    {formatDateToStringWithTime(job?.scheduledStart as string)}
                   </Text>
                 </VStack>
               </HStack>
@@ -327,7 +298,7 @@ export const ProviderManageRequests = () => {
                     Created
                   </Text>
                   <Text fontSize="sm" color="gray.800" fontWeight="medium">
-                    {formatDate(job.createdAt)}
+                    {formatDateToStringWithoutTime(job?.createdAt.toLocaleString())}
                   </Text>
                 </VStack>
               </HStack>

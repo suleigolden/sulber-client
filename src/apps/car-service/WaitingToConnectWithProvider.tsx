@@ -19,6 +19,7 @@ import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaDollarSign, FaInfoCircle } fr
 import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
 import { fullAddress } from "~/common/utils/address";
 import { getStatusColor } from "~/common/utils/status-color";
+import { formatDateToStringWithTime } from "~/common/utils/date-time";
 
 export const WaitingToConnectWithProvider = () => {
   const [searchParams] = useSearchParams();
@@ -57,35 +58,6 @@ export const WaitingToConnectWithProvider = () => {
   const selectedService = job?.serviceType
     ? ProviderServiceTypesList.services.find((s) => s.type === job.serviceType)
     : null;
-
-  const formatDate = (date: Date | string | null | undefined) => {
-    if (!date) return "Not scheduled";
-    try {
-      const d = typeof date === "string" ? new Date(date) : date;
-      return d.toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    } catch {
-      return "Invalid date";
-    }
-  };
-
-  const formatTime = (date: Date | string | null | undefined) => {
-    if (!date) return "Not scheduled";
-    try {
-      const d = typeof date === "string" ? new Date(date) : date;
-      return d.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      });
-    } catch {
-      return "Invalid time";
-    }
-  };
 
   if (isLoading) {
     return (
@@ -237,7 +209,7 @@ export const WaitingToConnectWithProvider = () => {
                       Date:
                     </Text>
                     <Text fontSize="sm" color="gray.800" fontWeight="medium">
-                      {formatDate(job.scheduledStart)}
+                      {formatDateToStringWithTime(job?.scheduledStart as string)}
                     </Text>
                   </HStack>
                   <HStack>
@@ -246,7 +218,7 @@ export const WaitingToConnectWithProvider = () => {
                       Time:
                     </Text>
                     <Text fontSize="sm" color="gray.800" fontWeight="medium">
-                      {formatTime(job.scheduledStart)}
+                      {formatDateToStringWithTime(job?.scheduledStart as string)}
                     </Text>
                   </HStack>
                 </VStack>

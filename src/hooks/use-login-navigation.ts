@@ -5,7 +5,6 @@ import { setUser, setToken } from '../redux-action/slices/auth-slice';
 
 
 export const useLogInNavigation = (type?: 'login' | 'signup') => {
-  console.log(type);
   const dispatch = useDispatch();
   const [isInvalidCredentials, setIsInvalidCredentials] =
     useState<boolean>(false);
@@ -32,7 +31,11 @@ export const useLogInNavigation = (type?: 'login' | 'signup') => {
           window.location.href = `/customer/${user.id}/dashboard`;
           break;
         case 'provider':
-          window.location.href = `/provider/${user.id}/provider-onboarding`;
+           if(type === 'signup') {
+            window.location.href = `/provider/${user.id}/dashboard-onboarding`;
+           } else {
+            window.location.href = `/provider/${user.id}/dashboard`;
+           }
           break;
         default:
           break;

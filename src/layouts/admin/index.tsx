@@ -12,6 +12,7 @@ import { UserProfileSettings } from "~/apps/users/UserProfileSettings";
 import { Dashboard } from "~/apps/dashboard/Dashboard";
 import { Vehicles } from "~/apps/vehicles";
 import { WaitingToConnectWithProvider } from "~/apps/car-service/WaitingToConnectWithProvider";
+import { ManageRequests } from "~/apps/manage-requests";
 
 // Add type definition at the top
 type RoutesType = {
@@ -118,7 +119,10 @@ export const DashboardNavBar = (props: Record<string, unknown>) => {
                 path={`/${user.id}/waiting-to-connect-with-provider`}
                 element={<WaitingToConnectWithProvider />}
               />
-              
+              <Route
+                path={`/${user.id}/manage-requests`}
+                element={<ManageRequests />}
+              />
             </Routes>
           </Box>
 

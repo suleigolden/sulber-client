@@ -34,6 +34,7 @@ import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
 import { fullAddress } from "~/common/utils/address";
 import { useState, useRef, useMemo, useEffect } from "react";
 import { useUser } from "~/hooks/use-user";
+import { useUserProfile } from "~/hooks/use-user-profile";
 import { getStatusColor } from "~/common/utils/status-color";
 import { formatDateToStringWithoutTime, formatDateToStringWithTime } from "~/common/utils/date-time";
 
@@ -41,6 +42,7 @@ import { formatDateToStringWithoutTime, formatDateToStringWithTime } from "~/com
 export const ProviderManageRequests = () => {
   const { jobs: providerJobs, isLoading: isLoadingProviderJobs } = useProviderJobs();
   const { user } = useUser();
+  const { userProfile, isLoading: isLoadingUserProfile } = useUserProfile();
   const [availableJobs, setAvailableJobs] = useState<Job[]>([]);
   const [isLoadingAvailableJobs, setIsLoadingAvailableJobs] = useState(true);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -54,15 +56,60 @@ export const ProviderManageRequests = () => {
   const cardBg = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
 
-  // Fetch available jobs (pending jobs without a provider)
+  // Helper function to check if job location matches provider location
+  const isJobInProviderLocation = (
+    jobAddress: Job["address"],
+    providerAddress: { country?: string | null; state?: string | null; city?: string | null; street?: string | null } | null | undefined
+  ): boolean => {
+    if (!providerAddress) return false;
+
+    // Normalize strings for comparison (case-insensitive, trim whitespace)
+    const normalize = (str: string | null | undefined): string => 
+      str?.toLowerCase().trim() || "";
+
+    const jobCountry = normalize(jobAddress.country);
+    const jobState = normalize(jobAddress.state);
+    const jobCity = normalize(jobAddress.city);
+    const jobStreet = normalize(jobAddress.street);
+
+    const providerCountry = normalize(providerAddress.country);
+    const providerState = normalize(providerAddress.state);
+    const providerCity = normalize(providerAddress.city);
+    const providerStreet = normalize(providerAddress.street);
+
+    // Match if same country AND (same state OR same city OR same street)
+    const countryMatch = jobCountry && providerCountry && jobCountry === providerCountry;
+    const locationMatch = 
+      (jobState && providerState && jobState === providerState) ||
+      (jobCity && providerCity && jobCity === providerCity) ||
+      (jobStreet && providerStreet && jobStreet === providerStreet);
+    
+    return Boolean(countryMatch && locationMatch);
+  };
+
+  // Fetch available jobs (pending jobs without a provider, filtered by location)
   useEffect(() => {
     const fetchAvailableJobs = async () => {
-      if (!user?.id) return;
+      if (!user?.id || isLoadingUserProfile) return;
+      
+      // Wait for user profile to load
+      if (!userProfile?.address) {
+        setIsLoadingAvailableJobs(false);
+        return;
+      }
+
       setIsLoadingAvailableJobs(true);
       try {
         const allPendingJobs = await api.service("job").list(undefined, undefined, "PENDING");
-        // Filter jobs that don't have a provider assigned
-        const available = allPendingJobs.filter((job) => !job.providerId);
+        
+        // Filter jobs that:
+        // 1. Don't have a provider assigned
+        // 2. Are in the same location zone as the provider
+        const available = allPendingJobs.filter((job) => {
+          if (job.providerId) return false;
+          return isJobInProviderLocation(job.address, userProfile.address);
+        });
+        
         setAvailableJobs(available);
       } catch (error: any) {
         console.error("Error fetching available jobs:", error);
@@ -79,7 +126,8 @@ export const ProviderManageRequests = () => {
     };
 
     fetchAvailableJobs();
-  }, [user?.id, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, userProfile?.address, isLoadingUserProfile]);
 
   // Filter accepted/in-progress jobs
   const activeJobs = useMemo(() => {
@@ -152,7 +200,7 @@ export const ProviderManageRequests = () => {
     }
   };
 
-  const isLoading = isLoadingProviderJobs || isLoadingAvailableJobs;
+  const isLoading = isLoadingProviderJobs || isLoadingAvailableJobs || isLoadingUserProfile;
 
   if (isLoading) {
     return (
@@ -347,7 +395,27 @@ export const ProviderManageRequests = () => {
           <TabPanels>
             {/* Available Jobs Tab */}
             <TabPanel px={0}>
-              {availableJobs.length === 0 ? (
+              {!userProfile?.address ? (
+                <Box
+                  w="full"
+                  p={12}
+                  bg="yellow.50"
+                  borderRadius="lg"
+                  borderWidth="1px"
+                  borderColor="yellow.200"
+                  textAlign="center"
+                >
+                  <VStack spacing={4}>
+                    <Icon as={FaMapMarkerAlt} boxSize={12} color="yellow.600" />
+                    <Text fontSize="lg" color="yellow.800" fontWeight="medium">
+                      Address Required
+                    </Text>
+                    <Text fontSize="sm" color="yellow.700">
+                      Please update your profile with your address to see available service requests in your area.
+                    </Text>
+                  </VStack>
+                </Box>
+              ) : availableJobs.length === 0 ? (
                 <Box
                   w="full"
                   p={12}
@@ -363,7 +431,7 @@ export const ProviderManageRequests = () => {
                       No available requests
                     </Text>
                     <Text fontSize="sm" color="gray.700">
-                      New service requests will appear here for you to accept.
+                      New service requests in your area will appear here for you to accept.
                     </Text>
                   </VStack>
                 </Box>

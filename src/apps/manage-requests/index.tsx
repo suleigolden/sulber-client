@@ -1,7 +1,7 @@
 import { Box } from "@chakra-ui/react";
 import { useUser } from "~/hooks/use-user";
-import { CustomerManageRequests } from "./CustomerManageRequests";
-import { ProviderManageRequests } from "./ProviderManageRequests";
+import { CustomerManageRequests } from "./customer/CustomerManageRequests";
+import { ProviderManageRequests } from "./provider/ProviderManageRequests";
 
 
 

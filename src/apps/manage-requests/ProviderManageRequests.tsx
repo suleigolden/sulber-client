@@ -29,7 +29,7 @@ import {
 } from "@chakra-ui/react";
 import { useProviderJobs } from "~/hooks/use-provider-jobs";
 import { Job, ProviderServiceTypesList, api } from "@suleigolden/sulber-api-client";
-import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaDollarSign, FaCheck, FaUser } from "react-icons/fa";
+import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaCheck, FaUser } from "react-icons/fa";
 import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
 import { fullAddress } from "~/common/utils/address";
 import { useState, useRef, useMemo, useEffect } from "react";
@@ -37,21 +37,20 @@ import { useUser } from "~/hooks/use-user";
 import { useUserProfile } from "~/hooks/use-user-profile";
 import { getStatusColor } from "~/common/utils/status-color";
 import { formatDateToStringWithoutTime, formatDateToStringWithTime } from "~/common/utils/date-time";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 
 export const ProviderManageRequests = () => {
   const { jobs: providerJobs, isLoading: isLoadingProviderJobs } = useProviderJobs();
   const { user } = useUser();
   const { userProfile, isLoading: isLoadingUserProfile } = useUserProfile();
-  const [availableJobs, setAvailableJobs] = useState<Job[]>([]);
-  const [isLoadingAvailableJobs, setIsLoadingAvailableJobs] = useState(true);
+  const queryClient = useQueryClient();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [actionType, setActionType] = useState<"accept" | "update">("accept");
   const [newStatus, setNewStatus] = useState<string>("");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const cardBg = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
@@ -87,47 +86,44 @@ export const ProviderManageRequests = () => {
     return Boolean(countryMatch && locationMatch);
   };
 
-  // Fetch available jobs (pending jobs without a provider, filtered by location)
-  useEffect(() => {
-    const fetchAvailableJobs = async () => {
-      if (!user?.id || isLoadingUserProfile) return;
+  // Fetch available jobs using TanStack Query
+  const {
+    data: availableJobs = [],
+    isLoading: isLoadingAvailableJobs,
+    error: availableJobsError,
+  } = useQuery({
+    queryKey: ["availableJobs", user?.id, userProfile?.address],
+    queryFn: async () => {
+      if (!user?.id || !userProfile?.address) {
+        return [];
+      }
+
+      const allPendingJobs = await api.service("job").list(undefined, undefined, "PENDING");
       
-      // Wait for user profile to load
-      if (!userProfile?.address) {
-        setIsLoadingAvailableJobs(false);
-        return;
-      }
+      // Filter jobs that:
+      // 1. Don't have a provider assigned
+      // 2. Are in the same location zone as the provider
+      return allPendingJobs.filter((job) => {
+        if (job.providerId) return false;
+        return isJobInProviderLocation(job.address, userProfile.address);
+      });
+    },
+    enabled: Boolean(user?.id && userProfile?.address && !isLoadingUserProfile),
+    staleTime: 30000, // Consider data fresh for 30 seconds
+  });
 
-      setIsLoadingAvailableJobs(true);
-      try {
-        const allPendingJobs = await api.service("job").list(undefined, undefined, "PENDING");
-        
-        // Filter jobs that:
-        // 1. Don't have a provider assigned
-        // 2. Are in the same location zone as the provider
-        const available = allPendingJobs.filter((job) => {
-          if (job.providerId) return false;
-          return isJobInProviderLocation(job.address, userProfile.address);
-        });
-        
-        setAvailableJobs(available);
-      } catch (error: any) {
-        console.error("Error fetching available jobs:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load available jobs. Please try again.",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      } finally {
-        setIsLoadingAvailableJobs(false);
-      }
-    };
-
-    fetchAvailableJobs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, userProfile?.address, isLoadingUserProfile]);
+  // Show error toast if available jobs fetch fails
+  useEffect(() => {
+    if (availableJobsError) {
+      toast({
+        title: "Error",
+        description: "Failed to load available jobs. Please try again.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  }, [availableJobsError, toast]);
 
   // Filter accepted/in-progress jobs
   const activeJobs = useMemo(() => {
@@ -156,16 +152,17 @@ export const ProviderManageRequests = () => {
     onOpen();
   };
 
-  const handleActionConfirm = async () => {
-    if (!selectedJob || !user?.id) return;
-
-    setIsProcessing(true);
-    try {
+  // Mutation for accepting/updating jobs
+  const updateJobMutation = useMutation({
+    mutationFn: async ({ jobId, updates }: { jobId: string; updates: Partial<Job> }) => {
+      return await api.service("job").update(jobId, updates);
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate and refetch relevant queries
+      queryClient.invalidateQueries({ queryKey: ["availableJobs"] });
+      queryClient.invalidateQueries({ queryKey: ["providerJobs"] });
+      
       if (actionType === "accept") {
-        await api.service("job").update(selectedJob.id, {
-          status: "ACCEPTED",
-          providerId: user.id,
-        });
         toast({
           title: "Job accepted",
           description: "You have successfully accepted this service request.",
@@ -174,7 +171,6 @@ export const ProviderManageRequests = () => {
           isClosable: true,
         });
       } else {
-        await api.service("job").update(selectedJob.id, { status: newStatus as any });
         toast({
           title: "Status updated",
           description: `Job status has been updated to ${newStatus.replace("_", " ")}.`,
@@ -184,9 +180,8 @@ export const ProviderManageRequests = () => {
         });
       }
       onClose();
-      // Refresh the page to update the list
-      window.location.reload();
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
         description:
@@ -195,8 +190,25 @@ export const ProviderManageRequests = () => {
         duration: 3000,
         isClosable: true,
       });
-    } finally {
-      setIsProcessing(false);
+    },
+  });
+
+  const handleActionConfirm = async () => {
+    if (!selectedJob || !user?.id) return;
+
+    if (actionType === "accept") {
+      updateJobMutation.mutate({
+        jobId: selectedJob.id,
+        updates: {
+          status: "ACCEPTED",
+          providerId: user.id,
+        },
+      });
+    } else {
+      updateJobMutation.mutate({
+        jobId: selectedJob.id,
+        updates: { status: newStatus as any },
+      });
     }
   };
 
@@ -236,7 +248,7 @@ export const ProviderManageRequests = () => {
               <VStack align="start" spacing={1} flex={1}>
                 <HStack>
                   <Heading size="md" fontWeight="bold">
-                    {selectedService?.title || job.serviceType || "Service Request"}
+                    {selectedService?.title}
                   </Heading>
                   <Badge
                     colorScheme={getStatusColor(job.status)}
@@ -531,7 +543,7 @@ export const ProviderManageRequests = () => {
                 colorScheme="brand"
                 onClick={handleActionConfirm}
                 ml={3}
-                isLoading={isProcessing}
+                isLoading={updateJobMutation.isPending}
                 loadingText="Processing..."
               >
                 {actionType === "accept" ? "Accept" : "Update"}

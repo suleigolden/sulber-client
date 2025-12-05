@@ -20,7 +20,7 @@ import {
   Tab,
   TabPanel,
 } from "@chakra-ui/react";
-import { useProviderJobs } from "~/hooks/use-provider-jobs";
+import { useJobs } from "~/hooks/use-jobs";
 import { Job, api } from "@suleigolden/sulber-api-client";
 import { useState, useRef, useMemo, useEffect } from "react";
 import { useUser } from "~/hooks/use-user";
@@ -32,7 +32,7 @@ import { CompletedJobsTab } from "./CompletedJobsTab";
 
 
 export const ProviderManageRequests = () => {
-  const { jobs: providerJobs, isLoading: isLoadingProviderJobs } = useProviderJobs();
+  const { jobs: providerJobs, isLoading: isLoadingProviderJobs } = useJobs();
   const { user } = useUser();
   const { userProfile, isLoading: isLoadingUserProfile } = useUserProfile();
   const queryClient = useQueryClient();

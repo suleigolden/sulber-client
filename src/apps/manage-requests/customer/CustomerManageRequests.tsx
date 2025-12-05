@@ -22,7 +22,7 @@ import {
   AlertDialogOverlay,
   useToast,
 } from "@chakra-ui/react";
-import { useCustomerJobs } from "~/hooks/use-customer-jobs";
+import { useJobs } from "~/hooks/use-jobs";
 import { Job, ProviderServiceTypesList, api } from "@suleigolden/sulber-api-client";
 import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaDollarSign, FaTimes } from "react-icons/fa";
 import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
@@ -32,7 +32,7 @@ import { getStatusColor } from "~/common/utils/status-color";
 import { formatDateToStringWithoutTime, formatDateToStringWithTime } from "~/common/utils/date-time";
 
 export const CustomerManageRequests = () => {
-  const { jobs, isLoading } = useCustomerJobs();
+  const { jobs, isLoading } = useJobs();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);

@@ -93,11 +93,11 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                 {job.status === "IN_PROGRESS" && onUpdateStatus && (
                   <Button
                     size="sm"
-                    colorScheme="green"
+                    colorScheme="blue"
                     leftIcon={<Icon as={FaCheck} />}
                     onClick={() => onUpdateStatus(job, "COMPLETED")}
                   >
-                    Complete
+                    Mark as Complete
                   </Button>
                 )}
               </VStack>

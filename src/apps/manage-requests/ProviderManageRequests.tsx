@@ -34,23 +34,9 @@ import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
 import { fullAddress } from "~/common/utils/address";
 import { useState, useRef, useMemo, useEffect } from "react";
 import { useUser } from "~/hooks/use-user";
+import { getStatusColor } from "~/common/utils/status-color";
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "PENDING":
-      return "yellow";
-    case "ACCEPTED":
-      return "blue";
-    case "IN_PROGRESS":
-      return "purple";
-    case "COMPLETED":
-      return "green";
-    case "CANCELLED":
-      return "red";
-    default:
-      return "gray";
-  }
-};
+
 
 const formatDate = (date: Date | string | null | undefined) => {
   if (!date) return "Not scheduled";
@@ -245,7 +231,7 @@ export const ProviderManageRequests = () => {
                     {job.status.replace("_", " ")}
                   </Badge>
                 </HStack>
-                <Text fontSize="xs" color="gray.500">
+                <Text fontSize="xs" color="gray.700">
                   Request ID: {job.id.slice(0, 8)}...
                 </Text>
               </VStack>
@@ -297,7 +283,7 @@ export const ProviderManageRequests = () => {
               <HStack align="start" spacing={3}>
                 <Icon as={FaMapMarkerAlt} color="brand.500" mt={1} />
                 <VStack align="start" spacing={0}>
-                  <Text fontSize="xs" color="gray.500" fontWeight="medium">
+                  <Text fontSize="xs" color="gray.700" fontWeight="medium">
                     Location
                   </Text>
                   <Text fontSize="sm" color="gray.800" fontWeight="medium">
@@ -310,7 +296,7 @@ export const ProviderManageRequests = () => {
               <HStack align="start" spacing={3}>
                 <Icon as={FaCalendarAlt} color="brand.500" mt={1} />
                 <VStack align="start" spacing={0}>
-                  <Text fontSize="xs" color="gray.500" fontWeight="medium">
+                  <Text fontSize="xs" color="gray.700" fontWeight="medium">
                     Schedule
                   </Text>
                   <Text fontSize="sm" color="gray.800" fontWeight="medium">
@@ -320,16 +306,14 @@ export const ProviderManageRequests = () => {
               </HStack>
 
               {/* Price */}
-              {job.totalPriceCents && (
+              {job.notes && (
                 <HStack align="start" spacing={3}>
-                  <Icon as={FaDollarSign} color="brand.500" mt={1} />
                   <VStack align="start" spacing={0}>
-                    <Text fontSize="xs" color="gray.500" fontWeight="medium">
-                      Price
+                    <Text fontSize="xs" color="gray.800" fontWeight="medium">
+                      Note
                     </Text>
                     <Text fontSize="sm" color="gray.800" fontWeight="bold">
-                      ${formatNumberWithCommas(Number(job.totalPriceCents) / 100)}{" "}
-                      {job.currency || "CAD"}
+                      {job.notes}
                     </Text>
                   </VStack>
                 </HStack>
@@ -339,7 +323,7 @@ export const ProviderManageRequests = () => {
               <HStack align="start" spacing={3}>
                 <Icon as={FaClock} color="brand.500" mt={1} />
                 <VStack align="start" spacing={0}>
-                  <Text fontSize="xs" color="gray.500" fontWeight="medium">
+                  <Text fontSize="xs" color="gray.700" fontWeight="medium">
                     Created
                   </Text>
                   <Text fontSize="sm" color="gray.800" fontWeight="medium">
@@ -349,20 +333,20 @@ export const ProviderManageRequests = () => {
               </HStack>
             </Box>
 
-            {/* Notes */}
-            {job.notes && (
-              <>
-                <Divider />
-                <Box>
-                  <Text fontSize="xs" color="gray.500" fontWeight="medium" mb={1}>
-                    Notes
-                  </Text>
-                  <Text fontSize="sm" color="gray.700">
-                    {job.notes}
-                  </Text>
-                </Box>
-              </>
-            )}
+             {/* Price */}
+             {job.totalPriceCents && (
+                <HStack align="start" spacing={3}>
+                  <VStack align="start" spacing={0}>
+                    <Text fontSize="xs" color="gray.900" fontWeight="medium">
+                      Price
+                    </Text>
+                    <Text fontSize="sm" color="gray.800" fontWeight="bold">
+                      ${formatNumberWithCommas(Number(job.totalPriceCents) / 100)}{" "}
+                      {/* {job.currency || "CAD"} */}
+                    </Text>
+                  </VStack>
+                </HStack>
+              )}
           </VStack>
         </CardBody>
       </Card>
@@ -407,7 +391,7 @@ export const ProviderManageRequests = () => {
                     <Text fontSize="lg" color="gray.600" fontWeight="medium">
                       No available requests
                     </Text>
-                    <Text fontSize="sm" color="gray.500">
+                    <Text fontSize="sm" color="gray.700">
                       New service requests will appear here for you to accept.
                     </Text>
                   </VStack>
@@ -438,7 +422,7 @@ export const ProviderManageRequests = () => {
                     <Text fontSize="lg" color="gray.600" fontWeight="medium">
                       No active jobs
                     </Text>
-                    <Text fontSize="sm" color="gray.500">
+                    <Text fontSize="sm" color="gray.700">
                       Jobs you've accepted will appear here.
                     </Text>
                   </VStack>
@@ -469,7 +453,7 @@ export const ProviderManageRequests = () => {
                     <Text fontSize="lg" color="gray.600" fontWeight="medium">
                       No completed jobs
                     </Text>
-                    <Text fontSize="sm" color="gray.500">
+                    <Text fontSize="sm" color="gray.700">
                       Completed service requests will appear here.
                     </Text>
                   </VStack>

@@ -28,23 +28,8 @@ import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaDollarSign, FaTimes } from "r
 import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
 import { fullAddress } from "~/common/utils/address";
 import { useState, useRef } from "react";
+import { getStatusColor } from "~/common/utils/status-color";
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "PENDING":
-      return "yellow";
-    case "ACCEPTED":
-      return "blue";
-    case "IN_PROGRESS":
-      return "purple";
-    case "COMPLETED":
-      return "green";
-    case "CANCELLED":
-      return "red";
-    default:
-      return "gray";
-  }
-};
 
 const formatDate = (date: Date | string | null | undefined) => {
   if (!date) return "Not scheduled";

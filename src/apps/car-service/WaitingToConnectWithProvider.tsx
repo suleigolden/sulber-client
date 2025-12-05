@@ -18,6 +18,7 @@ import { api, Job, ProviderServiceTypesList } from "@suleigolden/sulber-api-clie
 import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaDollarSign, FaInfoCircle } from "react-icons/fa";
 import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
 import { fullAddress } from "~/common/utils/address";
+import { getStatusColor } from "~/common/utils/status-color";
 
 export const WaitingToConnectWithProvider = () => {
   const [searchParams] = useSearchParams();
@@ -83,23 +84,6 @@ export const WaitingToConnectWithProvider = () => {
       });
     } catch {
       return "Invalid time";
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return "yellow";
-      case "ACCEPTED":
-        return "blue";
-      case "IN_PROGRESS":
-        return "purple";
-      case "COMPLETED":
-        return "green";
-      case "CANCELLED":
-        return "red";
-      default:
-        return "gray";
     }
   };
 

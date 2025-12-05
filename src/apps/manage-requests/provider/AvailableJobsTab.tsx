@@ -2,7 +2,7 @@ import { Box, VStack, Text, Icon, useColorModeValue, Badge, Button, Flex, HStack
 import { Job, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
 import { FaMapMarkerAlt, FaCalendarAlt, FaCheck, FaStar } from "react-icons/fa";
 import { JobCard } from "./JobCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { fullAddress } from "~/common/utils/address";
 import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
 import { formatDateToStringWithTime } from "~/common/utils/date-time";
@@ -26,6 +26,21 @@ export const AvailableJobsTab = ({
   const cardBg = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+
+  // Automatically select the first job on page load
+  useEffect(() => {
+    if (jobs.length > 0 && !selectedJobId) {
+      const firstJob = jobs[0];
+      setSelectedJobId(firstJob.id);
+      // Scroll to the first job card after a short delay to ensure it's rendered
+      setTimeout(() => {
+        const element = document.getElementById(`job-${firstJob.id}`);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
+    }
+  }, [jobs, selectedJobId]);
 
   if (!hasAddress) {
     return (
@@ -109,8 +124,7 @@ export const AvailableJobsTab = ({
       h={{ base: "auto", lg: "calc(100vh - 300px)" }}
       minH={{ base: "auto", lg: "600px" }}
       borderRadius="lg"
-      borderWidth="1px"
-      borderColor={borderColor}
+      boxShadow={"lg"}
       p={1}
     >
       {/* Left Panel - Job List */}
@@ -144,8 +158,8 @@ export const AvailableJobsTab = ({
                 key={job.id}
                 id={`job-${job.id}`}
                 bg={isSelected ? "brand.50" : cardBg}
-                borderWidth="2px"
-                borderColor={isSelected ? "brand.500" : borderColor}
+                boxShadow={"lg"}
+                borderColor={isSelected ? "brand.500" : ''}
                 borderRadius="lg"
                 p={4}
                 cursor="pointer"

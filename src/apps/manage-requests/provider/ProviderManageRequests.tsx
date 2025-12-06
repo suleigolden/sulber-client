@@ -258,11 +258,9 @@ export const ProviderManageRequests = () => {
   }
 
   return (
-    <Container maxW="1500px" px={[4, 8]} py={8}>
-      <VStack align="start" spacing={8} w="full" mt={10}>
-        <Heading size="lg" fontWeight="bold">
-          Manage Requests
-        </Heading>
+    <Container maxW="1500px" px={[4, 8]} py={[0, 0]}>
+      <VStack align="start" spacing={8} w="full" mt={1}>
+
 
         <Tabs colorScheme="brand" w="full" index={tabIndex} onChange={setTabIndex}>
           <TabList>

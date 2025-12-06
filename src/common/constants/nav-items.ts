@@ -11,21 +11,16 @@ type NavItem = {
 
 export const getNavItems = (user: User) => {
   const PROVIDER_NAV_ITEMS: Array<NavItem> = [
-    // {
-    //   label: "Complete Your Profile",
-    //   href: `/onboard/${user?.id}/property-onboard`,
-    //   type: "link",
-    // },
-    // {
-    //   label: "Service Requests",
-    //   href: `/provider/${user?.id}/service-requests`,
-    //   type: "link",
-    // },
     {
-      label: "Manage Requests",
-      href: `/provider/${user?.id}/manage-requests`,
+      label: "Requests a Service",
+      href: `/customer/${user?.id}/dashboard`,
       type: "link",
     },
+    // {
+    //   label: "Manage Requests",
+    //   href: `/provider/${user?.id}/manage-requests`,
+    //   type: "link",
+    // },
     {
       label: "Payment History",
       href: `/provider/${user?.id}/payment-history`,

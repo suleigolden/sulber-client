@@ -105,6 +105,7 @@ export const ProviderProfileSettings = () => {
                   ref={userInfoFormRef}
                   activeStep={0}
                   steps={[{ title: "User", Component: UserInformation }]}
+                  shouldDisplayStepper={false}
                 />
               </TabPanel>
             </TabPanels>

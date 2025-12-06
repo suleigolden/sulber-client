@@ -175,11 +175,12 @@ type ProviderServicesProps = {
   onServicesSelectedChange?: (hasSelection: boolean) => void;
   activeStep: number;
   steps: any;
+  shouldDisplayStepper?: boolean;
 };
 export const ProviderServices = forwardRef(
   (
     props: ProviderServicesProps,
-    ref: React.ForwardedRef<{ submitForm: () => Promise<void> }>
+    ref: React.ForwardedRef<{ submitForm: () => Promise<void> }>,
   ) => {
     const { methods, handleSubmit } = useProviderOnboarding();
     const {
@@ -221,7 +222,7 @@ export const ProviderServices = forwardRef(
             borderRadius={{ base: "xl", md: "2xl" }}
             overflow="hidden"
           >
-            <OnboardingStepper activeStep={props.activeStep} steps={props.steps} />
+            {props.shouldDisplayStepper && <OnboardingStepper activeStep={props.activeStep} steps={props.steps} />}
             <Box
               w="full"
               bg="brand.500"

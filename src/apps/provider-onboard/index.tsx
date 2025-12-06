@@ -135,6 +135,7 @@ export const ProviderOnboarding = () => {
         onLocationValidChange={activeStep === LOCATION_STEP_INDEX ? setIsLocationValid : undefined}
         onUserInfoValidChange={activeStep === USER_INFO_STEP_INDEX ? setIsUserInfoValid : undefined}
         onVerificationStatusChange={activeStep === VERIFICATION_STEP_INDEX ? setIsVerified : undefined}
+        shouldDisplayStepper={true}
       />
     );
   };

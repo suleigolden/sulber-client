@@ -24,6 +24,7 @@ type UserInformationProps = {
   onNext?: () => void;
   activeStep: number;
   steps: any;
+  shouldDisplayStepper?: boolean;
   onUserInfoValidChange?: (isValid: boolean) => void;
 };
 
@@ -71,7 +72,7 @@ const AvatarUploadSection = ({ userProfile }: AvatarUploadSectionProps) => {
 export const UserInformation = forwardRef<
   { submitForm: () => Promise<void> },
   UserInformationProps
->(({ onNext, activeStep, steps, onUserInfoValidChange }, ref) => {
+>(({ onNext, activeStep, steps, shouldDisplayStepper = true, onUserInfoValidChange }, ref) => {
   const { methods, handleSubmit } = useProviderOnboarding();
   const { userProfile } = useUserProfile();
   const {
@@ -127,7 +128,7 @@ export const UserInformation = forwardRef<
           bg="white"
           borderRadius="2xl"
         >
-          <OnboardingStepper activeStep={activeStep} steps={steps} />
+          {shouldDisplayStepper && <OnboardingStepper activeStep={activeStep} steps={steps} />}
           <Box
             w="full"
             bg="brand.500"

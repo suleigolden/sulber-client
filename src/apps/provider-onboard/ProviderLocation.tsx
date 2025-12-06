@@ -18,6 +18,7 @@ type ProviderLocationProps = {
   onNext?: () => void;
   activeStep: number;
   steps: any;
+  shouldDisplayStepper?: boolean;
   onLocationValidChange?: (isValid: boolean) => void;
 };
 
@@ -128,7 +129,7 @@ export const ProviderLocation = forwardRef(
             borderRadius="2xl"
 
           >
-            <OnboardingStepper activeStep={_props.activeStep} steps={_props.steps} />
+            {_props.shouldDisplayStepper && <OnboardingStepper activeStep={_props.activeStep} steps={_props.steps} />}
             <Box
               w="full"
               bg="brand.500"

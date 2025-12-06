@@ -11,16 +11,17 @@ import {
   VStack,
   Heading,
   Box,
-  Avatar,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { Job, ProviderServiceTypesList, api } from "@suleigolden/sulber-api-client";
-import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaCheck, FaUser } from "react-icons/fa";
+import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaCheck } from "react-icons/fa";
 import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
 import { fullAddress } from "~/common/utils/address";
 import { getStatusColor } from "~/common/utils/status-color";
 import { formatDateToStringWithoutTime, formatDateToStringWithTime } from "~/common/utils/date-time";
 import { useState, useEffect } from "react";
 import { UserProfile } from "@suleigolden/sulber-api-client";
+import { CustomerRequestInfoModal } from "./CustomerRequestInfoModal";
 
 type JobCardProps = {
   job: Job;
@@ -34,6 +35,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
   const borderColor = useColorModeValue("gray.200", "gray.700");
   const [customerProfile, setCustomerProfile] = useState<UserProfile | null>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const selectedService = job.serviceType
     ? ProviderServiceTypesList.services.find((s) => s.type === job.serviceType)
@@ -61,9 +63,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
   return (
     <Card
       bg={cardBg}
-      borderWidth="1px"
-      borderColor={borderColor}
-      boxShadow="sm"
+      boxShadow="xl"
       _hover={{ boxShadow: "md", transform: "translateY(-2px)" }}
       transition="all 0.2s"
     >
@@ -75,6 +75,20 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
               <HStack>
                 <Heading size="md" fontWeight="bold">
                   {selectedService?.title || job.serviceType || "Service Request"}
+                  {customerProfile && (
+                    <Text
+                      fontSize="sm"
+                      as="span"
+                      fontWeight="bold"
+                      color="brand.500"
+                      cursor="pointer"
+                      _hover={{ color: "brand.600", textDecoration: "underline" }}
+                      onClick={onOpen}
+                      ml={2}
+                    >
+                      For: {customerProfile.firstName} {customerProfile.lastName}
+                    </Text>
+                  )}
                 </Heading>
                 <Badge
                   colorScheme={getStatusColor(job.status)}
@@ -126,6 +140,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                 )}
               </VStack>
             )}
+            
           </HStack>
 
           <Divider />
@@ -207,37 +222,17 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
               </VStack>
             </HStack>
           )}
-           {/* Customer Information */}
-           {customerProfile && (
-            <Box
-              p={3}
-              bg={useColorModeValue("gray.50", "gray.700")}
-              borderRadius="md"
-              borderWidth="1px"
-              borderColor={borderColor}
-            >
-              <HStack spacing={3}>
-                <Avatar
-                  size="md"
-                  src={customerProfile.avatarUrl || undefined}
-                  name={`${customerProfile.firstName || ""} ${customerProfile.lastName || ""}`}
-                  icon={<FaUser />}
-                />
-                <VStack align="start" spacing={0} flex={1}>
-                  <Text fontSize="sm" fontWeight="bold" color="gray.800">
-                    {customerProfile.firstName} {customerProfile.lastName}
-                  </Text>
-                  {customerProfile.phoneNumber && (
-                    <Text fontSize="xs" color="gray.900">
-                      Mobile: {customerProfile.phoneNumber}
-                    </Text>
-                  )}
-                </VStack>
-              </HStack>
-            </Box>
-          )}
+           
         </VStack>
       </CardBody>
+
+      {/* Customer Request Information Modal */}
+      <CustomerRequestInfoModal
+        isOpen={isOpen}
+        onClose={onClose}
+        customerProfile={customerProfile}
+        job={job}
+      />
     </Card>
   );
 };

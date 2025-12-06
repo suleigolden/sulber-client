@@ -11,13 +11,16 @@ import {
   VStack,
   Heading,
   Box,
+  Avatar,
 } from "@chakra-ui/react";
-import { Job, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
-import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaCheck } from "react-icons/fa";
+import { Job, ProviderServiceTypesList, api } from "@suleigolden/sulber-api-client";
+import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaCheck, FaUser } from "react-icons/fa";
 import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
 import { fullAddress } from "~/common/utils/address";
 import { getStatusColor } from "~/common/utils/status-color";
 import { formatDateToStringWithoutTime, formatDateToStringWithTime } from "~/common/utils/date-time";
+import { useState, useEffect } from "react";
+import { UserProfile } from "@suleigolden/sulber-api-client";
 
 type JobCardProps = {
   job: Job;
@@ -29,10 +32,31 @@ type JobCardProps = {
 export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: JobCardProps) => {
   const cardBg = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
+  const [customerProfile, setCustomerProfile] = useState<UserProfile | null>(null);
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
 
   const selectedService = job.serviceType
     ? ProviderServiceTypesList.services.find((s) => s.type === job.serviceType)
     : null;
+
+  // Fetch customer profile information
+  useEffect(() => {
+    const fetchCustomerProfile = async () => {
+      if (!job.customerId) return;
+      
+      setIsLoadingCustomer(true);
+      try {
+        const profile = await api.service("user-profile").get(job.customerId);
+        setCustomerProfile(profile);
+      } catch (error) {
+        console.error("Failed to fetch customer profile:", error);
+      } finally {
+        setIsLoadingCustomer(false);
+      }
+    };
+
+    fetchCustomerProfile();
+  }, [job.customerId]);
 
   return (
     <Card
@@ -93,7 +117,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                 {job.status === "IN_PROGRESS" && onUpdateStatus && (
                   <Button
                     size="sm"
-                    colorScheme="blue"
+                    colorScheme="brand"
                     leftIcon={<Icon as={FaCheck} />}
                     onClick={() => onUpdateStatus(job, "COMPLETED")}
                   >
@@ -105,6 +129,8 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
           </HStack>
 
           <Divider />
+
+         
 
           {/* Details Grid */}
           <Box
@@ -164,7 +190,9 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                 </Text>
               </VStack>
             </HStack>
+            
           </Box>
+          
 
           {/* Price */}
           {job.totalPriceCents && (
@@ -178,6 +206,35 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                 </Text>
               </VStack>
             </HStack>
+          )}
+           {/* Customer Information */}
+           {customerProfile && (
+            <Box
+              p={3}
+              bg={useColorModeValue("gray.50", "gray.700")}
+              borderRadius="md"
+              borderWidth="1px"
+              borderColor={borderColor}
+            >
+              <HStack spacing={3}>
+                <Avatar
+                  size="md"
+                  src={customerProfile.avatarUrl || undefined}
+                  name={`${customerProfile.firstName || ""} ${customerProfile.lastName || ""}`}
+                  icon={<FaUser />}
+                />
+                <VStack align="start" spacing={0} flex={1}>
+                  <Text fontSize="sm" fontWeight="bold" color="gray.800">
+                    {customerProfile.firstName} {customerProfile.lastName}
+                  </Text>
+                  {customerProfile.phoneNumber && (
+                    <Text fontSize="xs" color="gray.900">
+                      Mobile: {customerProfile.phoneNumber}
+                    </Text>
+                  )}
+                </VStack>
+              </HStack>
+            </Box>
           )}
         </VStack>
       </CardBody>

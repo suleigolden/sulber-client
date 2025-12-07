@@ -127,6 +127,7 @@ export const UserInformation = forwardRef<
           maxW="720px"
           bg="white"
           borderRadius="2xl"
+          boxShadow="lg"
         >
           {shouldDisplayStepper && <OnboardingStepper activeStep={activeStep} steps={steps} />}
           <Box

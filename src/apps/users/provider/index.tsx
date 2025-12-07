@@ -32,15 +32,14 @@ export const ProviderProfileSettings = () => {
   const handleSave = async () => {
     setIsSubmitting(true);
     try {
-      // All components use the same useProviderOnboarding hook internally,
-      // so submitting any one form will save all the data
-      // We'll use the userInfoFormRef as it's typically the most complete
-      if (userInfoFormRef.current) {
-        await userInfoFormRef.current.submitForm();
-      } else if (locationFormRef.current) {
+      // Only submit the form for the currently active tab
+      // tabIndex 0 = Location, 1 = Services, 2 = Personal Information
+      if (tabIndex === 0 && locationFormRef.current) {
         await locationFormRef.current.submitForm();
-      } else if (servicesFormRef.current) {
+      } else if (tabIndex === 1 && servicesFormRef.current) {
         await servicesFormRef.current.submitForm();
+      } else if (tabIndex === 2 && userInfoFormRef.current) {
+        await userInfoFormRef.current.submitForm();
       }
     } catch (error) {
       console.error("Error saving profile:", error);
@@ -65,11 +64,11 @@ export const ProviderProfileSettings = () => {
   }
 
   return (
-    <Container maxW="1500px" px={[4, 0]} py={8}>
-      <VStack align="start" spacing={8} w="full" mt={0}>
-        {/* <Heading size="md" fontWeight="bold">
+    <Container maxW="1500px" px={[4, 0]} py={0}>
+      <VStack align="start" spacing={8} w="full" mt={0} pl={6}>
+        <Heading size="md" fontWeight="bold">
           Settings
-        </Heading> */}
+        </Heading>
 
         <Box w="full" bg="white" borderRadius="xl" boxShadow="xl" p={6}>
           <Tabs colorScheme="brand" index={tabIndex} onChange={setTabIndex} w="full">
@@ -96,6 +95,7 @@ export const ProviderProfileSettings = () => {
                   activeStep={0}
                   steps={[{ title: "Services", Component: ProviderServices }]}
                   onServicesSelectedChange={() => {}}
+                  isProviderProfileSettings={true}
                 />
               </TabPanel>
 

@@ -7,18 +7,21 @@ import {
   Badge,
   Flex,
   Spacer,
+  SimpleGrid,
 } from "@chakra-ui/react";
-import { forwardRef, useEffect, useImperativeHandle } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo } from "react";
 import { FormProvider } from "react-hook-form";
 import { useProviderOnboarding } from "~/hooks/use-provider-onboarding";
-import { ProviderServiceType } from "@suleigolden/sulber-api-client";
-import { FaCar, FaParking, FaSnowflake } from "react-icons/fa";
+import { api, ProviderProfile, ProviderServiceType, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
+import { FaCar, FaParking, FaSnowflake, FaHome, FaTree, FaLeaf } from "react-icons/fa";
 import { OnboardingStepper } from "./OnboardingStepper";
+import { useUser } from "~/hooks/use-user";
+import { CustomToast } from "~/hooks/CustomToast";
+import { useProviderProfile } from "~/hooks/use-provider-profile";
 
 type ServiceConfig = {
   type: ProviderServiceType;
   title: string;
-  description: string;
   icon: React.ElementType;
   requirements: {
     equipment?: string;
@@ -28,42 +31,27 @@ type ServiceConfig = {
     license?: string;
   };
 };
-const SERVICE_CONFIGS: ServiceConfig[] = [
-  {
-    type: "DRIVEWAY_CAR_WASH",
-    title: "Driveway Car Wash",
-    description: "Professional car washing services at customer locations",
-    icon: FaCar,
-    requirements: {
-      equipment: "Portable pressure washer, microfiber towels, eco-friendly soap, water supply hose, vacuum cleaner for interiors.",
-      experience: "Prior experience in car detailing or mobile washing preferred; must know safe cleaning techniques for different vehicle finishes.",
-      license: "Valid driver’s license or Government ID",
-    },
-  },
-  {
-    type: "SNOW_SHOVELING",
-    title: "Snow Shoveling",
-    description: "Clear driveways and walkways during winter months",
-    icon: FaSnowflake,
-    requirements: {
-      equipment: "Shovel, snow blower (optional), ice scraper, salt or eco-safe ice melt, and protective clothing.",
-      physical: "Must be physically fit to handle heavy snow and work in cold conditions for extended periods.",
-      availability: "Must be available on short notice during snowstorms, early mornings, or overnight snow events.",
-      license: "Valid driver’s license or Government ID",
-    },
-  },
-  {
-    type: "PARKING_LOT_CLEANING",
-    title: "Parking Lot Car Cleaning",
-    description: "Commercial parking lot car maintenance and cleaning",
-    icon: FaParking,
-    requirements: {
-      equipment: "Pressure washer, industrial vacuum, garbage collection tools, surface cleaner, cleaning agents, and safety cones.",
-      experience: "Prior experience in outdoor vehicle cleaning or facility maintenance; knowledge of surface cleaning safety standards.",
-      license: "Valid driver’s license, Government ID or business license",
-    },
-  },
-];
+
+// Map service types to icons
+const getServiceIcon = (serviceType: ProviderServiceType): React.ElementType => {
+  const iconMap: Record<string, React.ElementType> = {
+    DRIVEWAY_CAR_WASH: FaCar,
+    DRIVEWAY_CAR_CLEANING: FaCar,
+    PARKING_LOT_CAR_CLEANING: FaParking,
+    PARKING_LOT_CAR_WASH: FaParking,
+    GENERAL_CAR_CLEANING: FaCar,
+    DRIVEWAY_CLEANING: FaHome,
+    DRIVEWAY_SNOW_SHOVELING: FaSnowflake,
+    SNOW_SHOVELING: FaSnowflake,
+    FRONT_YARD_CLEANING: FaLeaf,
+    BACK_YARD_CLEANING: FaLeaf,
+    FRONT_YARD_LANDSCAPING: FaTree,
+    BACK_YARD_LANDSCAPING: FaTree,
+    FRONT_YARD_SNOW_SHOVELING: FaSnowflake,
+    BACK_YARD_SNOW_SHOVELING: FaSnowflake,
+  };
+  return iconMap[serviceType] || FaCar;
+};
 
 type ServiceCardProps = {
   service: ServiceConfig;
@@ -176,21 +164,40 @@ type ProviderServicesProps = {
   activeStep: number;
   steps: any;
   shouldDisplayStepper?: boolean;
+  isProviderProfileSettings?: boolean;
 };
 export const ProviderServices = forwardRef(
   (
     props: ProviderServicesProps,
     ref: React.ForwardedRef<{ submitForm: () => Promise<void> }>,
   ) => {
-    const { methods, handleSubmit } = useProviderOnboarding();
+    const { providerProfile } = useProviderProfile();
+    const showToast = CustomToast();
+    const { methods, handleSubmit, setValue } = useProviderOnboarding();
     const {
       watch,
-      setValue,
       formState: { errors },
     } = methods;
 
     const selectedServices = (watch("services") || []) as ProviderServiceType[];
-    const { onServicesSelectedChange } = props;
+    const { onServicesSelectedChange, isProviderProfileSettings } = props;
+    
+
+    // Map ProviderServiceTypesList to ServiceConfig format
+    const SERVICE_CONFIGS: ServiceConfig[] = useMemo(() => {
+      return ProviderServiceTypesList.services.map((service) => ({
+        type: service.type as ProviderServiceType,
+        title: service.title,
+        icon: getServiceIcon(service.type as ProviderServiceType),
+        requirements: {
+          equipment: service.requirements_for_provider?.equipment,
+          experience: service.requirements_for_provider?.experience,
+          license: service.requirements_for_provider?.license,
+          physical: service.requirements_for_provider?.physical,
+          availability: service.requirements_for_provider?.availability,
+        },
+      }));
+    }, []);
 
     const toggleService = (serviceType: ProviderServiceType) => {
       const currentServices = selectedServices || [];
@@ -204,12 +211,41 @@ export const ProviderServices = forwardRef(
       }
     };
 
+    // Update services from form to provider profile settings page
+    const updateServices = async (services: ProviderServiceType[]) => {
+      try {
+        if (!services || services.length === 0) {
+          showToast('Error', 'Please select at least one service', 'error');
+          return;
+        }
+        if (providerProfile?.id && services) {
+          // Only send the services field for update - userId is a foreign key and shouldn't be updated
+          await api.service('provider-profile').update(providerProfile.id as string, {
+            services: services,
+          });
+          showToast('Success', 'Services updated successfully', 'success');
+        }
+      } catch (error) {
+        console.error(error);
+        showToast('Error', 'Failed to update services', 'error');
+      }
+    };
+
+    // Custom submit function that conditionally uses updateServices or handleSubmit
+    const submitForm = async () => {
+      if (isProviderProfileSettings) {
+        await updateServices(selectedServices);
+      } else {
+        await handleSubmit();
+      }
+    };
+
     useEffect(() => {
       onServicesSelectedChange?.(selectedServices.length > 0);
     }, [selectedServices, onServicesSelectedChange]);
 
     useImperativeHandle(ref, () => ({
-      submitForm: handleSubmit,
+      submitForm,
     }));
 
     return (
@@ -217,7 +253,7 @@ export const ProviderServices = forwardRef(
         <VStack spacing={{ base: 4, sm: 6, md: 8 }} align="center" w="full">
           <Box
             w="full"
-            maxW={{ base: "100%", sm: "720px" }}
+            // maxW={{ base: "100%", sm: "720px" }}
             bg="white"
             borderRadius={{ base: "xl", md: "2xl" }}
             overflow="hidden"
@@ -246,7 +282,13 @@ export const ProviderServices = forwardRef(
               p={{ base: 3, sm: 4, md: 6, lg: 10 }}
               boxShadow="lg"
             >
-              <VStack spacing={{ base: 3, sm: 4 }} w="full" p={{ base: 0, sm: 2, md: 4, lg: 6 }}>
+              {/* Services List */}
+              <SimpleGrid
+                columns={{ base: 1, md: 2 }}
+                spacing={{ base: 3, sm: 4, md: 5 }}
+                w="full"
+                p={{ base: 0, sm: 2, md: 4, lg: 6 }}
+              >
                 {SERVICE_CONFIGS.map((service) => (
                   <ServiceCard
                     key={service.type}
@@ -255,7 +297,7 @@ export const ProviderServices = forwardRef(
                     onToggle={() => toggleService(service.type)}
                   />
                 ))}
-              </VStack>
+              </SimpleGrid>
             </VStack>
           </Box>
         </VStack>

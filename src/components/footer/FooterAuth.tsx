@@ -37,7 +37,7 @@ export default function Footer() {
               gap={1}
               justifyContent="center"
             >
-              Made with <Icon as={FaHeart} color="red.400" /> by HomiShare 
+            
               &copy; {new Date().getFullYear()}  All Rights Reserved
             </Text>
 

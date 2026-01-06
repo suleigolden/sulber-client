@@ -1,15 +1,11 @@
 import {
     Box,
-    Text,
     Flex,
-    VStack,
-    Button,
-    Icon,
+    Image,
     Container,
     useColorModeValue,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { MdLocationOn } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { ProviderServiceType } from "@suleigolden/sulber-api-client";
 import { RequestServiceCard } from "../car-service/RequestServiceCard";
@@ -76,56 +72,17 @@ export const HeroSection = () => {
                         flex={1}
                         w="full"
                         position="relative"
-                        minH={{ base: "300px", lg: "500px" }}
                         borderRadius="xl"
                         overflow="hidden"
-                        bgGradient="linear(to-br, blue.50, purple.50)"
                         display={{ base: "none", lg: "block" }}
                     >
                         {/* Placeholder Illustration - You can replace this with an actual illustration */}
-                        <Box
+                        <Image src="/images/busy_suburban_service_day.png"
+                            alt="Busy suburban service day"
                             w="full"
                             h="full"
-                            position="relative"
-                            bgGradient="linear(to-br, blue.100, purple.100)"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                        >
-                            {/* Simple illustration placeholder */}
-                            <VStack spacing={4} color="gray.600">
-                                <Icon as={MdLocationOn} boxSize={32} opacity={0.3} />
-                                <Text fontSize="xl" fontWeight="medium" opacity={0.5}>
-                                    Service Illustration
-                                </Text>
-                            </VStack>
-
-                            {/* CTA Overlay */}
-                            <Box
-                                position="absolute"
-                                bottom={0}
-                                left={0}
-                                right={0}
-                                bg="whiteAlpha.900"
-                                backdropFilter="blur(10px)"
-                                p={4}
-                                borderTopRadius="xl"
-                            >
-                                <Flex justify="space-between" align="center">
-                                    <Text fontSize="md" fontWeight="medium" color={textColor}>
-                                        Reserve a service
-                                    </Text>
-                                    <Button
-                                        colorScheme="brand"
-                                        size="sm"
-                                        borderRadius="full"
-                                        onClick={() => navigate("/car-service")}
-                                    >
-                                        Schedule
-                                    </Button>
-                                </Flex>
-                            </Box>
-                        </Box>
+                            objectFit="cover"
+                            objectPosition="center" />
                     </Box>
                 </Flex>
             </Container>

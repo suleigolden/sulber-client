@@ -9,17 +9,20 @@ import {
     Button,
     Select,
     Icon,
-    Heading,
     Radio,
     RadioGroup,
     Stack,
     Alert,
     AlertIcon,
     AlertDescription,
+    useColorModeValue,
+    Link,
 } from "@chakra-ui/react";
 import { FaCalendarAlt, FaInfoCircle } from "react-icons/fa";
 import { LocationSearchInput } from "../provider-onboard/components/LocationSearchInput";
 import { ProviderServiceType, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
+import { MdLocationOn } from "react-icons/md";
+import { useCurrentLocation } from "~/hooks/use-current-location";
 
 type ServiceRequestType = "one-time" | "monthly";
 
@@ -65,21 +68,58 @@ export const RequestServiceCard = ({
     onSearch,
     isSearchDisabled,
 }: RequestServiceCardProps) => {
+    const { currentLocation } = useCurrentLocation();
+    const textColor = useColorModeValue("black", "white");
+    const linkColor = useColorModeValue("blue.500", "blue.300");
+    // Format location display
+    const locationDisplay = currentLocation
+        ? `${currentLocation.city || ""}, ${currentLocation.state || ""}, ${currentLocation.country || ""}`
+            .replace(/^,\s*|,\s*$/g, "")
+            .replace(/,\s*,/g, ",")
+        : "Select location";
+
     return (
         <VStack
             spacing={{ base: 4, sm: 5, md: 6 }}
             align="stretch"
-            boxShadow="lg"
             borderRadius="lg"
             p={{ base: 4, sm: 5, md: 6 }}
         >
-            <Heading size={{ base: "sm", sm: "md" }} fontWeight="bold" mb={2}>
-                Request a service
-            </Heading>
+            {/* Location Header */}
+            <HStack spacing={2} fontSize={{ base: "sm", md: "md" }}>
+                <Icon as={MdLocationOn} color="gray.500" />
+                <Text color="gray.600">{locationDisplay}</Text>
+                <Link
+                    color={linkColor}
+                    textDecoration="underline"
+                    _hover={{ textDecoration: "none" }}
+                    fontSize={{ base: "xs", md: "sm" }}
+                >
+                    Change city
+                </Link>
+            </HStack>
+            <VStack align="start" spacing={2}>
+                <Text
+                    fontSize={{ base: "2xl", md: "2xl", lg: "3xl" }}
+                    fontWeight="bold"
+                    color={textColor}
+                    lineHeight="1.1"
+                >
+                    Get Your Car, Driveway and Window Cleaned
+                </Text>
+                <Text
+                    fontSize={{ base: "2xl", md: "2xl", lg: "3xl" }}
+                    fontWeight="bold"
+                    color={textColor}
+                    lineHeight="1.1"
+                >
+                    with Sulber
+                </Text>
+            </VStack>
 
             {/* Service Location */}
             <Box>
-                <Text fontSize={{ base: "xs", sm: "sm" }} fontWeight="medium" mb={2} color="gray.700">
+                <Text fontSize={{ base: "xs", sm: "sm" }} fontWeight="medium" mb={2} color={textColor}>
                     Service location
                 </Text>
                 <LocationSearchInput
@@ -93,7 +133,7 @@ export const RequestServiceCard = ({
 
             {/* Service Date and Time */}
             <Box>
-                <Text fontSize={{ base: "xs", sm: "sm" }} fontWeight="medium" mb={2} color="gray.700">
+                <Text fontSize={{ base: "xs", sm: "sm" }} fontWeight="medium" mb={2} color={textColor}>
                     Service date and time
                 </Text>
                 <HStack spacing={2} flexWrap={{ base: "wrap", sm: "nowrap" }}>
@@ -127,7 +167,7 @@ export const RequestServiceCard = ({
 
             {/* Service Type */}
             <Box>
-                <Text fontSize={{ base: "xs", sm: "sm" }} fontWeight="medium" mb={2} color="gray.700">
+                <Text fontSize={{ base: "xs", sm: "sm" }} fontWeight="medium" mb={2} color={textColor}>
                     Service type
                 </Text>
                 <Select
@@ -147,28 +187,28 @@ export const RequestServiceCard = ({
 
             {/* Service Request Type */}
             <Box>
-                <Text fontSize={{ base: "xs", sm: "sm" }} fontWeight="medium" mb={2} color="gray.700">
+                <Text fontSize={{ base: "xs", sm: "sm" }} fontWeight="medium" mb={2} color={textColor}>
                     Service Request Type
                 </Text>
                 <RadioGroup
                     value={serviceRequestType}
                     onChange={(value) => onServiceRequestTypeChange(value as ServiceRequestType)}
                 >
-                    <Stack 
-                        direction={{ base: "column", sm: "row" }} 
+                    <Stack
+                        direction={{ base: "column", sm: "row" }}
                         spacing={{ base: 3, sm: 4 }}
                         align={{ base: "start", sm: "center" }}
                     >
-                        <Radio 
-                            value="one-time" 
+                        <Radio
+                            value="one-time"
                             colorScheme="brand"
                             size={{ base: "sm", sm: "md" }}
                             whiteSpace={{ base: "normal", sm: "nowrap" }}
                         >
                             One time service
                         </Radio>
-                        <Radio 
-                            value="monthly" 
+                        <Radio
+                            value="monthly"
                             colorScheme="brand"
                             size={{ base: "sm", sm: "md" }}
                             whiteSpace={{ base: "normal", sm: "nowrap" }}
@@ -177,7 +217,7 @@ export const RequestServiceCard = ({
                         </Radio>
                     </Stack>
                 </RadioGroup>
-                
+
                 {/* Monthly Subscription Info */}
                 {serviceRequestType === "monthly" && (
                     <Alert
@@ -189,7 +229,7 @@ export const RequestServiceCard = ({
                         flexDirection={{ base: "column", sm: "row" }}
                     >
                         <AlertIcon as={FaInfoCircle} boxSize={{ base: "16px", sm: "20px" }} />
-                        <AlertDescription 
+                        <AlertDescription
                             fontSize={{ base: "xs", sm: "sm" }}
                             lineHeight={{ base: "1.4", sm: "1.5" }}
                         >

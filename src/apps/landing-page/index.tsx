@@ -1,8 +1,8 @@
-import { Box, Text, VStack } from '@chakra-ui/react';
+import { Box, VStack } from '@chakra-ui/react';
 import SystemThemeToggle from '../../components/SystemThemeToggle';
 import { Navbar } from './Navbar';
-import { RequestACarService } from '../car-service/RequestACarService';
 import Footer from '~/components/footer/FooterAuth';
+import { HeroSection } from './HeroSection';
 
 export const LandingPage = () => {
   return (
@@ -10,8 +10,7 @@ export const LandingPage = () => {
       <Navbar />
       <SystemThemeToggle />
       <VStack align="start" spacing={8} w="full" mt={20}>
-        <RequestACarService />
-
+        <HeroSection />
         <Footer />
       </VStack>
     </Box>

@@ -42,6 +42,7 @@
     "redux-persist": "^6.0.0",
     "suneditor": "^2.47.5",
     "suneditor-react": "^3.6.1",
+    "tailwindcss": "^4.2.0",
     "use-places-autocomplete": "^4.0.1",
     "vite-plugin-checker": "^0.9.3",
     "vite-plugin-rewrite-all": "^1.0.2",

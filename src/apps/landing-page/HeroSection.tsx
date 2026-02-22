@@ -3,68 +3,220 @@ import {
     Flex,
     Image,
     Container,
+    Text,
+    Input,
+    InputGroup,
+    InputLeftElement,
+    Select,
+    Button,
     useColorModeValue,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ProviderServiceType } from "@suleigolden/sulber-api-client";
-import { RequestServiceCard } from "../car-service/RequestServiceCard";
-
-type ServiceRequestType = "one-time" | "monthly";
+import {
+    ProviderServiceType,
+    ProviderServiceTypesList,
+} from "@suleigolden/sulber-api-client";
+import { FiMapPin, FiArrowRight, FiCalendar, FiCheck, FiShield } from "react-icons/fi";
 
 export const HeroSection = () => {
     const navigate = useNavigate();
     const [serviceLocation, setServiceLocation] = useState<string>("");
-    const [serviceLocationData, setServiceLocationData] = useState<{
-        lat: number;
-        lng: number;
-        address: string;
-        city?: string;
-        state?: string;
-        country?: string;
-        postalCode?: string;
-        street?: string;
-    } | null>(null);
-    const [serviceDate, setServiceDate] = useState<string>("");
-    const [serviceTime, setServiceTime] = useState<string>("");
     const [serviceType, setServiceType] = useState<ProviderServiceType | "">("");
-    const [serviceRequestType, setServiceRequestType] = useState<ServiceRequestType>("one-time");
 
-    const bgColor = useColorModeValue("white", "gray.800");
-    const textColor = useColorModeValue("black", "white");
+    const bgBase = useColorModeValue("white", "gray.900");
+    const headlineDark = useColorModeValue("gray.800", "white");
+    const bodyColor = useColorModeValue("gray.700", "gray.300");
+    const inputBg = useColorModeValue("gray.50", "gray.700");
+    const inputBorder = useColorModeValue("gray.200", "gray.600");
+    const availabilityColor = useColorModeValue("gray.600", "gray.400");
 
     const handleSearch = () => {
-        // Navigate to car service page with the form data
-        navigate("/car-service");
+        navigate("/car-service", {
+            state: { address: serviceLocation || undefined, serviceType: serviceType || undefined },
+        });
     };
 
-    const isSearchDisabled = !serviceLocation || !serviceDate || !serviceTime || !serviceType;
+    const isSearchDisabled = !serviceLocation || !serviceType;
 
     return (
-        <Box w="full" bg={bgColor} py={{ base: 8, md: 12 }}>
-            <Container maxW="container.xl">
+        <Box
+            w="full"
+            // minH={{ base: "auto", lg: "calc(100vh - 80px)" }}
+            bg={bgBase}
+            backgroundImage="radial-gradient(80% 60% at 50% 40%, rgba(81, 86, 236, 0.12) 0%, rgba(123, 73, 223, 0.06) 40%, transparent 70%)"
+            py={{ base: 10, md: 16 }}
+        >
+            <Container maxW="container.xl" px={{ base: 4, md: 8 }}>
                 <Flex
                     direction={{ base: "column", lg: "row" }}
-                    gap={{ base: 8, lg: 12 }}
+                    gap={{ base: 10, lg: 16 }}
                     align={{ base: "start", lg: "center" }}
                 >
-                    {/* Left Section - Service Request Card */}
-                    <Box flex={1} w="full" maxW={{ base: "100%", lg: "500px" }}>
-                        <RequestServiceCard
-                            serviceLocation={serviceLocation}
-                            onServiceLocationChange={setServiceLocation}
-                            onServiceLocationDataChange={setServiceLocationData}
-                            serviceDate={serviceDate}
-                            onServiceDateChange={setServiceDate}
-                            serviceTime={serviceTime}
-                            onServiceTimeChange={setServiceTime}
-                            serviceType={serviceType}
-                            onServiceTypeChange={setServiceType}
-                            serviceRequestType={serviceRequestType}
-                            onServiceRequestTypeChange={setServiceRequestType}
-                            onSearch={handleSearch}
-                            isSearchDisabled={isSearchDisabled}
-                        />
+                    {/* Left Section - Content */}
+                    <Box flex={1} w="full" maxW={{ base: "100%", lg: "560px" }}>
+                        {/* Availability indicator */}
+                        <Flex align="center" gap={2} mb={5}>
+                            <Box
+                                w="2"
+                                h="2"
+                                borderRadius="full"
+                                bg="brand.500"
+                                flexShrink={0}
+                            />
+                            <Text
+                                fontSize="sm"
+                                color={availabilityColor}
+                                fontWeight="medium"
+                            >
+                                Now available in your area
+                            </Text>
+                        </Flex>
+
+                        {/* Headline */}
+                        <Text
+                            as="h1"
+                            fontSize={{ base: "3xl", md: "4xl", lg: "5xl" }}
+                            fontWeight="bold"
+                            lineHeight="1.15"
+                            color={headlineDark}
+                            mb={4}
+                        >
+                            Exterior Services,{" "}
+                            <Box as="span" color="brand.500">
+                                Delivered to Your
+                            </Box>
+                            <br />
+                            <Box as="span" color="brand.500" fontSize={{ base: "4xl", md: "5xl", lg: "6xl" }}>
+                                Driveway
+                            </Box>
+                        </Text>
+
+                        {/* Description */}
+                        <Text
+                            color={bodyColor}
+                            fontSize={{ base: "md", md: "lg" }}
+                            lineHeight="tall"
+                            mb={8}
+                            maxW="520px"
+                        >
+                            Book trusted, vetted providers for car washing, window
+                            cleaning, snow shoveling, and more — right at your
+                            doorstep.
+                        </Text>
+
+                        {/* Search row */}
+                        <Flex
+                            direction={{ base: "column", md: "row" }}
+                            gap={3}
+                            mb={8}
+                        >
+                            <InputGroup flex={{ base: "1 1 100%", md: "1 1 auto" }}>
+                                <InputLeftElement pointerEvents="none" h="full">
+                                    <Box color="gray.500" mt={1}>
+                                        <FiMapPin size={18} />
+                                    </Box>
+                                </InputLeftElement>
+                                <Input
+                                    placeholder="Your address"
+                                    value={serviceLocation}
+                                    onChange={(e) =>
+                                        setServiceLocation(e.target.value)
+                                    }
+                                    bg={inputBg}
+                                    borderColor={inputBorder}
+                                    borderRadius="lg"
+                                    pl={10}
+                                    h="12"
+                                    _placeholder={{ color: "gray.500" }}
+                                />
+                            </InputGroup>
+                            <Select
+                                placeholder="Service type"
+                                value={serviceType}
+                                onChange={(e) =>
+                                    setServiceType(
+                                        e.target.value as ProviderServiceType
+                                    )
+                                }
+                                bg={inputBg}
+                                borderColor={inputBorder}
+                                borderRadius="lg"
+                                h="12"
+                                flex={{ base: "1 1 100%", md: "0 0 200px" }}
+                            >
+                                {ProviderServiceTypesList.services.map(
+                                    (service) => (
+                                        <option
+                                            key={service.type}
+                                            value={service.type}
+                                        >
+                                            {service.title}
+                                        </option>
+                                    )
+                                )}
+                            </Select>
+                            <Button
+                                onClick={handleSearch}
+                                isDisabled={isSearchDisabled}
+                                bg="brand.500"
+                                color="white"
+                                borderRadius="lg"
+                                h="12"
+                                px={6}
+                                fontWeight="semibold"
+                                _hover={{ bg: "brand.600" }}
+                                _active={{ bg: "brand.700" }}
+                                rightIcon={<FiArrowRight />}
+                                flex={{ base: "1 1 100%", md: "0 0 auto" }}
+                            >
+                                Find Services
+                            </Button>
+                        </Flex>
+
+                        {/* Benefit highlights */}
+                        <Flex
+                            flexWrap="wrap"
+                            gap={{ base: 4, md: 6 }}
+                            align="center"
+                        >
+                            <Flex align="center" gap={2}>
+                                <Box color="gray.500">
+                                    <FiCalendar size={18} />
+                                </Box>
+                                <Text
+                                    fontSize="sm"
+                                    color={bodyColor}
+                                    fontWeight="medium"
+                                >
+                                    Same-day booking
+                                </Text>
+                            </Flex>
+                            <Flex align="center" gap={2}>
+                                <Box color="gray.500">
+                                    <FiCheck size={18} />
+                                </Box>
+                                <Text
+                                    fontSize="sm"
+                                    color={bodyColor}
+                                    fontWeight="medium"
+                                >
+                                    Free cancellation
+                                </Text>
+                            </Flex>
+                            <Flex align="center" gap={2}>
+                                <Box color="gray.500">
+                                    <FiShield size={18} />
+                                </Box>
+                                <Text
+                                    fontSize="sm"
+                                    color={bodyColor}
+                                    fontWeight="medium"
+                                >
+                                    Insured providers
+                                </Text>
+                            </Flex>
+                        </Flex>
                     </Box>
 
                     {/* Right Section - Illustration */}
@@ -72,17 +224,19 @@ export const HeroSection = () => {
                         flex={1}
                         w="full"
                         position="relative"
-                        borderRadius="xl"
+                        borderRadius="2xl"
                         overflow="hidden"
                         display={{ base: "none", lg: "block" }}
+                        minH={{ lg: "480px" }}
                     >
-                        {/* Placeholder Illustration - You can replace this with an actual illustration */}
-                        <Image src="/images/busy_suburban_service_day.png"
-                            alt="Busy suburban service day"
+                        <Image
+                            src="/images/busy_suburban_service_day.png"
+                            alt="Exterior services at your driveway — car wash, home and yard"
                             w="full"
                             h="full"
                             objectFit="cover"
-                            objectPosition="center" />
+                            objectPosition="center"
+                        />
                     </Box>
                 </Flex>
             </Container>

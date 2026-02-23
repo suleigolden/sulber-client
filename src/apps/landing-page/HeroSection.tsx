@@ -4,9 +4,6 @@ import {
     Image,
     Container,
     Text,
-    Input,
-    InputGroup,
-    InputLeftElement,
     Select,
     Button,
     useColorModeValue,
@@ -17,7 +14,10 @@ import {
     ProviderServiceType,
     ProviderServiceTypesList,
 } from "@suleigolden/sulber-api-client";
-import { FiMapPin, FiArrowRight, FiCalendar, FiCheck, FiShield } from "react-icons/fi";
+import { FiArrowRight, FiCalendar, FiCheck, FiShield } from "react-icons/fi";
+import { LocationSearchInput } from "../provider-onboard/components/LocationSearchInput";
+import heroIllustration from "~/assets/hero-illustration.png";
+
 
 export const HeroSection = () => {
     const navigate = useNavigate();
@@ -47,14 +47,14 @@ export const HeroSection = () => {
             backgroundImage="radial-gradient(80% 60% at 50% 40%, rgba(81, 86, 236, 0.12) 0%, rgba(123, 73, 223, 0.06) 40%, transparent 70%)"
             py={{ base: 10, md: 16 }}
         >
-            <Container maxW="container.xl" px={{ base: 4, md: 8 }}>
+            <Container maxW="1600px" px={{ base: 4, md: 8 }}>
                 <Flex
                     direction={{ base: "column", lg: "row" }}
-                    gap={{ base: 10, lg: 16 }}
+                    gap={{ base: 10, lg: 1 }}
                     align={{ base: "start", lg: "center" }}
                 >
                     {/* Left Section - Content */}
-                    <Box flex={1} w="full" maxW={{ base: "100%", lg: "560px" }}>
+                    <Box flex={{ base: "1 1 100%", lg: "3 1 0%" }} w="full" minW={0}>
                         {/* Availability indicator */}
                         <Flex align="center" gap={2} mb={5}>
                             <Box
@@ -66,7 +66,7 @@ export const HeroSection = () => {
                             />
                             <Text
                                 fontSize="sm"
-                                color={availabilityColor}
+                                color={'brand.500'}
                                 fontWeight="medium"
                             >
                                 Now available in your area
@@ -100,8 +100,10 @@ export const HeroSection = () => {
                             mb={8}
                             maxW="520px"
                         >
-                            Book trusted, vetted providers for car washing, window
-                            cleaning, snow shoveling, and more — right at your
+                            Book trusted, vetted providers for  
+                            <Text as="span" color="brand.500" fontWeight="bold"> car washing</Text>,
+                             <Text as="span" color="brand.500" fontWeight="bold"> window cleaning</Text>,
+                             <Text as="span" color="brand.500" fontWeight="bold"> snow shoveling</Text>, and more right at your
                             doorstep.
                         </Text>
 
@@ -110,27 +112,20 @@ export const HeroSection = () => {
                             direction={{ base: "column", md: "row" }}
                             gap={3}
                             mb={8}
+                            bg={'#FFFFFF'}
+                            p={2}
+                            border={'1px solid #E0E0E0'}
+                            borderRadius={'10px'}
+                            maxW={'710px'}
                         >
-                            <InputGroup flex={{ base: "1 1 100%", md: "1 1 auto" }}>
-                                <InputLeftElement pointerEvents="none" h="full">
-                                    <Box color="gray.500" mt={1}>
-                                        <FiMapPin size={18} />
-                                    </Box>
-                                </InputLeftElement>
-                                <Input
-                                    placeholder="Your address"
-                                    value={serviceLocation}
-                                    onChange={(e) =>
-                                        setServiceLocation(e.target.value)
-                                    }
-                                    bg={inputBg}
-                                    borderColor={inputBorder}
-                                    borderRadius="lg"
-                                    pl={10}
-                                    h="12"
-                                    _placeholder={{ color: "gray.500" }}
+                            <Box flex={{ base: "1 1 100%", md: "0 0 300px" }}>
+                                <LocationSearchInput
+                                    onLocationSelect={(location) => {
+                                        setServiceLocation(location?.address || "");
+                                    }}
+                                    initialValue={serviceLocation}
                                 />
-                            </InputGroup>
+                            </Box>
                             <Select
                                 placeholder="Service type"
                                 value={serviceType}
@@ -221,7 +216,7 @@ export const HeroSection = () => {
 
                     {/* Right Section - Illustration */}
                     <Box
-                        flex={1}
+                        flex={{ base: "1 1 100%", lg: "2 1 0%" }}
                         w="full"
                         position="relative"
                         borderRadius="2xl"
@@ -229,8 +224,16 @@ export const HeroSection = () => {
                         display={{ base: "none", lg: "block" }}
                         minH={{ lg: "480px" }}
                     >
-                        <Image
+                        {/* <Image
                             src="/images/busy_suburban_service_day.png"
+                            alt="Exterior services at your driveway — car wash, home and yard"
+                            w="full"
+                            h="full"
+                            objectFit="cover"
+                            objectPosition="center"
+                        /> */}
+                         <Image
+                            src={heroIllustration}
                             alt="Exterior services at your driveway — car wash, home and yard"
                             w="full"
                             h="full"

@@ -13,6 +13,7 @@ import { Dashboard } from "~/apps/dashboard/Dashboard";
 import { Vehicles } from "~/apps/vehicles";
 import { WaitingToConnectWithProvider } from "~/apps/car-service/WaitingToConnectWithProvider";
 import { ManageRequests } from "~/apps/manage-requests";
+import { PostAJob } from "~/apps/post-a-job";
 
 // Add type definition at the top
 type RoutesType = {
@@ -122,6 +123,10 @@ export const DashboardNavBar = (props: Record<string, unknown>) => {
               <Route
                 path={`/${user.id}/manage-requests`}
                 element={<ManageRequests />}
+              />
+              <Route
+                path={`/${user.id}/post-a-job`}
+                element={<PostAJob />}
               />
             </Routes>
           </Box>

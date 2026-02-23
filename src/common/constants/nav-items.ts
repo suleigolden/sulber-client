@@ -12,8 +12,8 @@ type NavItem = {
 export const getNavItems = (user: User) => {
   const PROVIDER_NAV_ITEMS: Array<NavItem> = [
     {
-      label: "Requests a Service",
-      href: `/customer/${user?.id}/dashboard`,
+      label: "Post a Job",
+      href: `/provider/${user?.id}/post-a-job`,
       type: "link",
     },
     // {

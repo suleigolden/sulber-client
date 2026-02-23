@@ -3,16 +3,16 @@ import { extendTheme } from '@chakra-ui/react';
 export const theme = extendTheme({
   colors: {
     brand: {
-      50: '#e6e6ff',
-      100: '#c2c2ff',
-      200: '#9e9eff',
-      300: '#7a7aff',
-      400: '#5656ff',
-      500: '#6868f7', // Primary brand color
-      600: '#5959d4', // Darker shade for hover
-      700: '#4a4ab0',
-      800: '#3b3b8d',
-      900: '#2c2c6a',
+      50: '#e6f7f6',
+      100: '#b3ebe7',
+      200: '#80dfd8',
+      300: '#4dd3c9',
+      400: '#2db5ab',
+      500: '#24a89d', // Primary brand color (#24a89de6 solid)
+      600: '#1e8f85',
+      700: '#18766e',
+      800: '#125d56',
+      900: '#0c453f',
     },
     navy: {
       50: '#d0dcfb',

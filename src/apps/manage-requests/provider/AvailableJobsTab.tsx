@@ -49,7 +49,6 @@ export const AvailableJobsTab = ({
         bg="yellow.50"
         borderRadius="lg"
         borderWidth="1px"
-        borderColor="yellow.200"
         textAlign="center"
       >
         <VStack spacing={4}>
@@ -123,7 +122,6 @@ export const AvailableJobsTab = ({
       h={{ base: "auto", lg: "calc(100vh - 300px)" }}
       minH={{ base: "auto", lg: "600px" }}
       borderRadius="lg"
-      boxShadow={"lg"}
       p={1}
     >
       {/* Left Panel - Job List */}

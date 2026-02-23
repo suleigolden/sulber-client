@@ -63,7 +63,6 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
   return (
     <Card
       bg={cardBg}
-      boxShadow="xl"
       _hover={{ boxShadow: "md", transform: "translateY(-2px)" }}
       transition="all 0.2s"
     >

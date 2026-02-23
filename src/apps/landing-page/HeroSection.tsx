@@ -41,6 +41,7 @@ export const HeroSection = () => {
 
     return (
         <Box
+            id="hero"
             w="full"
             // minH={{ base: "auto", lg: "calc(100vh - 80px)" }}
             bg={bgBase}

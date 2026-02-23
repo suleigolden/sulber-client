@@ -5,16 +5,20 @@ import {
     SimpleGrid,
     VStack,
     Flex,
-    Link,
     Icon,
     Container,
     useColorMode,
     useColorModeValue,
 } from "@chakra-ui/react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaCar, FaParking, FaWindowMaximize, FaSnowflake, FaHome } from "react-icons/fa";
 import { FiArrowRight } from "react-icons/fi";
+import { ServiceDetailsModal } from "./ServiceDetailsModal";
+import { getServiceDetailByType } from "./service-details-data";
 
 type ServiceCard = {
+    serviceType: string;
     title: string;
     description: string;
     icon: React.ElementType;
@@ -24,6 +28,7 @@ type ServiceCard = {
 
 const services: ServiceCard[] = [
     {
+        serviceType: "DRIVEWAY_CAR_WASH",
         title: "Car Washing",
         description: "Professional car washing at your home or location. Get your vehicle cleaned on-demand.",
         icon: FaCar,
@@ -31,6 +36,7 @@ const services: ServiceCard[] = [
         iconColor: "brand.500",
     },
     {
+        serviceType: "PARKING_LOT_CLEANING",
         title: "Parking Lot Cleaning",
         description: "On-site vehicle cleaning for residential or commercial parking lots. Convenient and efficient.",
         icon: FaParking,
@@ -38,6 +44,7 @@ const services: ServiceCard[] = [
         iconColor: "green.600",
     },
     {
+        serviceType: "HOUSE_WINDOW_CLEANING",
         title: "Window Cleaning",
         description: "Residential window cleaning for exterior and interior surfaces. Crystal clear results.",
         icon: FaWindowMaximize,
@@ -45,6 +52,7 @@ const services: ServiceCard[] = [
         iconColor: "purple.600",
     },
     {
+        serviceType: "SNOW_SHOVELING",
         title: "Snow Shoveling",
         description: "Snow and ice removal during winter months for safe access and mobility.",
         icon: FaSnowflake,
@@ -52,6 +60,7 @@ const services: ServiceCard[] = [
         iconColor: "cyan.600",
     },
     {
+        serviceType: "HOME_SERVICES",
         title: "Home Services",
         description: "Complete exterior home maintenance delivered to your driveway. Book multiple services.",
         icon: FaHome,
@@ -61,7 +70,10 @@ const services: ServiceCard[] = [
 ];
 
 export const Suggestions = () => {
+    const navigate = useNavigate();
     const { colorMode } = useColorMode();
+    const [selectedServiceType, setSelectedServiceType] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const bgColor = useColorModeValue("white", "darkBg");
     const cardBg = useColorModeValue("white", "whiteAlpha.100");
     const cardBorder = useColorModeValue("gray.100", "whiteAlpha.200");
@@ -79,6 +91,22 @@ export const Suggestions = () => {
     const eyebrowColor = useColorModeValue("brand.500", "brand.300");
     const cardHoverBorder = useColorModeValue("brand.100", "whiteAlpha.300");
 
+    const selectedService = selectedServiceType ? getServiceDetailByType(selectedServiceType) : null;
+
+    const openModal = (serviceType: string) => {
+        setSelectedServiceType(serviceType);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedServiceType(null);
+    };
+
+    const handleBookNow = () => {
+        navigate("/#hero");
+    };
+
     return (
         <Box w="full" bg={bgColor} py={{ base: 16, md: 24 }}>
             <Container maxW="1600px" px={{ base: 4, md: 8 }}>
@@ -90,7 +118,7 @@ export const Suggestions = () => {
                         letterSpacing="wider"
                         textTransform="uppercase"
                     >
-                        What we offer
+                         Services
                     </Text>
                     <Heading
                         fontSize={{ base: "3xl", md: "4xl", lg: "5xl" }}
@@ -99,16 +127,8 @@ export const Suggestions = () => {
                         letterSpacing="tight"
                         lineHeight="1.2"
                     >
-                        Services for every need
+                        Suggestions
                     </Heading>
-                    <Text
-                        fontSize={{ base: "md", md: "lg" }}
-                        color={descriptionColor}
-                        maxW="560px"
-                        lineHeight="tall"
-                    >
-                        Trusted, vetted providers for exterior care — from your car to your windows and yard.
-                    </Text>
                 </VStack>
 
                 <SimpleGrid
@@ -180,8 +200,9 @@ export const Suggestions = () => {
                                             {service.description}
                                         </Text>
                                     </VStack>
-                                    <Link
-                                        href="#"
+                                    <Box
+                                        as="button"
+                                        type="button"
                                         fontSize="sm"
                                         fontWeight="semibold"
                                         color={linkColor}
@@ -189,16 +210,28 @@ export const Suggestions = () => {
                                         display="inline-flex"
                                         alignItems="center"
                                         gap={2}
+                                        onClick={() => openModal(service.serviceType)}
+                                        cursor="pointer"
+                                        bg="transparent"
+                                        border="none"
+                                        p={0}
                                     >
                                         Learn more
                                         <Icon as={FiArrowRight} boxSize={4} />
-                                    </Link>
+                                    </Box>
                                 </Flex>
                             </Box>
                         );
                     })}
                 </SimpleGrid>
             </Container>
+
+            <ServiceDetailsModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                service={selectedService ?? null}
+                onBookNow={handleBookNow}
+            />
         </Box>
     );
 };

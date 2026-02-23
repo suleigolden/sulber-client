@@ -5,189 +5,199 @@ import {
     SimpleGrid,
     VStack,
     Flex,
-    Button,
+    Link,
     Icon,
     Container,
+    useColorMode,
     useColorModeValue,
 } from "@chakra-ui/react";
 import { FaCar, FaParking, FaWindowMaximize, FaSnowflake, FaHome } from "react-icons/fa";
+import { FiArrowRight } from "react-icons/fi";
 
 type ServiceCard = {
     title: string;
     description: string;
     icon: React.ElementType;
+    iconBg: string;
     iconColor: string;
 };
 
 const services: ServiceCard[] = [
     {
         title: "Car Washing",
-        description: "Professional car washing performed at your home or location. Get your vehicle cleaned on-demand.",
+        description: "Professional car washing at your home or location. Get your vehicle cleaned on-demand.",
         icon: FaCar,
-        iconColor: "blue.500",
+        iconBg: "brand.50",
+        iconColor: "brand.500",
     },
     {
         title: "Parking Lot Cleaning",
         description: "On-site vehicle cleaning for residential or commercial parking lots. Convenient and efficient.",
         icon: FaParking,
-        iconColor: "green.500",
+        iconBg: "green.50",
+        iconColor: "green.600",
     },
     {
         title: "Window Cleaning",
         description: "Residential window cleaning for exterior and interior surfaces. Crystal clear results.",
         icon: FaWindowMaximize,
-        iconColor: "purple.500",
+        iconBg: "purple.50",
+        iconColor: "purple.600",
     },
     {
         title: "Snow Shoveling",
-        description: "Snow and ice removal during winter months for safe access and mobility. Seasonal service.",
+        description: "Snow and ice removal during winter months for safe access and mobility.",
         icon: FaSnowflake,
-        iconColor: "cyan.500",
+        iconBg: "cyan.50",
+        iconColor: "cyan.600",
     },
     {
         title: "Home Services",
-        description: "Complete exterior home maintenance services delivered to your driveway. Book multiple services.",
+        description: "Complete exterior home maintenance delivered to your driveway. Book multiple services.",
         icon: FaHome,
-        iconColor: "orange.500",
+        iconBg: "orange.50",
+        iconColor: "orange.600",
     },
 ];
 
 export const Suggestions = () => {
+    const { colorMode } = useColorMode();
     const bgColor = useColorModeValue("white", "darkBg");
-    const cardBg = useColorModeValue("gray.50", "gray.700");
-    const cardBorder = useColorModeValue("gray.200", "gray.600");
-    const textColor = useColorModeValue("black", "white");
+    const cardBg = useColorModeValue("white", "whiteAlpha.100");
+    const cardBorder = useColorModeValue("gray.100", "whiteAlpha.200");
+    const textColor = useColorModeValue("gray.800", "white");
     const descriptionColor = useColorModeValue("gray.600", "gray.300");
-    const buttonHoverBg = useColorModeValue("gray.100", "gray.600");
-    const buttonBg = useColorModeValue("white", "gray.600");
+    const linkColor = useColorModeValue("brand.500", "brand.300");
+    const shadowColor = useColorModeValue(
+        "0 4px 24px -4px rgba(0,0,0,0.08), 0 2px 8px -2px rgba(0,0,0,0.04)",
+        "0 4px 24px -4px rgba(0,0,0,0.2)"
+    );
+    const hoverShadow = useColorModeValue(
+        "0 12px 40px -8px rgba(36, 168, 157, 0.15), 0 4px 12px -2px rgba(0,0,0,0.06)",
+        "0 12px 40px -8px rgba(0,0,0,0.35)"
+    );
+    const eyebrowColor = useColorModeValue("brand.500", "brand.300");
+    const cardHoverBorder = useColorModeValue("brand.100", "whiteAlpha.300");
 
     return (
-        <Box w="full" bg={bgColor} py={{ base: 8, md: 12 }}>
-            <Container maxW="container.xl">
-                <VStack align="start" spacing={8} w="full">
-                    {/* Heading */}
+        <Box w="full" bg={bgColor} py={{ base: 16, md: 24 }}>
+            <Container maxW="1600px" px={{ base: 4, md: 8 }}>
+                <VStack align="start" spacing={4} w="full" mb={{ base: 10, md: 14 }}>
+                    <Text
+                        fontSize="sm"
+                        fontWeight="semibold"
+                        color={eyebrowColor}
+                        letterSpacing="wider"
+                        textTransform="uppercase"
+                    >
+                        What we offer
+                    </Text>
                     <Heading
                         fontSize={{ base: "3xl", md: "4xl", lg: "5xl" }}
                         fontWeight="bold"
                         color={textColor}
+                        letterSpacing="tight"
+                        lineHeight="1.2"
                     >
-                        Suggestions
+                        Services for every need
                     </Heading>
-
-                    {/* Service Cards Grid */}
-                    <SimpleGrid
-                        columns={{ base: 1, sm: 2, md: 3, lg: 3 }}
-                        spacing={{ base: 4, md: 6 }}
-                        w="full"
+                    <Text
+                        fontSize={{ base: "md", md: "lg" }}
+                        color={descriptionColor}
+                        maxW="560px"
+                        lineHeight="tall"
                     >
-                        {services.map((service, index) => {
-                            const IconComponent = service.icon;
-                            return (
-                                <Box
-                                    key={service.title}
-                                    bg={cardBg}
-                                    borderRadius="lg"
-                                    p={{ base: 4, md: 6 }}
-                                    boxShadow="sm"
-                                    border="1px solid"
-                                    borderColor={cardBorder}
-                                    transition="all 0.2s"
-                                    _hover={{
-                                        transform: "translateY(-2px)",
-                                        boxShadow: "md",
-                                    }}
-                                    position="relative"
-                                    overflow="hidden"
-                                    h="full"
-                                    minH={{ base: "140px", md: "160px" }}
-                                >
-                                    <Flex
-                                        direction="row"
-                                        align="center"
-                                        justify="space-between"
-                                        h="full"
-                                        gap={{ base: 3, md: 4 }}
-                                    >
-                                        {/* Left Side - Content */}
-                                        <VStack
-                                            align="start"
-                                            spacing={3}
-                                            flex={1}
-                                            h="full"
-                                            justify="space-between"
-                                            py={1}
-                                        >
-                                            <VStack align="start" spacing={2} flex={1}>
-                                                <Heading
-                                                    size="md"
-                                                    fontWeight="bold"
-                                                    color={textColor}
-                                                    fontSize={{ base: "lg", md: "xl" }}
-                                                >
-                                                    {service.title}
-                                                </Heading>
-                                                <Text
-                                                    fontSize={{ base: "xs", md: "sm" }}
-                                                    color={descriptionColor}
-                                                    lineHeight="1.5"
-                                                >
-                                                    {service.description}
-                                                </Text>
-                                            </VStack>
-
-                                            {/* Details Button */}
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                borderRadius="full"
-                                                borderColor={cardBorder}
-                                                bg={buttonBg}
-                                                color={textColor}
-                                                px={5}
-                                                fontSize={{ base: "xs", md: "sm" }}
-                                                fontWeight="normal"
-                                                _hover={{
-                                                    bg: buttonHoverBg,
-                                                }}
-                                            >
-                                                Details
-                                            </Button>
-                                        </VStack>
-
-                                        {/* Right Side - Illustration/Icon */}
-                                        <Box
-                                            flexShrink={0}
-                                            w={{ base: "70px", sm: "90px", md: "110px" }}
-                                            h={{ base: "70px", sm: "90px", md: "110px" }}
-                                            display="flex"
-                                            alignItems="center"
-                                            justifyContent="center"
-                                            position="relative"
-                                        >
-                                            <Box
-                                                w="full"
-                                                h="full"
-                                                display="flex"
-                                                alignItems="center"
-                                                justifyContent="center"
-                                                position="relative"
-                                            >
-                                                <Icon
-                                                    as={IconComponent}
-                                                    boxSize={{ base: 8, sm: 10, md: 12 }}
-                                                    color={service.iconColor}
-                                                    style={{
-                                                        filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
-                                                    }}
-                                                />
-                                            </Box>
-                                        </Box>
-                                    </Flex>
-                                </Box>
-                            );
-                        })}
-                    </SimpleGrid>
+                        Trusted, vetted providers for exterior care — from your car to your windows and yard.
+                    </Text>
                 </VStack>
+
+                <SimpleGrid
+                    columns={{ base: 1, sm: 2, lg: 3 }}
+                    spacing={{ base: 5, md: 6 }}
+                    w="full"
+                >
+                    {services.map((service) => {
+                        const IconComponent = service.icon;
+                        return (
+                            <Box
+                                key={service.title}
+                                as="article"
+                                bg={cardBg}
+                                borderRadius="2xl"
+                                p={{ base: 6, md: 8 }}
+                                borderWidth="1px"
+                                borderColor={cardBorder}
+                                boxShadow={shadowColor}
+                                transition="all 0.25s ease"
+                                _hover={{
+                                    transform: "translateY(-4px)",
+                                    boxShadow: hoverShadow,
+                                    borderColor: cardHoverBorder,
+                                }}
+                                position="relative"
+                                overflow="hidden"
+                                h="full"
+                                display="flex"
+                                flexDirection="column"
+                            >
+                                <Flex
+                                    direction="column"
+                                    align="start"
+                                    flex={1}
+                                    gap={5}
+                                >
+                                    <Box
+                                        w="14"
+                                        h="14"
+                                        borderRadius="2xl"
+                                        bg={colorMode === "dark" ? "whiteAlpha.200" : service.iconBg}
+                                        display="flex"
+                                        alignItems="center"
+                                        justifyContent="center"
+                                        flexShrink={0}
+                                    >
+                                        <Icon
+                                            as={IconComponent}
+                                            boxSize={7}
+                                            color={service.iconColor}
+                                        />
+                                    </Box>
+                                    <VStack align="start" spacing={2} flex={1}>
+                                        <Heading
+                                            size="md"
+                                            fontWeight="bold"
+                                            color={textColor}
+                                            fontSize={{ base: "xl", md: "2xl" }}
+                                            letterSpacing="tight"
+                                        >
+                                            {service.title}
+                                        </Heading>
+                                        <Text
+                                            fontSize="sm"
+                                            color={descriptionColor}
+                                            lineHeight="1.6"
+                                        >
+                                            {service.description}
+                                        </Text>
+                                    </VStack>
+                                    <Link
+                                        href="#"
+                                        fontSize="sm"
+                                        fontWeight="semibold"
+                                        color={linkColor}
+                                        _hover={{ color: "brand.600" }}
+                                        display="inline-flex"
+                                        alignItems="center"
+                                        gap={2}
+                                    >
+                                        Learn more
+                                        <Icon as={FiArrowRight} boxSize={4} />
+                                    </Link>
+                                </Flex>
+                            </Box>
+                        );
+                    })}
+                </SimpleGrid>
             </Container>
         </Box>
     );

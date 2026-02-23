@@ -59,7 +59,7 @@ export const Navbar = () => {
   } = useDisclosure();
   const { onOpen } = useDisclosure();
 
-  const bgColor = useColorModeValue("white", "gray.800");
+  const bgColor = useColorModeValue("white", "darkBg");
   const borderColor = useColorModeValue("gray.200", "gray.700");
   const linkColor = useColorModeValue("gray.600", "gray.200");
 
@@ -88,7 +88,7 @@ export const Navbar = () => {
       top={0}
       left={0}
       right={0}
-      bg={useColorModeValue("white", "gray.900")}
+      bg={bgColor}
       boxShadow="sm"
       zIndex={100}
     >

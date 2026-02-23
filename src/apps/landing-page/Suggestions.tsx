@@ -53,7 +53,7 @@ const services: ServiceCard[] = [
 ];
 
 export const Suggestions = () => {
-    const bgColor = useColorModeValue("white", "gray.800");
+    const bgColor = useColorModeValue("white", "darkBg");
     const cardBg = useColorModeValue("gray.50", "gray.700");
     const cardBorder = useColorModeValue("gray.200", "gray.600");
     const textColor = useColorModeValue("black", "white");

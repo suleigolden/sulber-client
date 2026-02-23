@@ -5,14 +5,13 @@ import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 export default function SystemThemeToggle(props: { [x: string]: any }) {
 	const { ...rest } = props;
 	const { colorMode, toggleColorMode } = useColorMode();
-	let bgButton = 'linear-gradient(135deg, #868CFF 0%, #4318FF 100%)';
 
 	return (
 		<Button
 			{...rest}
 			h='60px'
 			w='60px'
-			bg={bgButton}
+			bg={'brand.500'}
 			zIndex='99'
 			position='fixed'
 			variant='no-effects'
@@ -20,7 +19,7 @@ export default function SystemThemeToggle(props: { [x: string]: any }) {
 			right={document.documentElement.dir === 'rtl' ? '' : '35px'}
 			bottom='30px'
 			border='1px solid'
-			borderColor='#6A53FF'
+			borderColor='brand.500'
 			borderRadius='50px'
 			onClick={toggleColorMode}
 			display='flex'

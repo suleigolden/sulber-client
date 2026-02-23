@@ -13,7 +13,7 @@ export const Logo: FC<LogoProps> = ({ size = 32 }) => {
       href={'#'}
       fontSize={size}
       fontWeight={700}
-      color={colorMode === 'light' ? '#001a62' : 'white'}
+      color={colorMode === 'light' ? '#0b1437' : 'white'}
       ml={{ base: 0, sm: 1 }}
       mb={{ base: 0, sm: 4 }}
     >

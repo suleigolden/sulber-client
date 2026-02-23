@@ -1,7 +1,9 @@
 import { extendTheme } from '@chakra-ui/react';
+import { mode } from '@chakra-ui/theme-tools';
 
 export const theme = extendTheme({
   colors: {
+    darkBg: '#0b1437',
     brand: {
       50: '#e6f7f6',
       100: '#b3ebe7',
@@ -77,12 +79,12 @@ export const theme = extendTheme({
     },
   },
   styles: {
-    global: {
+    global: (props: Record<string, unknown>) => ({
       body: {
-        bg: 'white',
-        color: 'gray.800',
+        bg: mode('white', '#0b1437')(props),
+        color: mode('gray.800', 'white')(props),
       },
-    },
+    }),
   },
 });
 

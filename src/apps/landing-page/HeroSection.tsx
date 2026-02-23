@@ -24,7 +24,7 @@ export const HeroSection = () => {
     const [serviceLocation, setServiceLocation] = useState<string>("");
     const [serviceType, setServiceType] = useState<ProviderServiceType | "">("");
 
-    const bgBase = useColorModeValue("white", "gray.900");
+    const bgBase = useColorModeValue("white", "darkBg");
     const headlineDark = useColorModeValue("gray.800", "white");
     const bodyColor = useColorModeValue("gray.700", "gray.300");
     const inputBg = useColorModeValue("gray.50", "gray.700");

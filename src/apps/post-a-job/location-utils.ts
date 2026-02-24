@@ -20,6 +20,7 @@ export const DAYS_OF_WEEK = [
 
 export type AvailabilitySlot = {
   day: string;
+  selected: boolean;
   startTime: string;
   endTime: string;
 };
@@ -65,14 +66,14 @@ export function formatLocationDisplay(loc: ProviderJobServiceLocation | string |
 
 export function slotsToDaysOfWeekAvailable(slots: AvailabilitySlot[]): string[] {
   return slots
-    .filter((s) => s.startTime && s.endTime)
+    .filter((s) => s.selected && s.startTime && s.endTime)
     .map((s) => `${s.day} ${s.startTime}-${s.endTime}`);
 }
 
 export function daysOfWeekAvailableToSlots(days: string[] | undefined): AvailabilitySlot[] {
   const byDay = new Map<string, AvailabilitySlot>();
   DAYS_OF_WEEK.forEach((day) => {
-    byDay.set(day, { day, startTime: "", endTime: "" });
+    byDay.set(day, { day, selected: false, startTime: "", endTime: "" });
   });
   (days ?? []).forEach((s) => {
     const match = s.match(/^(\w+)\s+(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$/i);
@@ -80,9 +81,9 @@ export function daysOfWeekAvailableToSlots(days: string[] | undefined): Availabi
       const [, dayPart, start, end] = match;
       const dayKey = dayPart!.charAt(0).toUpperCase() + dayPart!.slice(1).toLowerCase();
       if (DAYS_OF_WEEK.includes(dayKey as (typeof DAYS_OF_WEEK)[number])) {
-        byDay.set(dayKey, { day: dayKey, startTime: start!, endTime: end! });
+        byDay.set(dayKey, { day: dayKey, selected: true, startTime: start!, endTime: end! });
       }
     }
   });
-  return DAYS_OF_WEEK.map((d) => byDay.get(d) ?? { day: d, startTime: "", endTime: "" });
+  return DAYS_OF_WEEK.map((d) => byDay.get(d) ?? { day: d, selected: false, startTime: "", endTime: "" });
 }

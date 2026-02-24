@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Checkbox,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -57,6 +58,7 @@ type FormValues = {
 
 const defaultSlots: AvailabilitySlot[] = DAYS_OF_WEEK.map((day) => ({
   day,
+  selected: false,
   startTime: "",
   endTime: "",
 }));
@@ -146,7 +148,7 @@ export function EditProviderJobModal({
   );
 
   const updateSlot = useCallback(
-    (index: number, field: "startTime" | "endTime", value: string) => {
+    (index: number, field: "startTime" | "endTime" | "selected", value: string | boolean) => {
       const next = [...(availabilitySlots ?? defaultSlots)];
       if (!next[index]) return;
       next[index] = { ...next[index], [field]: value };
@@ -154,6 +156,19 @@ export function EditProviderJobModal({
     },
     [availabilitySlots, setValue]
   );
+
+  const selectAllDays = useCallback(
+    (checked: boolean) => {
+      const next = (availabilitySlots ?? defaultSlots).map((s) => ({ ...s, selected: checked }));
+      setValue("availabilitySlots", next);
+    },
+    [availabilitySlots, setValue]
+  );
+
+  const allSelected =
+    (availabilitySlots ?? defaultSlots).length > 0 &&
+    (availabilitySlots ?? defaultSlots).every((s) => s.selected);
+  const someSelected = (availabilitySlots ?? defaultSlots).some((s) => s.selected);
 
   const onSubmit = async (data: FormValues) => {
     if (!job) return;
@@ -402,19 +417,36 @@ export function EditProviderJobModal({
                 Availability
               </FormLabel>
               <FormHelperText color={mutedColor} mb={3}>
-                Set your available time slots for each day.
+                Select days and set your available time slots for each.
               </FormHelperText>
+              <Checkbox
+                isChecked={allSelected}
+                isIndeterminate={someSelected && !allSelected}
+                onChange={(e) => selectAllDays(e.target.checked)}
+                colorScheme="brand"
+                mb={3}
+                fontWeight="500"
+              >
+                Select all days
+              </Checkbox>
               <VStack align="stretch" spacing={3}>
                 {(availabilitySlots ?? defaultSlots).map((slot, index) => (
                   <SimpleGrid key={slot.day} columns={{ base: 1, sm: 3 }} gap={2} alignItems="center" w="full">
-                    <Box fontWeight="500" fontSize="sm" minW="100px">
+                    <Checkbox
+                      isChecked={slot.selected}
+                      onChange={(e) => updateSlot(index, "selected", e.target.checked)}
+                      colorScheme="brand"
+                      fontWeight="500"
+                      fontSize="sm"
+                    >
                       {slot.day}
-                    </Box>
+                    </Checkbox>
                     <HStack spacing={2} flex={1}>
                       <Input
                         type="time"
                         size="sm"
                         borderRadius="lg"
+                        isDisabled={!slot.selected}
                         {...register(`availabilitySlots.${index}.startTime`)}
                         onChange={(e) => updateSlot(index, "startTime", e.target.value)}
                       />
@@ -425,6 +457,7 @@ export function EditProviderJobModal({
                         type="time"
                         size="sm"
                         borderRadius="lg"
+                        isDisabled={!slot.selected}
                         {...register(`availabilitySlots.${index}.endTime`)}
                         onChange={(e) => updateSlot(index, "endTime", e.target.value)}
                       />

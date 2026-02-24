@@ -27,9 +27,14 @@ type LocationSearchInputProps = {
     postalCode?: string;
   } | null) => void;
   initialValue?: string;
+  onValueChange?: (value: string) => void;
 };
 
-export const LocationSearchInput: FC<LocationSearchInputProps> = ({ onLocationSelect, initialValue }) => {
+export const LocationSearchInput: FC<LocationSearchInputProps> = ({
+  onLocationSelect,
+  initialValue,
+  onValueChange,
+}) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const bgDropdown = useColorModeValue("white", "gray.800");
   const hoverBg = useColorModeValue("gray.100", "gray.700");
@@ -69,11 +74,13 @@ export const LocationSearchInput: FC<LocationSearchInputProps> = ({ onLocationSe
   useEffect(() => {
     if (initialValue && ready && isScriptLoaded && !value) {
       setValue(initialValue, false);
+      onValueChange?.(initialValue);
     }
-  }, [initialValue, ready, isScriptLoaded, setValue, value]);
+  }, [initialValue, ready, isScriptLoaded, setValue, value, onValueChange]);
 
   const handleSelect = async (suggestion: any) => {
     setValue(suggestion.description, false);
+    onValueChange?.(suggestion.description);
     clearSuggestions();
     setIsOpen(false);
 
@@ -126,6 +133,7 @@ export const LocationSearchInput: FC<LocationSearchInputProps> = ({ onLocationSe
           value={value}
           onChange={(e) => {
             setValue(e.target.value);
+            onValueChange?.(e.target.value);
             if (!e.target.value) {
               onLocationSelect(null);
             }

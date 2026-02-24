@@ -64,13 +64,17 @@ export const ProviderLocation = forwardRef(
         .join(', ')
       : '';
 
+    const locationInitialValue =
+      savedAddress?.city !== "null" ? addressString : "";
+    const [locationInputValue, setLocationInputValue] = useState<string>(
+      locationInitialValue
+    );
+
     // Watch address fields to determine if location is valid
     const addressCity = watch('address.city');
     const addressState = watch('address.state');
     const addressCountry = watch('address.country');
-    const hasFormAddress = !!(addressCity || addressState || addressCountry);
-    const hasSavedAddress = !!(savedAddress?.city || savedAddress?.state || savedAddress?.country);
-    const isLocationValid = hasFormAddress || hasSavedAddress;
+    const isLocationValid = locationInputValue.trim().length > 0;
 
     useImperativeHandle(ref, () => ({
       submitForm: submitOnboarding,
@@ -80,6 +84,10 @@ export const ProviderLocation = forwardRef(
     React.useEffect(() => {
       _props.onLocationValidChange?.(isLocationValid);
     }, [isLocationValid, _props]);
+
+    React.useEffect(() => {
+      setLocationInputValue(locationInitialValue);
+    }, [locationInitialValue]);
 
     // Initialize form with saved address when component mounts
     React.useEffect(() => {
@@ -154,13 +162,25 @@ export const ProviderLocation = forwardRef(
             border="1px #333333 solid"
             borderRadius="0 0 8px 8px">
               <Text fontSize="md" color={mutedColor} mt={-7}>
-                Primary earning location? Decide where and how you want to offer driveway car washes, snow shoveling, and parking lot cleaning.
+                Primary earning location. Where do you want to offer your services?
               </Text>
 
               <VStack spacing={4} w="full">
                 <LocationSearchInput
-                  onLocationSelect={(location) => setSelectedLocation(location)}
-                  initialValue={addressString}
+                  onLocationSelect={(location) => {
+                    if (!location) {
+                      setSelectedLocation(null);
+                      setValue("address.street", "");
+                      setValue("address.city", "");
+                      setValue("address.state", "");
+                      setValue("address.country", "");
+                      setValue("address.postal_code", "");
+                      return;
+                    }
+                    setSelectedLocation(location);
+                  }}
+                  initialValue={locationInitialValue}
+                  onValueChange={setLocationInputValue}
                 />
                 <CustomInputField
                   type="text"

@@ -1,4 +1,10 @@
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
   Box,
   Button,
   Container,
@@ -9,19 +15,31 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MdAdd } from "react-icons/md";
 import { api, type ProviderJobService } from "@suleigolden/sulber-api-client";
 import { useUser } from "~/hooks/use-user";
+import { CustomToast } from "~/hooks/CustomToast";
 import { ProviderJobServiceCard } from "./ProviderJobServiceCard";
 import { PostJobModal } from "./PostJobModal";
+import { EditProviderJobModal } from "./EditProviderJobModal";
 
 export const PostAJob = () => {
   const { user } = useUser();
+  const showToast = CustomToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isDeleteOpen,
+    onOpen: onDeleteOpen,
+    onClose: onDeleteClose,
+  } = useDisclosure();
+  const cancelDeleteRef = useRef<HTMLButtonElement>(null);
   const [jobs, setJobs] = useState<ProviderJobService[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [jobToDelete, setJobToDelete] = useState<ProviderJobService | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [editingJob, setEditingJob] = useState<ProviderJobService | null>(null);
 
   const headingColor = useColorModeValue("gray.800", "white");
   const mutedColor = useColorModeValue("gray.900", "gray.400");
@@ -54,6 +72,68 @@ export const PostAJob = () => {
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
+
+  const handleToggleStatus = useCallback(
+    async (job: ProviderJobService) => {
+      const newStatus = job.status === "active" ? "inactive" : "active";
+      try {
+        const svc = api.service("provider-job-service" as never) as {
+          update?: (id: string, data: { status: string }) => Promise<unknown>;
+        };
+        if (typeof svc?.update !== "function") return;
+        await svc.update(job.id, { status: newStatus });
+        showToast("Success", `Service set to ${newStatus}.`, "success");
+        fetchJobs();
+      } catch (err) {
+        const message =
+          err && typeof err === "object" && "message" in err
+            ? String((err as { message: string }).message)
+            : "Failed to update status.";
+        showToast("Error", message, "error");
+      }
+    },
+    [fetchJobs, showToast]
+  );
+
+  const handleDeleteClick = useCallback((job: ProviderJobService) => {
+    setJobToDelete(job);
+    onDeleteOpen();
+  }, [onDeleteOpen]);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!jobToDelete) return;
+    setIsDeleting(true);
+    try {
+      const svc = api.service("provider-job-service" as never) as {
+        delete?: (id: string) => Promise<void>;
+      };
+      if (typeof svc?.delete !== "function") {
+        showToast("Error", "Provider job service API is not available.", "error");
+        return;
+      }
+      await svc.delete(jobToDelete.id);
+      showToast("Success", "Service removed.", "success");
+      onDeleteClose();
+      setJobToDelete(null);
+      fetchJobs();
+    } catch (err) {
+      const message =
+        err && typeof err === "object" && "message" in err
+          ? String((err as { message: string }).message)
+          : "Failed to delete.";
+      showToast("Error", message, "error");
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [jobToDelete, onDeleteClose, fetchJobs, showToast]);
+
+  const handleEdit = useCallback((job: ProviderJobService) => {
+    setEditingJob(job);
+  }, []);
+
+  const handleEditClose = useCallback(() => {
+    setEditingJob(null);
+  }, []);
 
   if (!user) {
     return (
@@ -144,10 +224,16 @@ export const PostAJob = () => {
           </Box>
         ) : (
           <VStack spacing={4} w="full" align="stretch">
-           {jobs.map((job) => (
-                <ProviderJobServiceCard key={job.id} job={job} />
-              ))}
-            </VStack>
+            {jobs.map((job) => (
+              <ProviderJobServiceCard
+                key={job.id}
+                job={job}
+                onEdit={handleEdit}
+                onToggleStatus={handleToggleStatus}
+                onDelete={handleDeleteClick}
+              />
+            ))}
+          </VStack>
         )}
       </VStack>
 
@@ -157,6 +243,47 @@ export const PostAJob = () => {
         onSuccess={fetchJobs}
         providerId={user.id}
       />
+
+      <EditProviderJobModal
+        job={editingJob}
+        onClose={handleEditClose}
+        onSuccess={() => {
+          handleEditClose();
+          fetchJobs();
+        }}
+      />
+
+      <AlertDialog
+        isOpen={isDeleteOpen}
+        leastDestructiveRef={cancelDeleteRef}
+        onClose={() => {
+          onDeleteClose();
+          setJobToDelete(null);
+        }}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent borderRadius="xl">
+            <AlertDialogHeader>Delete service?</AlertDialogHeader>
+            <AlertDialogBody>
+              This will permanently remove this service offering. This action cannot be undone.
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={cancelDeleteRef} onClick={onDeleteClose} borderRadius="lg">
+                Cancel
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={handleDeleteConfirm}
+                isLoading={isDeleting}
+                ml={3}
+                borderRadius="lg"
+              >
+                Delete
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Container>
   );
 };

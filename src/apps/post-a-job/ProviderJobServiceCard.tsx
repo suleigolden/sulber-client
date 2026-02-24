@@ -6,11 +6,18 @@ import {
   Heading,
   HStack,
   Icon,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Spacer,
   Text,
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
+import { MdMoreVert } from "react-icons/md";
+import { FiEdit2, FiToggleLeft, FiToggleRight, FiTrash2 } from "react-icons/fi";
 import type { ProviderJobService } from "@suleigolden/sulber-api-client";
 import { ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
 import { FaCar, FaParking, FaSnowflake, FaHome, FaTree, FaLeaf, FaMapMarkerAlt, FaStickyNote, FaCalendarAlt } from "react-icons/fa";
@@ -47,6 +54,9 @@ const statusColorMap: Record<string, string> = {
 
 type ProviderJobServiceCardProps = {
   job: ProviderJobService;
+  onEdit?: (job: ProviderJobService) => void;
+  onToggleStatus?: (job: ProviderJobService) => void;
+  onDelete?: (job: ProviderJobService) => void;
 };
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
@@ -58,11 +68,19 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function ProviderJobServiceCard({ job }: ProviderJobServiceCardProps) {
+export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }: ProviderJobServiceCardProps) {
   const cardBg = useColorModeValue("white", "whiteAlpha.50");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.200");
   const mutedColor = useColorModeValue("gray.600", "gray.400");
   const requirementsColor = useColorModeValue("gray.700", "gray.300");
+  const menuBg = useColorModeValue("white", "gray.800");
+  const menuBorder = useColorModeValue("gray.200", "whiteAlpha.200");
+  const menuItemHover = useColorModeValue("gray.50", "whiteAlpha.100");
+  const menuButtonHover = useColorModeValue("gray.100", "whiteAlpha.200");
+  const menuButtonActive = useColorModeValue("gray.200", "whiteAlpha.300");
+
+  const isActive = job.status === "active";
+  const canToggleActive = job.status === "active" || job.status === "inactive";
 
   const serviceConfig = ProviderServiceTypesList.services.find(
     (s) => s.type === job.serviceType
@@ -90,6 +108,59 @@ export function ProviderJobServiceCard({ job }: ProviderJobServiceCardProps) {
       position="relative"
       w="full"
     >
+      {/* Hamburger menu - top right */}
+      <Box position="absolute" top={3} right={3} zIndex={1}>
+        <Menu isLazy placement="bottom-end" autoSelect={false}>
+          <MenuButton
+            as={IconButton}
+            aria-label="Options"
+            icon={<MdMoreVert size={40} />}
+            variant="ghost"
+            size="sm"
+            borderRadius="full"
+            _hover={{ bg: menuButtonHover }}
+            _active={{ bg: menuButtonActive }}
+          />
+          <MenuList
+            minW="180px"
+            bg={menuBg}
+            borderColor={menuBorder}
+            borderRadius="lg"
+            py={1}
+            shadow="md"
+          >
+            {onEdit && (
+              <MenuItem
+                icon={<FiEdit2 size={16} />}
+                onClick={() => onEdit(job)}
+                _focus={{ bg: menuItemHover }}
+              >
+                Edit
+              </MenuItem>
+            )}
+            {onToggleStatus && canToggleActive && (
+              <MenuItem
+                icon={isActive ? <FiToggleLeft size={16} /> : <FiToggleRight size={16} />}
+                onClick={() => onToggleStatus(job)}
+                _focus={{ bg: menuItemHover }}
+              >
+                {isActive ? "Set as inactive" : "Set as active"}
+              </MenuItem>
+            )}
+            {onDelete && (
+              <MenuItem
+                icon={<FiTrash2 size={16} />}
+                onClick={() => onDelete(job)}
+                color="red.500"
+                _focus={{ bg: menuItemHover }}
+              >
+                Delete
+              </MenuItem>
+            )}
+          </MenuList>
+        </Menu>
+      </Box>
+
       {/* Same layout as ServiceCard: Badge + Icon, Heading, requirements */}
       <Flex
         justify="space-between"
@@ -170,7 +241,7 @@ export function ProviderJobServiceCard({ job }: ProviderJobServiceCardProps) {
         </VStack>
 
         <Box
-          ml={{ base: 0, sm: 4 }}
+          mr={50}
           alignSelf="flex-start"
           flexShrink={0}
           display={{ base: "none", sm: "block" }}

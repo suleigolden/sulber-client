@@ -3,7 +3,6 @@ import {
   Button,
   Container,
   Heading,
-  SimpleGrid,
   Spinner,
   Text,
   useColorModeValue,
@@ -25,7 +24,7 @@ export const PostAJob = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const headingColor = useColorModeValue("gray.800", "white");
-  const mutedColor = useColorModeValue("gray.600", "gray.400");
+  const mutedColor = useColorModeValue("gray.900", "gray.400");
 
   const fetchJobs = useCallback(async () => {
     if (!user?.id || user?.role !== "provider") return;
@@ -85,12 +84,12 @@ export const PostAJob = () => {
               textTransform="uppercase"
               mb={1}
             >
-              Provider
+              How do you want to earn with SulBer?
             </Text>
             <Heading size="xl" color={headingColor} letterSpacing="tight">
               My services
             </Heading>
-            <Text color={mutedColor} mt={2} fontSize="sm">
+            <Text color={mutedColor} mt={2}>
               Manage the services you offer. Add new ones so customers can find and book you.
             </Text>
           </Box>
@@ -144,11 +143,11 @@ export const PostAJob = () => {
             </Button>
           </Box>
         ) : (
-          <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} spacing={4}>
-            {jobs.map((job) => (
-              <ProviderJobServiceCard key={job.id} job={job} />
-            ))}
-          </SimpleGrid>
+          <VStack spacing={4} w="full" align="stretch">
+           {jobs.map((job) => (
+                <ProviderJobServiceCard key={job.id} job={job} />
+              ))}
+            </VStack>
         )}
       </VStack>
 

@@ -15,6 +15,7 @@ import { FormProvider } from "react-hook-form";
 import { useProviderOnboarding } from "~/hooks/use-provider-onboarding";
 import { api, ProviderProfile, ProviderServiceType, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
 import { FaCar, FaParking, FaSnowflake, FaHome, FaTree, FaLeaf } from "react-icons/fa";
+import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 import { OnboardingStepper } from "./OnboardingStepper";
 import { useUser } from "~/hooks/use-user";
 import { CustomToast } from "~/hooks/CustomToast";
@@ -65,6 +66,7 @@ const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.300");
   const hoverBorder = useColorModeValue("gray.400", "whiteAlpha.500");
   const textColor = useColorModeValue("gray.700", "gray.300");
+  const checkboxColor = useColorModeValue("brand.500", "brand.400");
 
   return (
     <Box
@@ -83,6 +85,13 @@ const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
       position="relative"
       w="full"
     >
+      <Box position="absolute" top={3} right={3}>
+        {isSelected ? (
+          <MdCheckBox size={22} color={checkboxColor} />
+        ) : (
+          <MdCheckBoxOutlineBlank size={22} color={checkboxColor} />
+        )}
+      </Box>
       <Flex
         justify="space-between"
         align="start"
@@ -153,6 +162,8 @@ const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
           alignSelf={{ base: "flex-start", sm: "flex-start" }}
           flexShrink={0}
           display={{ base: "none", sm: "block" }}
+          mr={7}
+          mt={-2}
         >
           <Icon size={24} color={isSelected ? "brand.500" : "gray.500"} />
         </Box>
@@ -185,6 +196,16 @@ export const ProviderServices = forwardRef(
     const selectedServices = (watch("services") || []) as ProviderServiceType[];
     const { onServicesSelectedChange, isProviderProfileSettings } = props;
     
+    // Ensure no services are pre-selected by default during onboarding.
+    // (We keep existing behavior for provider profile settings editing.)
+    useEffect(() => {
+      const servicesDirty = Boolean((methods.formState.dirtyFields as any)?.services);
+      if (!isProviderProfileSettings && !servicesDirty && selectedServices.length > 0) {
+        setValue("services", [], { shouldValidate: true, shouldDirty: false });
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isProviderProfileSettings, selectedServices.length, setValue, methods.formState.dirtyFields]);
+
 
     // Map ProviderServiceTypesList to ServiceConfig format
     const SERVICE_CONFIGS: ServiceConfig[] = useMemo(() => {
@@ -207,10 +228,14 @@ export const ProviderServices = forwardRef(
       if (currentServices.includes(serviceType)) {
         setValue(
           "services",
-          currentServices.filter((s) => s !== serviceType)
+          currentServices.filter((s) => s !== serviceType),
+          { shouldValidate: true, shouldDirty: true }
         );
       } else {
-        setValue("services", [...currentServices, serviceType]);
+        setValue("services", [...currentServices, serviceType], {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
       }
     };
 
@@ -280,12 +305,12 @@ export const ProviderServices = forwardRef(
               spacing={{ base: 4, sm: 5, md: 6 }}
               w="full"
               p={{ base: 3, sm: 4, md: 6, lg: 10 }}
-              border="1px #333333 solid"
+              // border="1px #333333 solid"
               borderRadius="0 0 8px 8px"
             >
               {/* Services List */}
               <SimpleGrid
-                columns={{ base: 1, md: 2 }}
+                columns={{ base: 1, md: 3 }}
                 spacing={{ base: 3, sm: 4, md: 5 }}
                 w="full"
                 p={{ base: 0, sm: 2, md: 4, lg: 6 }}

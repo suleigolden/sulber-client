@@ -20,6 +20,7 @@ import { MdMoreVert } from "react-icons/md";
 import { FiEdit2, FiToggleLeft, FiToggleRight, FiTrash2 } from "react-icons/fi";
 import type { ProviderJobService } from "@suleigolden/sulber-api-client";
 import { ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
+import { formatLocationDisplay } from "./location-utils";
 import { FaCar, FaParking, FaSnowflake, FaHome, FaTree, FaLeaf, FaMapMarkerAlt, FaStickyNote, FaCalendarAlt } from "react-icons/fa";
 
 const getServiceIcon = (serviceType: string): React.ElementType => {
@@ -269,7 +270,7 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
           <HStack align="start" spacing={2} mt={1}>
             <Icon as={FaMapMarkerAlt} boxSize={4} color={mutedColor} mt={0.5} />
             <Text fontSize="sm" color={requirementsColor}>
-              {job.primaryLocation}
+              {formatLocationDisplay(job.primaryLocation)}
             </Text>
           </HStack>
         </Box>
@@ -279,10 +280,12 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
           <Box>
             <FieldLabel>Other locations</FieldLabel>
             <VStack align="stretch" spacing={1} mt={1}>
-              {job.otherLocations.map((addr, i) => (
+              {job.otherLocations.map((loc, i) => (
                 <HStack key={i} align="start" spacing={2}>
                   <Icon as={FaMapMarkerAlt} boxSize={3} color={mutedColor} mt={1} />
-                  <Text fontSize="sm" color={requirementsColor}>{addr}</Text>
+                  <Text fontSize="sm" color={requirementsColor}>
+                    {formatLocationDisplay(loc)}
+                  </Text>
                 </HStack>
               ))}
             </VStack>

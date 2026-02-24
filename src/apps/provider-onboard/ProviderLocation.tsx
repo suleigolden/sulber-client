@@ -5,6 +5,7 @@ import {
   Text,
   HStack,
   Circle,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { FaRegMoneyBillAlt } from "react-icons/fa";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
@@ -119,15 +120,15 @@ export const ProviderLocation = forwardRef(
       }
     }, [selectedLocation, setValue]);
 
+    const mutedColor = useColorModeValue("gray.600", "gray.400");
+
     return (
       <FormProvider {...methods}>
-        <VStack spacing={8} align="center" w="full">
+        <VStack spacing={8} align="center" w="full" >
           <Box
             w="full"
             maxW="720px"
-            bg="white"
             borderRadius="2xl"
-
           >
             {_props.shouldDisplayStepper && <OnboardingStepper activeStep={_props.activeStep} steps={_props.steps} />}
             <Box
@@ -135,7 +136,6 @@ export const ProviderLocation = forwardRef(
               bg="brand.500"
               color="white"
               borderRadius="8px 8px 0 0"
-              boxShadow="lg"
               p={{ base: 6, md: 10 }}
             >
 
@@ -146,9 +146,14 @@ export const ProviderLocation = forwardRef(
                 <Heading size="lg">Earn with SulBer</Heading>
               </HStack>
             </Box>
-            <VStack align="start" spacing={6} w="full" p={{ base: 6, md: 10 }} boxShadow="lg">
-
-              <Text fontSize="md" color="gray.600" mt={-7}>
+            <VStack 
+            align="start" 
+            spacing={6} 
+            w="full" 
+            p={{ base: 6, md: 10 }} 
+            border="1px #333333 solid"
+            borderRadius="0 0 8px 8px">
+              <Text fontSize="md" color={mutedColor} mt={-7}>
                 Primary earning location? Decide where and how you want to offer driveway car washes, snow shoveling, and parking lot cleaning.
               </Text>
 
@@ -166,7 +171,7 @@ export const ProviderLocation = forwardRef(
                 />
               </VStack>
 
-              <Text fontSize="sm" color="gray.600" lineHeight="tall">
+              <Text fontSize="sm" color={mutedColor} lineHeight="tall">
                 By proceeding, I agree that SulBer, its customers, and its representatives may contact me by
                 email, phone, or SMS for service requests at this location.
               </Text>

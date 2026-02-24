@@ -145,7 +145,7 @@ export const ProviderOnboarding = () => {
       maxW="container.2xl"
       py={{ base: 2, sm: 4, md: 10 }}
       px={{ base: 2, sm: 3, md: 4 }}
-      bg="white"
+      // bg={containerBg}
       minH="100vh"
     >
       <VStack spacing={{ base: 3, sm: 4, md: 8 }} w="full" align="stretch">
@@ -161,7 +161,6 @@ export const ProviderOnboarding = () => {
         <Box
           w="full"
           maxW="720px"
-          bg="white"
           borderRadius="2xl"
         >
 

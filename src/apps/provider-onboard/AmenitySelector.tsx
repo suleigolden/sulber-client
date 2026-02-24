@@ -4,6 +4,7 @@ import {
   SimpleGrid,
   VStack,
   Text,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { amenities } from "~/common/constants/amenities";
@@ -24,6 +25,12 @@ export function AmenitySelector({
   selectedAmenities,
   setSelectedAmenities,
 }: AmenitySelectorProps) {
+  const buttonBg = useColorModeValue("white", "gray.800");
+  const buttonBgSelected = useColorModeValue("brand.100", "brand.900");
+  const borderColor = useColorModeValue("gray.300", "whiteAlpha.400");
+  const hoverBg = useColorModeValue("gray.50", "gray.700");
+  const hoverBgSelected = useColorModeValue("brand.200", "brand.800");
+
   const categories = useMemo(() => {
     const grouped: { [key: string]: Amenity[] } = {};
     amenities.forEach((a) => {
@@ -63,9 +70,9 @@ export function AmenitySelector({
                   onClick={() => handleToggle(label)}
                   variant="outline"
                   leftIcon={<Icon />}
-                  bg={isSelected ? "brand.100" : "white"}
-                  borderColor={isSelected ? "brand.400" : "gray.300"}
-                  _hover={{ bg: isSelected ? "brand.200" : "gray.50" }}
+                  bg={isSelected ? buttonBgSelected : buttonBg}
+                  borderColor={isSelected ? "brand.400" : borderColor}
+                  _hover={{ bg: isSelected ? hoverBgSelected : hoverBg }}
                   _active={{ transform: "scale(0.98)" }}
                   borderWidth="1px"
                   borderRadius="md"

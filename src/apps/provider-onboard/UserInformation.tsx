@@ -45,6 +45,7 @@ const AvatarUploadSection = ({ userProfile }: AvatarUploadSectionProps) => {
     onClose();
   };
 
+
   return (
     <FormControl>
       <FormLabel>Profile Photo</FormLabel>
@@ -54,7 +55,7 @@ const AvatarUploadSection = ({ userProfile }: AvatarUploadSectionProps) => {
           <Button size="sm" onClick={onOpen} isLoading={isUploading}>
             {avatarUrl ? "Change Photo" : "Upload Photo"}
           </Button>
-          <Text fontSize="xs" color="gray.500">
+            <Text fontSize="xs" color="gray.500">
             PNG, JPG or JPEG (max. 5MB)
           </Text>
         </VStack>
@@ -119,13 +120,13 @@ export const UserInformation = forwardRef<
     submitForm: handleSubmit,
   }));
 
+
   return (
     <FormProvider {...methods}>
       <VStack spacing={8} align="center" w="full">
         <Box
           w="full"
           maxW="720px"
-          bg="white"
           borderRadius="2xl"
           boxShadow="lg"
         >

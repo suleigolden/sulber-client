@@ -31,8 +31,9 @@ type LocationSearchInputProps = {
 
 export const LocationSearchInput: FC<LocationSearchInputProps> = ({ onLocationSelect, initialValue }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const bgDropdown = useColorModeValue('white', 'navy.800');
-  const hoverBg = useColorModeValue('gray.100', 'navy.700');
+  const bgDropdown = useColorModeValue("white", "gray.800");
+  const hoverBg = useColorModeValue("gray.100", "gray.700");
+  const iconColor = useColorModeValue("gray.400", "gray.500");
   const [isScriptLoaded, setIsScriptLoaded] = useState<boolean>(false);
 
   useEffect(() => {
@@ -118,8 +119,8 @@ export const LocationSearchInput: FC<LocationSearchInputProps> = ({ onLocationSe
   return (
     <Box position="relative" width="100%">
       <InputGroup>
-        <InputLeftElement pointerEvents="none">
-          <MdLocationOn color="gray.300" />
+        <InputLeftElement pointerEvents="none" color={iconColor}>
+          <MdLocationOn />
         </InputLeftElement>
         <Input
           value={value}

@@ -8,6 +8,7 @@ import {
   Flex,
   Spacer,
   SimpleGrid,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { forwardRef, useEffect, useImperativeHandle, useMemo } from "react";
 import { FormProvider } from "react-hook-form";
@@ -61,19 +62,21 @@ type ServiceCardProps = {
 
 const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
   const Icon = service.icon;
+  const borderColor = useColorModeValue("gray.200", "whiteAlpha.300");
+  const hoverBorder = useColorModeValue("gray.400", "whiteAlpha.500");
+  const textColor = useColorModeValue("gray.700", "gray.300");
 
   return (
     <Box
       onClick={onToggle}
       cursor="pointer"
       borderWidth={isSelected ? "2px" : "1px"}
-      borderColor={isSelected ? "brand.500" : "gray.200"}
+      borderColor={isSelected ? "brand.500" : borderColor}
       borderRadius={{ base: "md", md: "lg" }}
-      bg="white"
       p={{ base: 3, sm: 4, md: 5 }}
       transition="all 0.2s"
       _hover={{
-        borderColor: isSelected ? "brand.500" : "gray.400",
+        borderColor: isSelected ? "brand.500" : hoverBorder,
         transform: { base: "none", md: "translateY(-2px)" },
         boxShadow: { base: "sm", md: "md" },
       }}
@@ -108,7 +111,7 @@ const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
               flexShrink={0}
               display={{ base: "block", sm: "none" }}
             >
-              <Icon size={24} color={isSelected ? "#6868f7" : "#999"} />
+              <Icon size={24} color={isSelected ? "brand.500" : "gray.500"} />
             </Box>
           </Flex>
 
@@ -118,27 +121,27 @@ const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
 
           <VStack align="start" spacing={{ base: 0.5, sm: 1 }} w="full">
             {service.requirements.equipment && (
-              <Text fontSize={{ base: "xs", sm: "sm" }} color="gray.700" lineHeight="tall">
+              <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
                 <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> Equipment:</Text> {service.requirements.equipment}
               </Text>
             )}
             {service.requirements.experience && (
-              <Text fontSize={{ base: "xs", sm: "sm" }} color="gray.700" lineHeight="tall">
+              <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
                 <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> Experience:</Text> {service.requirements.experience}
               </Text>
             )}
             {service.requirements.license && (
-              <Text fontSize={{ base: "xs", sm: "sm" }} color="gray.700" lineHeight="tall">
+              <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
                 <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> License:</Text> {service.requirements.license}
               </Text>
             )}
             {service.requirements.physical && (
-              <Text fontSize={{ base: "xs", sm: "sm" }} color="gray.700" lineHeight="tall">
+              <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
                 <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> Physical:</Text> {service.requirements.physical}
               </Text>
             )}
             {service.requirements.availability && (
-              <Text fontSize={{ base: "xs", sm: "sm" }} color="gray.700" lineHeight="tall">
+              <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
                 <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> Availability:</Text> {service.requirements.availability}
               </Text>
             )}
@@ -151,7 +154,7 @@ const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
           flexShrink={0}
           display={{ base: "none", sm: "block" }}
         >
-          <Icon size={24} color={isSelected ? "#6868f7" : "#999"} />
+          <Icon size={24} color={isSelected ? "brand.500" : "gray.500"} />
         </Box>
       </Flex>
     </Box>
@@ -253,8 +256,6 @@ export const ProviderServices = forwardRef(
         <VStack spacing={{ base: 4, sm: 6, md: 8 }} align="center" w="full">
           <Box
             w="full"
-            // maxW={{ base: "100%", sm: "720px" }}
-            bg="white"
             borderRadius={{ base: "xl", md: "2xl" }}
             overflow="hidden"
           >
@@ -264,7 +265,6 @@ export const ProviderServices = forwardRef(
               bg="brand.500"
               color="white"
               borderRadius={{ base: "0", md: "8px 8px 0 0" }}
-              boxShadow="lg"
               p={{ base: 4, sm: 5, md: 6, lg: 10 }}
             >
               <Heading size={{ base: "sm", sm: "md" }} mb={{ base: 1, md: 2 }} fontWeight="700">
@@ -280,7 +280,8 @@ export const ProviderServices = forwardRef(
               spacing={{ base: 4, sm: 5, md: 6 }}
               w="full"
               p={{ base: 3, sm: 4, md: 6, lg: 10 }}
-              boxShadow="lg"
+              border="1px #333333 solid"
+              borderRadius="0 0 8px 8px"
             >
               {/* Services List */}
               <SimpleGrid

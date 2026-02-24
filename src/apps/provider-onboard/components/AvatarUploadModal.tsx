@@ -32,6 +32,8 @@ export const AvatarUploadModal = ({
   const showToast = CustomToast();
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const hoverBorderColor = useColorModeValue("gray.300", "gray.500");
+  const iconColor = useColorModeValue("gray.500", "gray.400");
+  const mutedColor = useColorModeValue("gray.500", "gray.400");
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -84,15 +86,15 @@ export const AvatarUploadModal = ({
           >
             <input {...getInputProps()} />
             <VStack spacing={4}>
-              <Icon as={MdUpload} w={8} h={8} color="gray.500" />
+              <Icon as={MdUpload} w={8} h={8} color={iconColor} />
               <Text fontWeight="medium">
-                {isDragActive 
-                  ? "Drop the file here..." 
-                  : isUploading 
+                {isDragActive
+                  ? "Drop the file here..."
+                  : isUploading
                   ? "Uploading..."
                   : "Drag & drop photo here, or click to select"}
               </Text>
-              <Text fontSize="sm" color="gray.500">
+              <Text fontSize="sm" color={mutedColor}>
                 PNG, JPG or JPEG (max. 5MB)
               </Text>
             </VStack>

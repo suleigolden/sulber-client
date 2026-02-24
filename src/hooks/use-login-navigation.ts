@@ -32,7 +32,7 @@ export const useLogInNavigation = (type?: 'login' | 'signup') => {
           break;
         case 'provider':
            if(type === 'signup') {
-            window.location.href = `/provider/${user.id}/dashboard-onboarding`;
+            window.location.href = `/provider/${user.id}/provider-onboarding`;
            } else {
             window.location.href = `/provider/${user.id}/dashboard`;
            }

@@ -10,6 +10,7 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { forwardRef, useImperativeHandle } from "react";
@@ -166,12 +167,24 @@ export const ProviderVerification = forwardRef<
     },
   }));
 
+  const cardBg = useColorModeValue("white", "gray.800");
+  const mutedColor = useColorModeValue("gray.600", "gray.400");
+  const infoBg = useColorModeValue("blue.50", "blue.900");
+  const infoBorder = useColorModeValue("blue.500", "blue.400");
+  const infoTitleColor = useColorModeValue("blue.900", "blue.100");
+  const infoTextColor = useColorModeValue("blue.800", "blue.200");
+  const boxBg = useColorModeValue("gray.50", "gray.700");
+  const boxBorder = useColorModeValue("gray.200", "whiteAlpha.300");
+  const boxTextColor = useColorModeValue("gray.700", "gray.300");
+  const boxMutedColor = useColorModeValue("gray.500", "gray.400");
+  const boxMutedText = useColorModeValue("gray.600", "gray.400");
+
   return (
     <VStack spacing={8} align="center" w="full">
       <Box
         w="full"
         maxW="720px"
-        bg="white"
+        bg={cardBg}
         borderRadius="2xl"
       >
         <OnboardingStepper activeStep={activeStep} steps={steps} />
@@ -193,8 +206,7 @@ export const ProviderVerification = forwardRef<
 
         <VStack spacing={6} align="start" w="full" p={{ base: 6, md: 10 }}>
           <Box>
-
-            <Text fontSize="md" color="gray.600">
+            <Text fontSize="md" color={mutedColor}>
               We need to verify your identity to ensure you are a legitimate
               service provider. This helps us maintain trust and safety on our
               platform.
@@ -216,25 +228,25 @@ export const ProviderVerification = forwardRef<
           ) : (
             <>
               <Box
-                bg="blue.50"
+                bg={infoBg}
                 borderLeft="4px solid"
-                borderColor="blue.500"
+                borderColor={infoBorder}
                 p={4}
                 borderRadius="md"
                 w="full"
               >
-                <Text fontWeight="semibold" mb={2} color="blue.900">
+                <Text fontWeight="semibold" mb={2} color={infoTitleColor}>
                   What you'll need:
                 </Text>
                 <VStack align="start" spacing={2} pl={4}>
-                  <Text fontSize="sm" color="blue.800">
+                  <Text fontSize="sm" color={infoTextColor}>
                     • A valid government-issued ID (Driver's License, Passport,
                     or National ID)
                   </Text>
-                  <Text fontSize="sm" color="blue.800">
+                  <Text fontSize="sm" color={infoTextColor}>
                     • A device with a camera for selfie verification
                   </Text>
-                  <Text fontSize="sm" color="blue.800">
+                  <Text fontSize="sm" color={infoTextColor}>
                     • 5-10 minutes to complete the process
                   </Text>
                 </VStack>
@@ -268,14 +280,14 @@ export const ProviderVerification = forwardRef<
 
                 {verificationUrl && !isVerified && (
                   <Box
-                    bg="gray.50"
+                    bg={boxBg}
                     p={4}
                     borderRadius="md"
                     w="full"
                     border="1px solid"
-                    borderColor="gray.200"
+                    borderColor={boxBorder}
                   >
-                    <Text fontSize="sm" color="gray.700" mb={2}>
+                    <Text fontSize="sm" color={boxTextColor} mb={2}>
                       Verification window opened. If it didn't open,{" "}
                       <Button
                         variant="link"
@@ -287,7 +299,7 @@ export const ProviderVerification = forwardRef<
                       </Button>{" "}
                       to open it manually.
                     </Text>
-                    <Text fontSize="xs" color="gray.500">
+                    <Text fontSize="xs" color={boxMutedColor}>
                       Complete the verification process in the popup window, then
                       click "Check Verification Status" above.
                     </Text>
@@ -298,14 +310,14 @@ export const ProviderVerification = forwardRef<
           )}
 
           <Box
-            bg="gray.50"
+            bg={boxBg}
             p={4}
             borderRadius="md"
             w="full"
             border="1px solid"
-            borderColor="gray.200"
+            borderColor={boxBorder}
           >
-            <Text fontSize="xs" color="gray.600" lineHeight="tall">
+            <Text fontSize="xs" color={boxMutedText} lineHeight="tall">
               Your information is securely processed by Stripe Identity, a
               trusted identity verification service. We never store your
               document images or personal details beyond what's necessary for

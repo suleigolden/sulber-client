@@ -11,6 +11,7 @@ import {
   VStack,
   Box,
   Heading,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { Control, Controller, FieldErrors } from "react-hook-form";
 import { ProviderOnboardingSchemaType } from "../schema";
@@ -32,6 +33,12 @@ const currencies = [
 export const PriceInput = ({ control, listingType, errors }: PriceInputProps) => {
   const isRental = listingType === "rent";
   const label = isRental ? "Monthly Rent" : "Selling Price";
+  const mutedColor = useColorModeValue("gray.600", "gray.400");
+  const boxBg = useColorModeValue("gray.50", "gray.700");
+  const boxBorder = useColorModeValue("gray.200", "whiteAlpha.300");
+  const labelColor = useColorModeValue("gray.700", "gray.300");
+  const inputBg = useColorModeValue("white", "gray.800");
+  const iconColor = useColorModeValue("gray.500", "gray.400");
 
   const formatNumber = useCallback((value: string) => {
     // Remove any existing commas and non-numeric characters except decimal point
@@ -61,24 +68,24 @@ export const PriceInput = ({ control, listingType, errors }: PriceInputProps) =>
           <Heading size="md" mb={1}>
             {label}
           </Heading>
-          <Text fontSize="sm" color="gray.600">
+          <Text fontSize="sm" color={mutedColor}>
             {isRental
               ? "Set the monthly rental amount for your property"
               : "Set the selling price for your property"}
           </Text>
         </Box>
 
-        <Box 
-          w="full" 
-          p={6} 
-          bg="gray.50" 
+        <Box
+          w="full"
+          p={6}
+          bg={boxBg}
           borderRadius="xl"
           border="1px solid"
-          borderColor="gray.200"
+          borderColor={boxBorder}
         >
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
             <Box>
-              <FormLabel fontSize="sm" color="gray.700">
+              <FormLabel fontSize="sm" color={labelColor}>
                 Amount
               </FormLabel>
               <Controller
@@ -88,11 +95,11 @@ export const PriceInput = ({ control, listingType, errors }: PriceInputProps) =>
                   <InputGroup size="lg">
                     <InputLeftElement
                       pointerEvents="none"
-                      children={<FaDollarSign color="gray.500" />}
+                      children={<FaDollarSign color={iconColor} />}
                     />
                     <Input
                       {...field}
-                      bg="white"
+                      bg={inputBg}
                       value={field.value ? formatNumber(field.value.toString()) : ''}
                       onChange={(e) => {
                         const rawValue = e.target.value;
@@ -126,7 +133,7 @@ export const PriceInput = ({ control, listingType, errors }: PriceInputProps) =>
             </Box>
 
             <Box>
-              <FormLabel fontSize="sm" color="gray.700">
+              <FormLabel fontSize="sm" color={labelColor}>
                 Currency
               </FormLabel>
               <Controller
@@ -136,7 +143,7 @@ export const PriceInput = ({ control, listingType, errors }: PriceInputProps) =>
                   <Select
                     {...field}
                     size="lg"
-                    bg="white"
+                    bg={inputBg}
                     fontSize="lg"
                     _focus={{
                       borderColor: "brand.500",
@@ -155,7 +162,7 @@ export const PriceInput = ({ control, listingType, errors }: PriceInputProps) =>
           </SimpleGrid>
 
           {isRental && (
-            <Text mt={4} fontSize="sm" color="gray.600">
+            <Text mt={4} fontSize="sm" color={mutedColor}>
               This is the amount your tenants will pay monthly
             </Text>
           )}

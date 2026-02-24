@@ -10,7 +10,7 @@ import {
   SimpleGrid,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { forwardRef, useEffect, useImperativeHandle, useMemo } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
 import { FormProvider } from "react-hook-form";
 import { useProviderOnboarding } from "~/hooks/use-provider-onboarding";
 import { api, ProviderProfile, ProviderServiceType, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
@@ -67,6 +67,13 @@ const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
   const hoverBorder = useColorModeValue("gray.400", "whiteAlpha.500");
   const textColor = useColorModeValue("gray.700", "gray.300");
   const checkboxColor = useColorModeValue("brand.500", "brand.400");
+  const [showRequirements, setShowRequirements] = useState(false);
+  const hasRequirements =
+    !!service.requirements.equipment ||
+    !!service.requirements.experience ||
+    !!service.requirements.license ||
+    !!service.requirements.physical ||
+    !!service.requirements.availability;
 
   return (
     <Box
@@ -127,34 +134,75 @@ const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
           <Heading size={{ base: "sm", sm: "md" }} fontWeight="600">
             {service.title}
           </Heading>
-           {/* Service Requirements */}
-          <VStack align="start" spacing={{ base: 0.5, sm: 1 }} w="full">
-            {service.requirements.equipment && (
-              <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
-                <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> Equipment:</Text> {service.requirements.equipment}
-              </Text>
-            )}
-            {service.requirements.experience && (
-              <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
-                <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> Experience:</Text> {service.requirements.experience}
-              </Text>
-            )}
-            {service.requirements.license && (
-              <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
-                <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> License:</Text> {service.requirements.license}
-              </Text>
-            )}
-            {service.requirements.physical && (
-              <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
-                <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> Physical:</Text> {service.requirements.physical}
-              </Text>
-            )}
-            {service.requirements.availability && (
-              <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
-                <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold"> Availability:</Text> {service.requirements.availability}
-              </Text>
-            )}
-          </VStack>
+
+          {hasRequirements && (
+            <Badge
+              mt={1}
+              variant="outline"
+              colorScheme="brand"
+              borderRadius="full"
+              px={3}
+              py={1}
+              fontSize="xs"
+              cursor="pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowRequirements((prev) => !prev);
+              }}
+            >
+              {showRequirements ? "Hide details" : "Read service requirements"}
+            </Badge>
+          )}
+
+          {showRequirements && (
+            <VStack align="start" spacing={{ base: 0.5, sm: 1 }} w="full" mt={2}>
+              {service.requirements.equipment && (
+                <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
+                  <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold">
+                    {" "}
+                    Equipment:
+                  </Text>{" "}
+                  {service.requirements.equipment}
+                </Text>
+              )}
+              {service.requirements.experience && (
+                <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
+                  <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold">
+                    {" "}
+                    Experience:
+                  </Text>{" "}
+                  {service.requirements.experience}
+                </Text>
+              )}
+              {service.requirements.license && (
+                <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
+                  <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold">
+                    {" "}
+                    License:
+                  </Text>{" "}
+                  {service.requirements.license}
+                </Text>
+              )}
+              {service.requirements.physical && (
+                <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
+                  <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold">
+                    {" "}
+                    Physical:
+                  </Text>{" "}
+                  {service.requirements.physical}
+                </Text>
+              )}
+              {service.requirements.availability && (
+                <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
+                  <Text as="span" fontSize={{ base: "xs", sm: "sm" }} fontWeight="bold">
+                    {" "}
+                    Availability:
+                  </Text>{" "}
+                  {service.requirements.availability}
+                </Text>
+              )}
+            </VStack>
+          )}
         </VStack>
 
         <Box

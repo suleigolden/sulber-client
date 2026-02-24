@@ -127,7 +127,7 @@ const ServiceCard = ({ service, isSelected, onToggle }: ServiceCardProps) => {
           <Heading size={{ base: "sm", sm: "md" }} fontWeight="600">
             {service.title}
           </Heading>
-
+           {/* Service Requirements */}
           <VStack align="start" spacing={{ base: 0.5, sm: 1 }} w="full">
             {service.requirements.equipment && (
               <Text fontSize={{ base: "xs", sm: "sm" }} color={textColor} lineHeight="tall">
@@ -281,13 +281,14 @@ export const ProviderServices = forwardRef(
         <VStack spacing={{ base: 4, sm: 6, md: 8 }} align="center" w="full">
           <Box
             w="full"
+            maxW="720px"
             borderRadius={{ base: "xl", md: "2xl" }}
             overflow="hidden"
           >
             {props.shouldDisplayStepper && <OnboardingStepper activeStep={props.activeStep} steps={props.steps} />}
             <Box
               w="full"
-              bg="brand.500"
+               bg="brand.500"
               color="white"
               borderRadius={{ base: "0", md: "8px 8px 0 0" }}
               p={{ base: 4, sm: 5, md: 6, lg: 10 }}
@@ -301,16 +302,17 @@ export const ProviderServices = forwardRef(
             </Box>
 
             <VStack
-              align="start"
-              spacing={{ base: 4, sm: 5, md: 6 }}
-              w="full"
-              p={{ base: 3, sm: 4, md: 6, lg: 10 }}
-              // border="1px #333333 solid"
+              align="start" 
+              spacing={6} 
+              w="full" 
+              borderLeft="1px #333333 solid"
+              borderRight="1px #333333 solid"
+              borderBottom="1px #333333 solid"
               borderRadius="0 0 8px 8px"
             >
               {/* Services List */}
               <SimpleGrid
-                columns={{ base: 1, md: 3 }}
+                columns={{ base: 1, md: 1 }}
                 spacing={{ base: 3, sm: 4, md: 5 }}
                 w="full"
                 p={{ base: 0, sm: 2, md: 4, lg: 6 }}

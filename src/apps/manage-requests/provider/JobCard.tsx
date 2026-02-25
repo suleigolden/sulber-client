@@ -33,6 +33,11 @@ type JobCardProps = {
 export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: JobCardProps) => {
   const cardBg = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
+  const labelColor = useColorModeValue("gray.600", "gray.400");
+  const textColor = useColorModeValue("gray.800", "gray.200");
+  const mutedTextColor = useColorModeValue("gray.700", "gray.300");
+  const headingColor = useColorModeValue("gray.900", "white");
+  const dividerColor = useColorModeValue("gray.200", "gray.600");
   const [customerProfile, setCustomerProfile] = useState<UserProfile | null>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -63,6 +68,8 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
   return (
     <Card
       bg={cardBg}
+      borderWidth="1px"
+      borderColor={borderColor}
       _hover={{ boxShadow: "md", transform: "translateY(-2px)" }}
       transition="all 0.2s"
     >
@@ -72,7 +79,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
           <HStack justify="space-between" align="start">
             <VStack align="start" spacing={1} flex={1}>
               <HStack>
-                <Heading size="md" fontWeight="bold">
+                <Heading size="md" fontWeight="bold" color={headingColor}>
                   {selectedService?.title || job.serviceType || "Service Request"}
                   {customerProfile && (
                     <Text
@@ -101,7 +108,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                   {job.status.replace("_", " ")}
                 </Badge>
               </HStack>
-              <Text fontSize="xs" color="gray.700">
+              <Text fontSize="xs" color={mutedTextColor}>
                 Request ID: {job.id.slice(0, 8)}...
               </Text>
             </VStack>
@@ -142,9 +149,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
             
           </HStack>
 
-          <Divider />
-
-         
+          <Divider borderColor={dividerColor} />
 
           {/* Details Grid */}
           <Box
@@ -156,10 +161,10 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
             <HStack align="start" spacing={3}>
               <Icon as={FaMapMarkerAlt} color="brand.500" mt={1} />
               <VStack align="start" spacing={0}>
-                <Text fontSize="xs" color="gray.700" fontWeight="medium">
+                <Text fontSize="xs" color={labelColor} fontWeight="medium">
                   Location
                 </Text>
-                <Text fontSize="sm" color="gray.800" fontWeight="medium">
+                <Text fontSize="sm" color={textColor} fontWeight="medium">
                   {fullAddress(job.address)}
                 </Text>
               </VStack>
@@ -169,10 +174,10 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
             <HStack align="start" spacing={3}>
               <Icon as={FaCalendarAlt} color="brand.500" mt={1} />
               <VStack align="start" spacing={0}>
-                <Text fontSize="xs" color="gray.700" fontWeight="medium">
+                <Text fontSize="xs" color={labelColor} fontWeight="medium">
                   Schedule
                 </Text>
-                <Text fontSize="sm" color="gray.800" fontWeight="medium">
+                <Text fontSize="sm" color={textColor} fontWeight="medium">
                   {formatDateToStringWithTime(job?.scheduledStart as string)}
                 </Text>
               </VStack>
@@ -182,10 +187,10 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
             {job.notes && (
               <HStack align="start" spacing={3}>
                 <VStack align="start" spacing={0}>
-                  <Text fontSize="xs" color="gray.800" fontWeight="medium">
+                  <Text fontSize="xs" color={labelColor} fontWeight="medium">
                     Note
                   </Text>
-                  <Text fontSize="sm" color="gray.800" fontWeight="bold">
+                  <Text fontSize="sm" color={textColor} fontWeight="bold">
                     {job.notes}
                   </Text>
                 </VStack>
@@ -196,26 +201,24 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
             <HStack align="start" spacing={3}>
               <Icon as={FaClock} color="brand.500" mt={1} />
               <VStack align="start" spacing={0}>
-                <Text fontSize="xs" color="gray.700" fontWeight="medium">
+                <Text fontSize="xs" color={labelColor} fontWeight="medium">
                   Created
                 </Text>
-                <Text fontSize="sm" color="gray.800" fontWeight="medium">
+                <Text fontSize="sm" color={textColor} fontWeight="medium">
                   {formatDateToStringWithoutTime(job?.createdAt.toLocaleString())}
                 </Text>
               </VStack>
             </HStack>
-            
           </Box>
-          
 
           {/* Price */}
           {job.totalPriceCents && (
             <HStack align="start" spacing={3}>
               <VStack align="start" spacing={0}>
-                <Text fontSize="xs" color="gray.900" fontWeight="medium">
+                <Text fontSize="xs" color={labelColor} fontWeight="medium">
                   Price
                 </Text>
-                <Text fontSize="sm" color="gray.800" fontWeight="bold">
+                <Text fontSize="sm" color="brand.600" fontWeight="bold">
                   ${formatNumberWithCommas(Number(job.totalPriceCents) / 100)}
                 </Text>
               </VStack>

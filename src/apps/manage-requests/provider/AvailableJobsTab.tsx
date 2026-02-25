@@ -33,8 +33,11 @@ export const AvailableJobsTab = ({
     : null;
   const { distances, isLoading: isLoadingDistances } = useJobDistances(providerAddress, jobs);
   const cardBg = useColorModeValue("white", "gray.800");
+  const selectedCardBg = useColorModeValue("brand.50", "whiteAlpha.200");
   const borderColor = useColorModeValue("gray.200", "gray.700");
-  const distanceColor = useColorModeValue("gray.900", "gray.400");
+  const addressColor = useColorModeValue("gray.800", "gray.200");
+  const titleColor = useColorModeValue("gray.900", "white");
+  const scheduleColor = useColorModeValue("gray.900", "gray.400");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
   // Automatically select the first job on page load
@@ -165,9 +168,10 @@ export const AvailableJobsTab = ({
               <Box
                 key={job.id}
                 id={`job-${job.id}`}
-                bg={isSelected ? "brand.50" : cardBg}
-                boxShadow={"lg"}
-                borderColor={isSelected ? "brand.500" : ''}
+                bg={isSelected ? selectedCardBg : cardBg}
+                boxShadow="lg"
+                borderWidth="1px"
+                borderColor={isSelected ? "brand.500" : borderColor}
                 borderRadius="lg"
                 p={4}
                 cursor="pointer"
@@ -197,28 +201,37 @@ export const AvailableJobsTab = ({
                   {/* Address */}
                   <HStack spacing={2} align="start">
                     <Icon as={FaMapMarkerAlt} color="brand.500" mt={0.5} boxSize={4} />
-                    <Text fontSize="sm" fontWeight="medium" color="gray.800" flex={1}>
+                    <Text fontSize="sm" fontWeight="medium" color={addressColor} flex={1}>
                       {fullAddress(job.address)}
                     </Text>
                   </HStack>
 
                   {/* Distance from provider (e.g. "10 km away") */}
                   {!isLoadingDistances && distances.has(job.id) && (
-                    <Badge colorScheme="brand">
+                    <Badge 
+                      colorScheme="orange" 
+                      variant="outline" 
+                      width="fit-content" 
+                      px={2} 
+                      py={1} 
+                      borderRadius="md"
+                      fontSize="xs"
+                      fontWeight="bold"
+                    >
                       <Icon as={FaMapMarkerAlt} mr={1} boxSize={3} />
                       {formatDistance(distances.get(job.id)!)}
                     </Badge>
                   )}
 
                   {/* Service Type */}
-                  <Text fontSize="md" fontWeight="bold" color="gray.900">
+                  <Text fontSize="md" fontWeight="bold" color={titleColor}>
                     {selectedService?.title || job.serviceType || "Service Request"}
                   </Text>
 
                   {/* Schedule */}
                   <HStack spacing={2}>
-                    <Icon as={FaCalendarAlt} color="gray.500" boxSize={3} />
-                    <Text fontSize="xs" color="gray.600">
+                    <Icon as={FaCalendarAlt} color="brand.500" boxSize={3} />
+                    <Text color={scheduleColor}>
                       {formatDateToStringWithTime(job?.scheduledStart as string)}
                     </Text>
                   </HStack>
@@ -246,9 +259,18 @@ export const AvailableJobsTab = ({
 
                   {/* Price and Action Button */}
                   <HStack justify="space-between" align="center" pt={2}>
-                    <Text fontSize="lg" fontWeight="bold" color="brand.600">
-                      ${price}
-                    </Text>
+                  <Badge 
+                      colorScheme="green" 
+                      variant="outline" 
+                      width="fit-content" 
+                      px={2} 
+                      py={1} 
+                      borderRadius="md"
+                      fontSize="lg"
+                      fontWeight="bold"
+                    >
+                       ${price}
+                    </Badge>
                     <Button
                       size="sm"
                       colorScheme="brand"

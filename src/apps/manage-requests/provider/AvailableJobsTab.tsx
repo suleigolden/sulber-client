@@ -5,6 +5,9 @@ import { useState, useEffect } from "react";
 import { fullAddress } from "~/common/utils/address";
 import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
 import { formatDateToStringWithTime } from "~/common/utils/date-time";
+import { formatDistance } from "~/common/utils/distance";
+import { useJobDistances } from "~/hooks/use-job-distances";
+import { useUserProfile } from "~/hooks/use-user-profile";
 import { JobsMap } from "./JobsMap";
 
 type AvailableJobsTabProps = {
@@ -22,8 +25,16 @@ export const AvailableJobsTab = ({
   onAccept,
   onUpdateStatus,
 }: AvailableJobsTabProps) => {
+  const { userProfile } = useUserProfile();
+  const providerAddress = userProfile?.address
+    ? [userProfile.address.street, userProfile.address.city, userProfile.address.state, userProfile.address.country, userProfile.address.postalCode]
+        .filter(Boolean)
+        .join(", ")
+    : null;
+  const { distances, isLoading: isLoadingDistances } = useJobDistances(providerAddress, jobs);
   const cardBg = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
+  const distanceColor = useColorModeValue("gray.900", "gray.400");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
   // Automatically select the first job on page load
@@ -190,6 +201,14 @@ export const AvailableJobsTab = ({
                       {fullAddress(job.address)}
                     </Text>
                   </HStack>
+
+                  {/* Distance from provider (e.g. "10 km away") */}
+                  {!isLoadingDistances && distances.has(job.id) && (
+                    <Badge colorScheme="brand">
+                      <Icon as={FaMapMarkerAlt} mr={1} boxSize={3} />
+                      {formatDistance(distances.get(job.id)!)}
+                    </Badge>
+                  )}
 
                   {/* Service Type */}
                   <Text fontSize="md" fontWeight="bold" color="gray.900">

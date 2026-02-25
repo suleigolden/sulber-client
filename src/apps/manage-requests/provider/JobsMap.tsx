@@ -1,9 +1,27 @@
-import { Box, Spinner, Text, VStack } from "@chakra-ui/react";
+import { Box, Spinner, Text, useColorMode, useColorModeValue, VStack } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { Job } from "@suleigolden/sulber-api-client";
 import { fullAddress } from "~/common/utils/address";
 import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
 import { loadGoogleMapsScript } from "~/common/utils/loadGoogleMapsScript";
+
+// Dark map style for Google Maps (dark mode)
+const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
+  { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+  { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+  { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#263c3f" }] },
+  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
+  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
+  { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2f3948" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
+  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
+];
 
 type JobsMapProps = {
   jobs: Job[];
@@ -12,11 +30,23 @@ type JobsMapProps = {
 };
 
 export const JobsMap = ({ jobs, selectedJobId, onJobSelect }: JobsMapProps) => {
+  const { colorMode } = useColorMode();
   const mapRef = useRef<HTMLDivElement>(null);
+  const loadingBg = useColorModeValue("gray.100", "gray.800");
+  const loadingTextColor = useColorModeValue("gray.600", "gray.400");
   const [isLoading, setIsLoading] = useState(true);
   const [mapError, setMapError] = useState<string | null>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
+
+  // Sync map style when color mode changes
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    map.setOptions({
+      styles: colorMode === "dark" ? DARK_MAP_STYLES : [],
+    });
+  }, [colorMode]);
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -71,9 +101,22 @@ export const JobsMap = ({ jobs, selectedJobId, onJobSelect }: JobsMapProps) => {
           mapTypeControl: true,
           streetViewControl: false,
           fullscreenControl: true,
+          styles: colorMode === "dark" ? DARK_MAP_STYLES : [],
         });
 
         mapInstanceRef.current = map;
+
+        // Force map to recalculate size so it renders at 100% in its container
+        const triggerResize = () => {
+          if (window.google?.maps?.event && mapRef.current) {
+            window.google.maps.event.trigger(map, "resize");
+          }
+        };
+        if (typeof requestAnimationFrame !== "undefined") {
+          requestAnimationFrame(triggerResize);
+        } else {
+          setTimeout(triggerResize, 0);
+        }
 
         // Geocode addresses and add markers
         const geocoder = new window.google.maps.Geocoder();
@@ -83,7 +126,6 @@ export const JobsMap = ({ jobs, selectedJobId, onJobSelect }: JobsMapProps) => {
 
         const checkIfDone = () => {
           if (geocodedCount + failedCount === jobs.length) {
-            setIsLoading(false);
             // Fit bounds if we have at least one marker
             if (markersRef.current.length > 1) {
               map.fitBounds(bounds);
@@ -94,6 +136,11 @@ export const JobsMap = ({ jobs, selectedJobId, onJobSelect }: JobsMapProps) => {
                 map.setZoom(15);
               }
             }
+            // Resize so map renders at 100% after view is set
+            if (window.google?.maps?.event) {
+              window.google.maps.event.trigger(map, "resize");
+            }
+            setIsLoading(false);
           }
         };
 
@@ -165,11 +212,11 @@ export const JobsMap = ({ jobs, selectedJobId, onJobSelect }: JobsMapProps) => {
       markersRef.current.forEach((marker) => marker.setMap(null));
       markersRef.current = [];
     };
-  }, [jobs, selectedJobId, onJobSelect]);
+  }, [jobs, selectedJobId, onJobSelect, colorMode]);
 
   if (mapError) {
     return (
-      <Box w="full" h="full" display="flex" alignItems="center" justifyContent="center" bg="gray.100">
+      <Box w="full" h="full" display="flex" alignItems="center" justifyContent="center" bg={loadingBg}>
         <Text color="red.500">{mapError}</Text>
       </Box>
     );
@@ -177,10 +224,10 @@ export const JobsMap = ({ jobs, selectedJobId, onJobSelect }: JobsMapProps) => {
 
   if (isLoading) {
     return (
-      <Box w="full" h="full" display="flex" alignItems="center" justifyContent="center" bg="gray.100">
+      <Box w="full" h="full" display="flex" alignItems="center" justifyContent="center" bg={loadingBg}>
         <VStack spacing={2}>
           <Spinner size="xl" color="brand.500" thickness="4px" />
-          <Text color="gray.600" fontSize="sm">
+          <Text color={loadingTextColor} fontSize="sm">
             Loading map...
           </Text>
         </VStack>

@@ -9,7 +9,6 @@ import {
 } from "@chakra-ui/react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { UserInformation } from "./UserInformation";
-import { ProviderServices } from "./ProviderServices";
 import { ProviderLocation } from "./ProviderLocation";
 import { ProviderVerification } from "./ProviderVerification";
 import { useUser } from "~/hooks/use-user";
@@ -18,7 +17,6 @@ import { useUser } from "~/hooks/use-user";
 
 const steps = [
   { title: "Location", Component: ProviderLocation },
-  { title: "Services", Component: ProviderServices },
   { title: "User", Component: UserInformation },
   { title: "Verification", Component: ProviderVerification },
 ];
@@ -42,12 +40,10 @@ export const ProviderOnboarding = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [hasSelectedServices, setHasSelectedServices] = useState<boolean>(false);
   const [isLocationValid, setIsLocationValid] = useState<boolean>(false);
   const [isUserInfoValid, setIsUserInfoValid] = useState<boolean>(false);
   const [isVerified, setIsVerified] = useState<boolean>(false);
   const formRef = useRef<{ submitForm: () => Promise<void> }>(null);
-  const SERVICES_STEP_INDEX = steps.findIndex((step) => step.title === "Services");
   const LOCATION_STEP_INDEX = steps.findIndex((step) => step.title === "Location");
   const USER_INFO_STEP_INDEX = steps.findIndex((step) => step.title === "User");
   const VERIFICATION_STEP_INDEX = steps.findIndex((step) => step.title === "Verification");
@@ -115,17 +111,6 @@ export const ProviderOnboarding = () => {
   };
 
   const renderStepComponent = () => {
-    if (activeStep === SERVICES_STEP_INDEX) {
-      return (
-        <ProviderServices
-          ref={formRef}
-          onServicesSelectedChange={setHasSelectedServices}
-          activeStep={activeStep}
-          steps={steps}
-        />
-      );
-    }
-
     const StepComponent = steps[activeStep].Component;
     return (
       <StepComponent
@@ -191,9 +176,7 @@ export const ProviderOnboarding = () => {
             colorScheme="brand"
             isLoading={isSubmitting}
             isDisabled={
-              activeStep === SERVICES_STEP_INDEX
-                ? !hasSelectedServices
-                : activeStep === LOCATION_STEP_INDEX
+              activeStep === LOCATION_STEP_INDEX
                 ? !isLocationValid
                 : activeStep === USER_INFO_STEP_INDEX
                 ? !isUserInfoValid

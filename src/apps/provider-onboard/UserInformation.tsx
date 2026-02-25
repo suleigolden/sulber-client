@@ -151,7 +151,7 @@ export const UserInformation = forwardRef<
 
             <CustomInputField
               type="date"
-              label="Date of Birth"
+              label="Date of Birth *"
               registerName="date_of_birth"
               isError={errors?.date_of_birth}
               placeholder="Select your date of birth"
@@ -159,7 +159,7 @@ export const UserInformation = forwardRef<
 
             <CustomInputField
               type="text"
-              label="Phone Number"
+              label="Phone Number *"
               registerName="phone_number"
               isError={errors?.phone_number}
               placeholder="Enter your phone number"
@@ -168,7 +168,7 @@ export const UserInformation = forwardRef<
 
             <CustomInputField
               type="select"
-              label="Gender"
+              label="Gender *"
               registerName="gender"
               options={Gender.map((gender) => ({ label: gender, value: gender }))}
               isError={errors?.gender}

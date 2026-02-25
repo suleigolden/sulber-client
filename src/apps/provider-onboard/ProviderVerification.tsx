@@ -120,7 +120,7 @@ export const ProviderVerification = forwardRef<
     }
     setIsLoading(true);
     try {
-      const returnUrl = `${window.location.origin}/provider/${user.id}/provider-onboard?step=3`;
+      const returnUrl = `${window.location.origin}/provider/${user.id}/provider-onboarding?step=2`;
 
       const response = await api
         .service("identity-verification")

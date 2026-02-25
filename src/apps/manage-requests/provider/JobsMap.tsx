@@ -38,6 +38,7 @@ export const JobsMap = ({ jobs, selectedJobId, onJobSelect }: JobsMapProps) => {
   const [mapError, setMapError] = useState<string | null>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
+  const markersByJobIdRef = useRef<Map<string, { marker: google.maps.Marker; position: google.maps.LatLng }>>(new Map());
 
   // Sync map style when color mode changes
   useEffect(() => {
@@ -126,8 +127,12 @@ export const JobsMap = ({ jobs, selectedJobId, onJobSelect }: JobsMapProps) => {
 
         const checkIfDone = () => {
           if (geocodedCount + failedCount === jobs.length) {
-            // Fit bounds if we have at least one marker
-            if (markersRef.current.length > 1) {
+            // If a job is selected, center and zoom on it (same as marker click)
+            const selectedEntry = selectedJobId ? markersByJobIdRef.current.get(selectedJobId) : undefined;
+            if (selectedEntry) {
+              map.setCenter(selectedEntry.position);
+              map.setZoom(15);
+            } else if (markersRef.current.length > 1) {
               map.fitBounds(bounds);
             } else if (markersRef.current.length === 1) {
               const firstMarker = markersRef.current[0];
@@ -159,7 +164,7 @@ export const JobsMap = ({ jobs, selectedJobId, onJobSelect }: JobsMapProps) => {
               const markerIcon = {
                 url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
                   <svg width="60" height="80" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M30 0 C13.4 0 0 13.4 0 30 C0 45 30 80 30 80 C30 80 60 45 60 30 C60 13.4 46.6 0 30 0 Z" fill="#6868f7" stroke="#FFF" stroke-width="2"/>
+                    <path d="M30 0 C13.4 0 0 13.4 0 30 C0 45 30 80 30 80 C30 80 60 45 60 30 C60 13.4 46.6 0 30 0 Z" fill="#24a89d"/>
                     <text x="30" y="35" text-anchor="middle" fill="white" font-size="17" font-weight="bold">$${price}</text>
                   </svg>
                 `)}`,
@@ -176,12 +181,13 @@ export const JobsMap = ({ jobs, selectedJobId, onJobSelect }: JobsMapProps) => {
                 animation: selectedJobId === job.id ? window.google.maps.Animation.BOUNCE : undefined,
               });
 
+              markersByJobIdRef.current.set(job.id, { marker, position: location });
+
               // Add click listener
               marker.addListener("click", () => {
                 if (onJobSelect && isMounted) {
                   onJobSelect(job);
                 }
-                // Center map on marker
                 if (isMounted) {
                   map.setCenter(location);
                   map.setZoom(15);
@@ -211,8 +217,23 @@ export const JobsMap = ({ jobs, selectedJobId, onJobSelect }: JobsMapProps) => {
       isMounted = false;
       markersRef.current.forEach((marker) => marker.setMap(null));
       markersRef.current = [];
+      markersByJobIdRef.current.clear();
     };
-  }, [jobs, selectedJobId, onJobSelect, colorMode]);
+  }, [jobs, onJobSelect, colorMode]);
+
+  // When selectedJobId changes, center map on that job and zoom to 15 (same as marker click)
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !selectedJobId) return;
+    const entry = markersByJobIdRef.current.get(selectedJobId);
+    if (!entry) return;
+    map.setCenter(entry.position);
+    map.setZoom(15);
+    // Update marker animations: bounce selected, none for others
+    markersByJobIdRef.current.forEach(({ marker }, jobId) => {
+      marker.setAnimation(jobId === selectedJobId ? window.google.maps.Animation.BOUNCE : undefined);
+    });
+  }, [selectedJobId]);
 
   if (mapError) {
     return (

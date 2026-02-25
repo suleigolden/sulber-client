@@ -29,7 +29,7 @@ const mobileNavStyles = {
     display: "block",
     _hover: {
       bg: "gray.50",
-      color: "#6868f7",
+      color: "#24a89d",
     },
     transition: "all 0.2s",
   },
@@ -128,7 +128,7 @@ export const AdminNavbar: FC<AdminNavbarProps> = ({
                 isOpen ? (
                   <CloseIcon w={9} h={9} />
                 ) : (
-                  <HamburgerIcon w={10} h={10} color="#6868f7" />
+                  <HamburgerIcon w={10} h={10} color="#24a89d" />
                 )
               }
               variant="ghost"

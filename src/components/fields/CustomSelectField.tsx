@@ -42,11 +42,11 @@ export const CustomSelectField: FC<CustomSelectFieldProps> = ({
             styles={{
               control: (provided, state) => ({
                 ...provided,
-                border: state.isFocused ? "1px solid #6868f7" : "",
-                borderColor: state.isFocused ? "#6868f7" : "#000",
-                boxShadow: state.isFocused ? "0 0 0 1px #6868f7" : "none",
+                border: state.isFocused ? "1px solid #24a89d" : "",
+                borderColor: state.isFocused ? "#24a89d" : "#000",
+                boxShadow: state.isFocused ? "0 0 0 1px #24a89d" : "none",
                 ":hover": {
-                  borderColor: "#6868f7",
+                  borderColor: "#24a89d",
                 },
                 // backgroundColor: `${inputBg}`,
                 // color: `${inputText}`

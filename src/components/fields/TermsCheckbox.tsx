@@ -18,11 +18,11 @@ export const TermsCheckbox = ({ register, error }: TermsCheckboxProps) => {
       >
         <Text fontSize="sm" color="gray.600">
           I agree to the{' '}
-          <Link as={RouterLink} to="/terms-of-service" color="#6868f7" fontWeight="medium">
+          <Link as={RouterLink} to="/terms-of-service" color="#24a89d" fontWeight="medium">
             Terms of Service
           </Link>{' '}
           and{' '}
-          <Link as={RouterLink} to="/privacy-policy" color="#6868f7" fontWeight="medium">
+          <Link as={RouterLink} to="/privacy-policy" color="#24a89d" fontWeight="medium">
             Privacy Policy
           </Link>
         </Text>

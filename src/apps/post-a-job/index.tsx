@@ -23,9 +23,11 @@ import { CustomToast } from "~/hooks/CustomToast";
 import { ProviderJobServiceCard } from "./ProviderJobServiceCard";
 import { PostJobModal } from "./PostJobModal";
 import { EditProviderJobModal } from "./EditProviderJobModal";
+import { useCheckProviderVerification } from "~/hooks/use-check-provider-verification";
 
 export const PostAJob = () => {
   const { user } = useUser();
+  const { isLoading: isCheckingVerification } = useCheckProviderVerification();
   const showToast = CustomToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
@@ -134,6 +136,10 @@ export const PostAJob = () => {
   const handleEditClose = useCallback(() => {
     setEditingJob(null);
   }, []);
+
+  if (isCheckingVerification) {
+    return <Spinner size="lg" color="brand.500" />;
+  }
 
   if (!user) {
     return (

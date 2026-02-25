@@ -14,6 +14,7 @@ import { Vehicles } from "~/apps/vehicles";
 import { WaitingToConnectWithProvider } from "~/apps/car-service/WaitingToConnectWithProvider";
 import { ManageRequests } from "~/apps/manage-requests";
 import { PostAJob } from "~/apps/post-a-job";
+import { CompleteProviderProfile } from "~/apps/users/provider/CompleteProviderProfile";
 
 // Add type definition at the top
 type RoutesType = {
@@ -128,7 +129,13 @@ export const DashboardNavBar = (props: Record<string, unknown>) => {
                 path={`/${user.id}/post-a-job`}
                 element={<PostAJob />}
               />
+
+              <Route
+                path={`/${user.id}/complete-profile`}
+                element={<CompleteProviderProfile />}
+              />
             </Routes>
+
           </Box>
 
           <Box>

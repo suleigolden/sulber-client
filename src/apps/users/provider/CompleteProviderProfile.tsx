@@ -8,7 +8,6 @@ import {
   Button,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { useEffect } from "react";
 import { useCheckProviderVerification } from "~/hooks/use-check-provider-verification";
 import { useUser } from "~/hooks/use-user";
 import { MdVerifiedUser, MdPerson, MdInfo } from "react-icons/md";

@@ -1,14 +1,18 @@
 import {
   Container,
+  Spinner,
   VStack,
 } from "@chakra-ui/react";
 import { ProviderManageRequests } from "../manage-requests/provider/ProviderManageRequests";
 import { useCheckProviderVerification } from "~/hooks/use-check-provider-verification";
 
 export const ProviderDashboard = () => {
-  const {isLoading } = useCheckProviderVerification();
+  const {isLoading, verificationStatus, isProfileComplete } = useCheckProviderVerification();
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Spinner size="lg" color="brand.500" />;
+  }
+  if (!isLoading && verificationStatus) {
+    isProfileComplete(verificationStatus);
   }
 
   return (

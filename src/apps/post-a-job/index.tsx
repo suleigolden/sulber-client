@@ -27,7 +27,7 @@ import { useCheckProviderVerification } from "~/hooks/use-check-provider-verific
 
 export const PostAJob = () => {
   const { user } = useUser();
-  const { isLoading: isCheckingVerification } = useCheckProviderVerification();
+  const { isLoading: isCheckingVerification, verificationStatus, isProfileComplete } = useCheckProviderVerification();
   const showToast = CustomToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
@@ -140,7 +140,9 @@ export const PostAJob = () => {
   if (isCheckingVerification) {
     return <Spinner size="lg" color="brand.500" />;
   }
-
+  if (!isLoading && verificationStatus) {
+    isProfileComplete(verificationStatus);
+  }
   if (!user) {
     return (
       <Container maxW="1100px" px={{ base: 4, md: 8 }} py={8}>

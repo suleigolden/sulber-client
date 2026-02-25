@@ -16,23 +16,22 @@ export const useCheckProviderVerification = () => {
             setIsLoading(false);
             return;
         }
-        const checkProviderVerification = async () => {
+        let cancelled = false;
+        const check = async () => {
             setIsLoading(true);
-            const result = await api.service("user").getProviderVerificationStatus(user?.id as string, user?.email as string);
-            setVerificationStatus(result);
-            if (result.status === 'identity_and_profile_not_verified') {
-                window.location.href = `/provider/${user?.id}/complete-profile`;
+            try {
+                const result = await api.service("user").getProviderVerificationStatus(user.id, user.email);
+                if (!cancelled) setVerificationStatus(result);
+            } catch (error) {
+                if (!cancelled) setVerificationStatus(undefined);
+                console.error("Error checking provider verification:", error);
+            } finally {
+                if (!cancelled) setIsLoading(false);
             }
-        }
-        
-        try {
-            checkProviderVerification();
-        } catch (error) {
-            console.error("Error checking provider verification:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [user]);
+        };
+        check();
+        return () => { cancelled = true; };
+    }, [user?.id, user?.email]);
 
     return { verificationStatus, isLoading };
 }

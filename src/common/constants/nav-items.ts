@@ -12,15 +12,15 @@ type NavItem = {
 export const getNavItems = (user: User) => {
   const PROVIDER_NAV_ITEMS: Array<NavItem> = [
     {
+      label: "Manage Jobs",
+      href: `/provider/${user?.id}/dashboard`,
+      type: "link",
+    },
+    {
       label: "Post a Job",
       href: `/provider/${user?.id}/post-a-job`,
       type: "link",
     },
-    // {
-    //   label: "Manage Requests",
-    //   href: `/provider/${user?.id}/manage-requests`,
-    //   type: "link",
-    // },
     {
       label: "Payment History",
       href: `/provider/${user?.id}/payment-history`,

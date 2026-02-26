@@ -27,7 +27,9 @@ import { useForm } from "react-hook-form";
 import { MdAdd, MdDelete } from "react-icons/md";
 import {
   api,
+  CarWashServiceAddOnPriceEntries,
   ProviderServiceTypesList,
+  type AddOnPriceEntry,
   type CreateProviderJobServiceRequest,
 } from "@suleigolden/sulber-api-client";
 import { CustomToast } from "~/hooks/CustomToast";
@@ -41,9 +43,24 @@ import {
   type ProviderJobServiceLocation,
 } from "./location-utils";
 
+const DRIVEWAY_CAR_WASH = "DRIVEWAY_CAR_WASH";
+
+const ADD_ON_LABELS: Record<(typeof CarWashServiceAddOnPriceEntries)[number], string> = {
+  interior_deep_cleaning: "Interior deep cleaning",
+  wax_polish: "Wax & polish",
+  engine_bay_cleaning: "Engine bay cleaning",
+  odor_removal: "Odor removal",
+  multiple_vehicles_discount: "Multiple vehicles discount",
+};
+
 type FormValues = {
   serviceType: string;
   priceDollars: string;
+  sedanPriceDollars: string;
+  suvPriceDollars: string;
+  truckPriceDollars: string;
+  vanPriceDollars: string;
+  addOnPriceDollars: Record<(typeof CarWashServiceAddOnPriceEntries)[number], string>;
   primaryLocation: ProviderJobServiceLocation | null;
   otherLocations: ProviderJobServiceLocation[];
   description: string;
@@ -58,9 +75,18 @@ const defaultSlots: AvailabilitySlot[] = DAYS_OF_WEEK.map((day) => ({
   endTime: "",
 }));
 
+const defaultAddOnPriceDollars = Object.fromEntries(
+  CarWashServiceAddOnPriceEntries.map((key) => [key, ""])
+) as FormValues["addOnPriceDollars"];
+
 const defaultValues: FormValues = {
   serviceType: "",
   priceDollars: "",
+  sedanPriceDollars: "",
+  suvPriceDollars: "",
+  truckPriceDollars: "",
+  vanPriceDollars: "",
+  addOnPriceDollars: defaultAddOnPriceDollars,
   primaryLocation: null,
   otherLocations: [],
   description: "",
@@ -84,6 +110,8 @@ export function PostJobModal({
   const showToast = CustomToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const mutedColor = useColorModeValue("gray.600", "gray.400");
+  const sectionBorder = useColorModeValue("gray.200", "whiteAlpha.300");
+  const bg = useColorModeValue("white", "#0b1437");
 
   const {
     register,
@@ -96,9 +124,11 @@ export function PostJobModal({
     defaultValues,
   });
 
+  const serviceType = watch("serviceType");
   const primaryLocation = watch("primaryLocation");
   const otherLocations = watch("otherLocations");
   const availabilitySlots = watch("availabilitySlots") ?? defaultSlots;
+  const isDrivewayCarWash = serviceType === DRIVEWAY_CAR_WASH;
 
   const addOtherLocation = useCallback(() => {
     setValue("otherLocations", [...(otherLocations ?? []), emptyLocation()]);
@@ -141,37 +171,77 @@ export function PostJobModal({
       showToast("Error", "Select a primary location.", "error");
       return;
     }
-    const priceCents = Math.round(parseFloat(data.priceDollars || "0") * 100);
-    if (priceCents < 0) {
-      showToast("Error", "Price must be a positive number.", "error");
-      return;
-    }
 
     const primary = data.primaryLocation!;
     const others = data.otherLocations?.filter((l) => l?.street?.trim()) ?? [];
-    const payload = {
+    const daysOfWeek = slotsToDaysOfWeekAvailable(data.availabilitySlots ?? defaultSlots);
+
+    let priceCents: number;
+    let basePriceCents: number | undefined;
+    let sedanPriceCents: number | undefined;
+    let suvPriceCents: number | undefined;
+    let truckPriceCents: number | undefined;
+    let vanPriceCents: number | undefined;
+    let addOnPrice: AddOnPriceEntry[] | undefined;
+
+    if (data.serviceType === DRIVEWAY_CAR_WASH) {
+      const sedan = Math.round(parseFloat(data.sedanPriceDollars || "0") * 100);
+      const suv = Math.round(parseFloat(data.suvPriceDollars || "0") * 100);
+      const truck = Math.round(parseFloat(data.truckPriceDollars || "0") * 100);
+      const van = Math.round(parseFloat(data.vanPriceDollars || "0") * 100);
+      if (sedan < 0 || suv < 0 || truck < 0 || van < 0) {
+        showToast("Error", "Vehicle prices must be zero or positive.", "error");
+        return;
+      }
+      priceCents = sedan;
+      basePriceCents = sedan;
+      sedanPriceCents = sedan;
+      suvPriceCents = suv;
+      truckPriceCents = truck;
+      vanPriceCents = van;
+      addOnPrice = CarWashServiceAddOnPriceEntries.map((key) => {
+        const cents = Math.round(parseFloat(data.addOnPriceDollars?.[key] || "0") * 100);
+        return { [key]: { price: cents } };
+      });
+    } else {
+      priceCents = Math.round(parseFloat(data.priceDollars || "0") * 100);
+      if (priceCents < 0) {
+        showToast("Error", "Price must be a positive number.", "error");
+        return;
+      }
+    }
+
+    const payload: CreateProviderJobServiceRequest = {
       providerId,
       serviceType: data.serviceType as CreateProviderJobServiceRequest["serviceType"],
       priceCents,
+      basePriceCents,
+      sedanPriceCents,
+      suvPriceCents,
+      truckPriceCents,
+      vanPriceCents,
+      addOnPrice,
       primaryLocation: primary,
       otherLocations: others,
       description: data.description?.trim() || undefined,
       notes: data.notes?.trim() || undefined,
-      status: "active" as const,
-      daysOfWeekAvailable: slotsToDaysOfWeekAvailable(data.availabilitySlots ?? defaultSlots),
+      status: "active",
+      daysOfWeekAvailable: daysOfWeek,
     };
 
     setIsSubmitting(true);
     try {
       const svc = api.service("provider-job-service" as never) as {
+        createProviderJob?: (p: CreateProviderJobServiceRequest) => Promise<unknown>;
         create?: (p: CreateProviderJobServiceRequest) => Promise<unknown>;
       };
-      if (typeof svc?.create !== "function") {
+      const createFn = svc?.createProviderJob ?? svc?.create;
+      if (typeof createFn !== "function") {
         showToast("Error", "Provider job service API is not available.", "error");
         setIsSubmitting(false);
         return;
       }
-      await svc.create(payload as unknown as CreateProviderJobServiceRequest);
+      await createFn(payload);
       showToast("Success", "Your service has been posted successfully.", "success");
       reset(defaultValues);
       onClose();
@@ -195,7 +265,7 @@ export function PostJobModal({
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="2xl" scrollBehavior="inside">
       <ModalOverlay />
-      <ModalContent borderRadius="2xl" maxH="90vh">
+      <ModalContent borderRadius="2xl" maxH="90vh" bg={bg}>
         <ModalHeader fontWeight="600" fontSize="lg">
           Post a service
           <Text fontSize="sm" mt={2} borderWidth="1px" borderColor="gray.200" borderRadius="md" p={2}>
@@ -235,30 +305,147 @@ export function PostJobModal({
               )}
             </FormControl>
 
-            <FormControl isInvalid={!!errors.priceDollars} isRequired>
-              <FormLabel fontWeight="600" fontSize="sm">
-                Price (How much do you charge for this service?)
-              </FormLabel>
-              <Input
-                type="number"
-                step="0.01"
-                min={0}
-                placeholder="e.g. 25.00"
-                {...register("priceDollars", {
-                  required: "Enter a price",
-                  min: { value: 0, message: "Price must be positive" },
-                })}
-                size="md"
-                borderRadius="lg"
-                borderColor="gray.200"
-                _dark={{ borderColor: "whiteAlpha.300" }}
-              />
-              {errors.priceDollars && (
-                <FormHelperText color="red.500">
-                  {errors.priceDollars.message}
-                </FormHelperText>
-              )}
-            </FormControl>
+            {isDrivewayCarWash ? (
+              <>
+                <Box
+                  p={4}
+                  borderRadius="xl"
+                  borderWidth="1px"
+                  borderColor={sectionBorder}
+                >
+                  <Text fontWeight="600" fontSize="sm" mb={1} color={mutedColor}>
+                    Vehicle prices (per vehicle type)
+                  </Text>
+                  <Text mt={0} mb={3} color={mutedColor} fontSize="sm">
+                    Set your base price for each vehicle type in dollars.
+                  </Text>
+                  <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={4}>
+                    <FormControl>
+                      <FormLabel fontSize="sm" fontWeight="500">
+                        Sedan ($)
+                      </FormLabel>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        placeholder="0.00"
+                        {...register("sedanPriceDollars")}
+                        size="md"
+                        borderRadius="lg"
+                        borderColor="gray.200"
+                        _dark={{ borderColor: "whiteAlpha.300" }}
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel fontSize="sm" fontWeight="500">
+                        SUV ($)
+                      </FormLabel>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        placeholder="0.00"
+                        {...register("suvPriceDollars")}
+                        size="md"
+                        borderRadius="lg"
+                        borderColor="gray.200"
+                        _dark={{ borderColor: "whiteAlpha.300" }}
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel fontSize="sm" fontWeight="500">
+                        Truck ($)
+                      </FormLabel>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        placeholder="0.00"
+                        {...register("truckPriceDollars")}
+                        size="md"
+                        borderRadius="lg"
+                        borderColor="gray.200"
+                        _dark={{ borderColor: "whiteAlpha.300" }}
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel fontSize="sm" fontWeight="500">
+                        Van ($)
+                      </FormLabel>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        placeholder="0.00"
+                        {...register("vanPriceDollars")}
+                        size="md"
+                        borderRadius="lg"
+                        borderColor="gray.200"
+                        _dark={{ borderColor: "whiteAlpha.300" }}
+                      />
+                    </FormControl>
+                  </SimpleGrid>
+                </Box>
+                <Box
+                  p={4}
+                  borderRadius="xl"
+                  borderWidth="1px"
+                  borderColor={sectionBorder}
+                >
+                  <Text fontWeight="600" fontSize="sm" mb={1} color={mutedColor}>
+                    Add-on prices (optional)
+                  </Text>
+                  <Text mt={0} mb={3} color={mutedColor} fontSize="sm">
+                    Charge extra for add-ons; leave 0 if not offered.
+                  </Text>
+                  <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
+                    {CarWashServiceAddOnPriceEntries.map((key) => (
+                      <FormControl key={key}>
+                        <FormLabel fontSize="sm" fontWeight="500">
+                          {ADD_ON_LABELS[key]} ($)
+                        </FormLabel>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min={0}
+                          placeholder="0.00"
+                          {...register(`addOnPriceDollars.${key}`)}
+                          size="md"
+                          borderRadius="lg"
+                          borderColor="gray.200"
+                          _dark={{ borderColor: "whiteAlpha.300" }}
+                        />
+                      </FormControl>
+                    ))}
+                  </SimpleGrid>
+                </Box>
+              </>
+            ) : (
+              <FormControl isInvalid={!!errors.priceDollars} isRequired>
+                <FormLabel fontWeight="600" fontSize="sm">
+                  Price (How much do you charge for this service?)
+                </FormLabel>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  placeholder="e.g. 25.00"
+                  {...register("priceDollars", {
+                    required: isDrivewayCarWash ? false : "Enter a price",
+                    min: { value: 0, message: "Price must be positive" },
+                  })}
+                  size="md"
+                  borderRadius="lg"
+                  borderColor="gray.200"
+                  _dark={{ borderColor: "whiteAlpha.300" }}
+                />
+                {errors.priceDollars && (
+                  <FormHelperText color="red.500">
+                    {errors.priceDollars.message}
+                  </FormHelperText>
+                )}
+              </FormControl>
+            )}
 
             <FormControl isRequired>
               <FormLabel fontWeight="600" fontSize="sm">

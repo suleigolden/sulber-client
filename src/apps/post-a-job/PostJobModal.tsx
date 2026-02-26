@@ -198,6 +198,9 @@ export function PostJobModal({
       <ModalContent borderRadius="2xl" maxH="90vh">
         <ModalHeader fontWeight="600" fontSize="lg">
           Post a service
+          <Text fontSize="sm" mt={2} borderWidth="1px" borderColor="gray.200" borderRadius="md" p={2}>
+            Important: The currency is based on your current location.
+          </Text>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody pb={6}>
@@ -234,7 +237,7 @@ export function PostJobModal({
 
             <FormControl isInvalid={!!errors.priceDollars} isRequired>
               <FormLabel fontWeight="600" fontSize="sm">
-                Price (USD)
+                Price (How much do you charge for this service?)
               </FormLabel>
               <Input
                 type="number"

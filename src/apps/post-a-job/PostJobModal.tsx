@@ -231,17 +231,7 @@ export function PostJobModal({
 
     setIsSubmitting(true);
     try {
-      const svc = api.service("provider-job-service" as never) as {
-        createProviderJob?: (p: CreateProviderJobServiceRequest) => Promise<unknown>;
-        create?: (p: CreateProviderJobServiceRequest) => Promise<unknown>;
-      };
-      const createFn = svc?.createProviderJob ?? svc?.create;
-      if (typeof createFn !== "function") {
-        showToast("Error", "Provider job service API is not available.", "error");
-        setIsSubmitting(false);
-        return;
-      }
-      await createFn(payload);
+      await api.service("provider-job-service").createProviderJob(payload);
       showToast("Success", "Your service has been posted successfully.", "success");
       reset(defaultValues);
       onClose();
@@ -269,7 +259,7 @@ export function PostJobModal({
         <ModalHeader fontWeight="600" fontSize="lg">
           Post a service
           <Text fontSize="sm" mt={2} borderWidth="1px" borderColor="gray.200" borderRadius="md" p={2}>
-            Important: The currency is based on your current location.
+            Important: The currency type is based on your current country location.
           </Text>
         </ModalHeader>
         <ModalCloseButton />
@@ -322,7 +312,7 @@ export function PostJobModal({
                   <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={4}>
                     <FormControl>
                       <FormLabel fontSize="sm" fontWeight="500">
-                        Sedan ($)
+                        Sedan Price
                       </FormLabel>
                       <Input
                         type="number"
@@ -338,7 +328,7 @@ export function PostJobModal({
                     </FormControl>
                     <FormControl>
                       <FormLabel fontSize="sm" fontWeight="500">
-                        SUV ($)
+                        SUV Price
                       </FormLabel>
                       <Input
                         type="number"
@@ -354,7 +344,7 @@ export function PostJobModal({
                     </FormControl>
                     <FormControl>
                       <FormLabel fontSize="sm" fontWeight="500">
-                        Truck ($)
+                        Truck Price
                       </FormLabel>
                       <Input
                         type="number"
@@ -370,7 +360,7 @@ export function PostJobModal({
                     </FormControl>
                     <FormControl>
                       <FormLabel fontSize="sm" fontWeight="500">
-                        Van ($)
+                        Van Price
                       </FormLabel>
                       <Input
                         type="number"
@@ -402,7 +392,7 @@ export function PostJobModal({
                     {CarWashServiceAddOnPriceEntries.map((key) => (
                       <FormControl key={key}>
                         <FormLabel fontSize="sm" fontWeight="500">
-                          {ADD_ON_LABELS[key]} ($)
+                          {ADD_ON_LABELS[key]} Price
                         </FormLabel>
                         <Input
                           type="number"
@@ -449,7 +439,7 @@ export function PostJobModal({
 
             <FormControl isRequired>
               <FormLabel fontWeight="600" fontSize="sm">
-                Primary location
+                Primary location (where you will be offering your service)
               </FormLabel>
               <Box mt={1}>
                 <LocationSearchInput

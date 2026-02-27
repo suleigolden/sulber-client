@@ -148,7 +148,7 @@ export const ConfirmServiceRequest = ({
       const selectedService = ProviderServiceTypesList.services.find(
         (s) => s.type === serviceType
       );
-      const priceCents = formatNumberWithCommas(selectedService?.price || 0);
+      const price = formatNumberWithCommas(selectedService?.price || 0);
 
       // Build notes
       const notesParts: string[] = [];
@@ -169,7 +169,7 @@ export const ConfirmServiceRequest = ({
         address,
         scheduledStart,
         scheduledEnd,
-        totalPriceCents: priceCents,
+        totalprice: price,
         currency: "CAD",
         notes: notesParts.length > 0 ? notesParts.join(". ") : undefined,
       };

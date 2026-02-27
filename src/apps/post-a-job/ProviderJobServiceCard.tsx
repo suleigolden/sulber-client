@@ -19,9 +19,35 @@ import {
 import { MdMoreVert } from "react-icons/md";
 import { FiEdit2, FiToggleLeft, FiToggleRight, FiTrash2 } from "react-icons/fi";
 import type { ProviderJobService } from "@suleigolden/sulber-api-client";
-import { ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
+import {
+  ProviderServiceTypesList,
+  CarWashServiceAddOnPriceEntries,
+} from "@suleigolden/sulber-api-client";
 import { formatLocationDisplay } from "./location-utils";
-import { FaCar, FaParking, FaSnowflake, FaHome, FaTree, FaLeaf, FaMapMarkerAlt, FaStickyNote, FaCalendarAlt } from "react-icons/fa";
+import {
+  FaCar,
+  FaParking,
+  FaSnowflake,
+  FaHome,
+  FaTree,
+  FaLeaf,
+  FaMapMarkerAlt,
+  FaStickyNote,
+  FaCalendarAlt,
+} from "react-icons/fa";
+
+const DRIVEWAY_CAR_WASH = "DRIVEWAY_CAR_WASH";
+
+const ADD_ON_LABELS: Record<
+  (typeof CarWashServiceAddOnPriceEntries)[number],
+  string
+> = {
+  interior_deep_cleaning: "Interior deep cleaning",
+  wax_polish: "Wax & polish",
+  engine_bay_cleaning: "Engine bay cleaning",
+  odor_removal: "Odor removal",
+  multiple_vehicles_discount: "Multiple vehicles discount",
+};
 
 const getServiceIcon = (serviceType: string): React.ElementType => {
   const iconMap: Record<string, React.ElementType> = {
@@ -80,17 +106,46 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
   const menuButtonHover = useColorModeValue("gray.100", "whiteAlpha.200");
   const menuButtonActive = useColorModeValue("gray.200", "whiteAlpha.300");
 
+  // Support both camelCase (client types) and snake_case (API payload) fields
+  const raw: any = job as any;
+  const serviceType: string =
+    raw.serviceType ?? raw.service_type ?? "";
+  const priceCents: number = raw.price ?? raw.price_cents ?? 0;
+  const basePriceCents: number | undefined =
+    raw.basePrice ?? raw.base_price ?? priceCents;
+  const sedanPriceCents: number | undefined =
+    raw.sedanPrice ?? raw.sedan_price ?? basePriceCents;
+  const suvPriceCents: number | undefined =
+    raw.suvPrice ?? raw.suv_price ?? 0;
+  const truckPriceCents: number | undefined =
+    raw.truckPrice ?? raw.truck_price ?? 0;
+  const vanPriceCents: number | undefined =
+    raw.vanPrice ?? raw.van_price ?? 0;
+  const addOnPrices: any[] = raw.addOnPrices ?? raw.add_on_prices ?? [];
+  const primaryLocation = raw.primaryLocation ?? raw.primary_location;
+  const otherLocations: any[] = raw.otherLocations ?? raw.other_locations ?? [];
+  const daysOfWeekAvailable: string[] =
+    raw.daysOfWeekAvailable ?? raw.days_of_week_available ?? [];
   const isActive = job.status === "active";
   const canToggleActive = job.status === "active" || job.status === "inactive";
 
   const serviceConfig = ProviderServiceTypesList.services.find(
-    (s) => s.type === job.serviceType
+    (s) => s.type === serviceType
   );
-  const serviceTitle = serviceConfig?.title ?? job.serviceType;
-  const requirements = (serviceConfig as { requirements_for_provider?: { equipment?: string; experience?: string; license?: string; physical?: string; availability?: string } })?.requirements_for_provider;
-  const priceDollars = (job.priceCents / 100).toFixed(2);
+  const serviceTitle = serviceConfig?.title ?? serviceType;
+  const requirements = (serviceConfig as {
+    requirements_for_provider?: {
+      equipment?: string;
+      experience?: string;
+      license?: string;
+      physical?: string;
+      availability?: string;
+    };
+  })?.requirements_for_provider;
+  const priceDollars = (priceCents / 100).toFixed(2);
+  const isDrivewayCarWash = serviceType === DRIVEWAY_CAR_WASH;
   const statusColor = statusColorMap[job.status] ?? "gray";
-  const IconComponent = getServiceIcon(job.serviceType);
+  const IconComponent = getServiceIcon(serviceType);
   const hoverBorderColor = useColorModeValue("gray.300", "whiteAlpha.300");
 
   return (
@@ -255,14 +310,76 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
       <Divider my={4} />
 
       <VStack align="stretch" spacing={4}>
-        {/* Price */}
-        <Box>
-          <FieldLabel>Price</FieldLabel>
-          <Text fontSize="lg" fontWeight="bold" color="brand.500" mt={1}>
-            ${priceDollars}
-          </Text>
-          <Text fontSize="xs" color={mutedColor}>Base price</Text>
-        </Box>
+        {/* Price / vehicle pricing */}
+        {isDrivewayCarWash ? (
+          <Box>
+            <FieldLabel>Vehicle prices</FieldLabel>
+            <VStack align="start" spacing={1} mt={1}>
+              <Text fontSize="sm" color={requirementsColor}>
+                <Text as="span" fontWeight="bold">
+                  Sedan:
+                </Text>{" "}
+                ${((sedanPriceCents ?? basePriceCents ?? priceCents) / 100).toFixed(2)}
+              </Text>
+              {suvPriceCents != null && suvPriceCents > 0 && (
+                <Text fontSize="sm" color={requirementsColor}>
+                  <Text as="span" fontWeight="bold">
+                    SUV:
+                  </Text>{" "}
+                  ${(suvPriceCents / 100).toFixed(2)}
+                </Text>
+              )}
+              {truckPriceCents != null && truckPriceCents > 0 && (
+                <Text fontSize="sm" color={requirementsColor}>
+                  <Text as="span" fontWeight="bold">
+                    Truck:
+                  </Text>{" "}
+                  ${(truckPriceCents / 100).toFixed(2)}
+                </Text>
+              )}
+              {vanPriceCents != null && vanPriceCents > 0 && (
+                <Text fontSize="sm" color={requirementsColor}>
+                  <Text as="span" fontWeight="bold">
+                    Van:
+                  </Text>{" "}
+                  ${(vanPriceCents / 100).toFixed(2)}
+                </Text>
+              )}
+            </VStack>
+          </Box>
+        ) : (
+          <Box>
+            <FieldLabel>Price</FieldLabel>
+            <Text fontSize="lg" fontWeight="bold" color="brand.500" mt={1}>
+              ${priceDollars}
+            </Text>
+            <Text fontSize="xs" color={mutedColor}>
+              Base price
+            </Text>
+          </Box>
+        )}
+
+        {/* Add-on prices for car wash */}
+        {isDrivewayCarWash && addOnPrices && addOnPrices.length > 0 && (
+          <Box>
+            <FieldLabel>Add-on prices</FieldLabel>
+            <VStack align="start" spacing={1} mt={1}>
+              {CarWashServiceAddOnPriceEntries.map((key) => {
+                const entry = addOnPrices!.find((p) => p[key]);
+                const cents = entry?.[key]?.price ?? 0;
+                if (!cents) return null;
+                return (
+                  <Text key={key} fontSize="sm" color={requirementsColor}>
+                    <Text as="span" fontWeight="bold">
+                      {ADD_ON_LABELS[key]}:
+                    </Text>{" "}
+                    ${(cents / 100).toFixed(2)}
+                  </Text>
+                );
+              })}
+            </VStack>
+          </Box>
+        )}
 
         {/* Primary location */}
         <Box>
@@ -270,17 +387,17 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
           <HStack align="start" spacing={2} mt={1}>
             <Icon as={FaMapMarkerAlt} boxSize={4} color={mutedColor} mt={0.5} />
             <Text fontSize="sm" color={requirementsColor}>
-              {formatLocationDisplay(job.primaryLocation)}
+              {formatLocationDisplay(primaryLocation)}
             </Text>
           </HStack>
         </Box>
 
         {/* Other locations */}
-        {job.otherLocations?.length > 0 && (
+        {otherLocations?.length > 0 && (
           <Box>
             <FieldLabel>Other locations</FieldLabel>
             <VStack align="stretch" spacing={1} mt={1}>
-              {job.otherLocations.map((loc, i) => (
+              {otherLocations.map((loc, i) => (
                 <HStack key={i} align="start" spacing={2}>
                   <Icon as={FaMapMarkerAlt} boxSize={3} color={mutedColor} mt={1} />
                   <Text fontSize="sm" color={requirementsColor}>
@@ -316,13 +433,13 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
         )}
 
         {/* Availability */}
-        {job.daysOfWeekAvailable?.length > 0 && (
+        {daysOfWeekAvailable?.length > 0 && (
           <Box>
             <FieldLabel>Availability</FieldLabel>
             <HStack align="start" spacing={2} mt={1} flexWrap="wrap">
               <Icon as={FaCalendarAlt} boxSize={4} color={mutedColor} mt={0.5} />
               <Flex wrap="wrap" gap={2}>
-                {job.daysOfWeekAvailable.map((slot, i) => (
+                {daysOfWeekAvailable.map((slot, i) => (
                   <Badge key={i} variant="subtle" colorScheme="brand" fontSize="xs" px={2} py={1} borderRadius="md">
                     {slot}
                   </Badge>

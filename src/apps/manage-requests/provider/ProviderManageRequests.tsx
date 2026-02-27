@@ -93,7 +93,7 @@ export const ProviderManageRequests = () => {
       // 1. Don't have a provider assigned
       // 2. Are in the same location zone as the provider
       return allPendingJobs.filter((job) => {
-        if (job.providerId) return false;
+        if (job.provider_id) return false;
         return isJobInProviderLocation(job.address, userProfile.address);
       });
     },
@@ -158,7 +158,7 @@ export const ProviderManageRequests = () => {
       // Optimistically update the cache
       if (actionType === "accept" && selectedJob) {
         // Add the accepted job to provider jobs list
-        const updatedProviderJobs = previousJobs ? [...previousJobs, { ...selectedJob, ...updates, status: "ACCEPTED" as any, providerId: user?.id }] : [{ ...selectedJob, ...updates, status: "ACCEPTED" as any, providerId: user?.id }];
+        const updatedProviderJobs = previousJobs ? [...previousJobs, { ...selectedJob, ...updates, status: "ACCEPTED" as any, provider_id: user?.id }] : [{ ...selectedJob, ...updates, status: "ACCEPTED" as any, provider_id: user?.id }];
         queryClient.setQueryData<Job[]>(["customerJobs", user?.id], updatedProviderJobs);
         
         // Remove the job from available jobs list
@@ -231,7 +231,7 @@ export const ProviderManageRequests = () => {
         jobId: selectedJob.id,
         updates: {
           status: "ACCEPTED",
-          providerId: user.id,
+          provider_id: user.id,
         },
       });
     } else {

@@ -42,7 +42,7 @@ export const useAvatarUpload = (
             
             // Update user profile with new avatar URL
             await api.service("user-profile").update(user.id, {
-              avatarUrl: downloadURL,
+              avatar_url: downloadURL,
             });
 
             showToast("Success", "Avatar uploaded successfully!", "success");

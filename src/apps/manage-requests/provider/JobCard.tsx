@@ -42,18 +42,18 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const selectedService = job.serviceType
-    ? ProviderServiceTypesList.services.find((s) => s.type === job.serviceType)
+  const selectedService = job.service_type
+    ? ProviderServiceTypesList.services.find((s) => s.type === job.service_type)
     : null;
 
   // Fetch customer profile information
   useEffect(() => {
     const fetchCustomerProfile = async () => {
-      if (!job.customerId) return;
+      if (!job.customer_id) return;
       
       setIsLoadingCustomer(true);
       try {
-        const profile = await api.service("user-profile").get(job.customerId);
+        const profile = await api.service("user-profile").get(job.customer_id);
         setCustomerProfile(profile);
       } catch (error) {
         console.error("Failed to fetch customer profile:", error);
@@ -63,7 +63,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
     };
 
     fetchCustomerProfile();
-  }, [job.customerId]);
+  }, [job.customer_id]);
 
   return (
     <Card
@@ -80,7 +80,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
             <VStack align="start" spacing={1} flex={1}>
               <HStack>
                 <Heading size="md" fontWeight="bold" color={headingColor}>
-                  {selectedService?.title || job.serviceType || "Service Request"}
+                  {selectedService?.title || job.service_type || "Service Request"}
                   {customerProfile && (
                     <Text
                       fontSize="sm"
@@ -92,7 +92,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                       onClick={onOpen}
                       ml={2}
                     >
-                      For: {customerProfile.firstName} {customerProfile.lastName}
+                      For: {customerProfile.first_name} {customerProfile.last_name}
                     </Text>
                   )}
                 </Heading>
@@ -114,7 +114,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
             </VStack>
             {showActions && (
               <VStack spacing={2}>
-                {job.status === "PENDING" && !job.providerId && onAccept && (
+                {job.status === "PENDING" && !job.provider_id && onAccept && (
                   <Button
                     size="sm"
                     colorScheme="brand"
@@ -178,7 +178,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                   Schedule
                 </Text>
                 <Text fontSize="sm" color={textColor} fontWeight="medium">
-                  {formatDateToStringWithTime(job?.scheduledStart as string)}
+                  {formatDateToStringWithTime(job?.scheduled_start as string)}
                 </Text>
               </VStack>
             </HStack>
@@ -205,21 +205,21 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                   Created
                 </Text>
                 <Text fontSize="sm" color={textColor} fontWeight="medium">
-                  {formatDateToStringWithoutTime(job?.createdAt.toLocaleString())}
+                  {formatDateToStringWithoutTime(job?.created_at.toLocaleString())}
                 </Text>
               </VStack>
             </HStack>
           </Box>
 
           {/* Price */}
-          {job.totalPriceCents && (
+          {job.total_price_cents && (
             <HStack align="start" spacing={3}>
               <VStack align="start" spacing={0}>
                 <Text fontSize="xs" color={labelColor} fontWeight="medium">
                   Price
                 </Text>
                 <Text fontSize="sm" color="brand.600" fontWeight="bold">
-                  ${formatNumberWithCommas(Number(job.totalPriceCents) / 100)}
+                  ${formatNumberWithCommas(Number(job.total_price_cents) / 100)}
                 </Text>
               </VStack>
             </HStack>

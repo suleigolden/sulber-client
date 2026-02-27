@@ -92,7 +92,7 @@ export const ConfirmServiceRequest = ({
     if (vehicle.make) parts.push(vehicle.make);
     if (vehicle.model) parts.push(vehicle.model);
     if (vehicle.color) parts.push(vehicle.color);
-    if (vehicle.licensePlate) parts.push(`(${vehicle.licensePlate})`);
+    if (vehicle.license_plate) parts.push(`(${vehicle.license_plate})`);
     return parts.length > 0 ? parts.join(" ") : "Unnamed Vehicle";
   };
 
@@ -164,7 +164,7 @@ export const ConfirmServiceRequest = ({
 
       // Create job
       const jobData = {
-        customerId: user.id,
+        customer_id: user.id,
         serviceType: serviceType as ProviderServiceType,
         address,
         scheduledStart,

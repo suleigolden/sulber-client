@@ -156,8 +156,8 @@ export const JobsMap = ({ jobs, selectedJobId, onJobSelect }: JobsMapProps) => {
 
             if (status === "OK" && results && results[0]) {
               const location = results[0].geometry.location;
-              const price = job.totalPriceCents
-                ? formatNumberWithCommas(Number(job.totalPriceCents) / 100)
+              const price = job.total_price_cents
+                ? formatNumberWithCommas(Number(job.total_price_cents) / 100)
                 : "0";
 
               // Create custom marker icon with price

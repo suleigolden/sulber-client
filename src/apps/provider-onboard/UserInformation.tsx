@@ -35,7 +35,7 @@ type AvatarUploadSectionProps = {
 const AvatarUploadSection = ({ userProfile }: AvatarUploadSectionProps) => {
   const { watch, setValue } = useFormContext();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const avatarUrl = watch("avatar_url") || userProfile?.avatarUrl || "";
+  const avatarUrl = watch("avatar_url") || userProfile?.avatar_url || "";
   const { uploadAvatar, isUploading } = useAvatarUpload((url) => {
     setValue("avatar_url", url);
   });
@@ -104,13 +104,13 @@ export const UserInformation = forwardRef<
   // Initialize form with existing user profile data
   useEffect(() => {
     if (userProfile) {
-      setValue("avatar_url", userProfile.avatarUrl || "");
+      setValue("avatar_url", userProfile.avatar_url || "");
       // Format date for input field (YYYY-MM-DD)
-      const dateOfBirth = userProfile.dateOfBirth
-        ? new Date(userProfile.dateOfBirth).toISOString().split('T')[0]
+      const dateOfBirth = userProfile.date_of_birth
+        ? new Date(userProfile.date_of_birth).toISOString().split('T')[0]
         : "";
       setValue("date_of_birth", dateOfBirth);
-      setValue("phone_number", userProfile.phoneNumber || "");
+      setValue("phone_number", userProfile.phone_number || "");
       setValue("gender", userProfile.gender || "");
       setValue("bio", "");
     }
@@ -140,7 +140,7 @@ export const UserInformation = forwardRef<
             p={{ base: 6, md: 10 }}
           >
             <Heading size="lg" mb={2}>
-              Hi {userProfile?.firstName}! Tell us about yourself
+              Hi {userProfile?.first_name}! Tell us about yourself
             </Heading>
             <Text fontSize="md">
               Share some information to help customers get to know you better.

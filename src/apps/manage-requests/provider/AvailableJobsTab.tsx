@@ -148,12 +148,12 @@ export const AvailableJobsTab = ({
       >
         <VStack spacing={3} p={4} align="stretch">
           {jobs.map((job, index) => {
-            const selectedService = job.serviceType
-              ? ProviderServiceTypesList.services.find((s) => s.type === job.serviceType)
+            const selectedService = job.service_type
+              ? ProviderServiceTypesList.services.find((s) => s.type === job.service_type)
               : null;
 
-            const price = job.totalPriceCents
-              ? formatNumberWithCommas(Number(job.totalPriceCents) / 100)
+            const price = job.total_price_cents
+              ? formatNumberWithCommas(Number(job.total_price_cents) / 100)
               : "0";
 
             const isSelected = selectedJobId === job.id;
@@ -225,14 +225,14 @@ export const AvailableJobsTab = ({
 
                   {/* Service Type */}
                   <Text fontSize="md" fontWeight="bold" color={titleColor}>
-                    {selectedService?.title || job.serviceType || "Service Request"}
+                    {selectedService?.title || job.service_type || "Service Request"}
                   </Text>
 
                   {/* Schedule */}
                   <HStack spacing={2}>
                     <Icon as={FaCalendarAlt} color="brand.500" boxSize={3} />
                     <Text color={scheduleColor}>
-                      {formatDateToStringWithTime(job?.scheduledStart as string)}
+                      {formatDateToStringWithTime(job?.scheduled_start as string)}
                     </Text>
                   </HStack>
 

@@ -549,17 +549,21 @@ export function PostJobModal({
               </Checkbox>
               <VStack align="stretch" spacing={3}>
                 {(availabilitySlots ?? defaultSlots).map((slot, index) => (
-                  <SimpleGrid key={slot.day} columns={{ base: 1, sm: 3 }} gap={2} alignItems="center" w="full">
+                  <SimpleGrid key={slot.day} columns={{ base: 1, sm: 2 }} gap={0} alignItems="center" w="full">
                     <Checkbox
                       isChecked={slot.selected}
                       onChange={(e) => updateSlot(index, "selected", e.target.checked)}
                       colorScheme="brand"
                       fontWeight="500"
                       fontSize="sm"
+                      w="200px"
                     >
                       {slot.day}
                     </Checkbox>
-                    <HStack spacing={2} flex={1}>
+                    <HStack spacing={0} flex={1} w="full" ml={{base: 0, sm: -40}}>
+                    <Text as="span" fontSize="sm" color={mutedColor} mr={1}>
+                        From:
+                      </Text>
                       <Input
                         type="time"
                         size="sm"
@@ -568,13 +572,14 @@ export function PostJobModal({
                         {...register(`availabilitySlots.${index}.startTime`)}
                         onChange={(e) => updateSlot(index, "startTime", e.target.value)}
                       />
-                      <Text as="span" fontSize="sm" color={mutedColor}>
-                        to
+                      <Text as="span" fontSize="sm" color={mutedColor} mr={1} ml={1}>
+                        To:
                       </Text>
                       <Input
                         type="time"
                         size="sm"
                         borderRadius="lg"
+                        pl={0}
                         isDisabled={!slot.selected}
                         {...register(`availabilitySlots.${index}.endTime`)}
                         onChange={(e) => updateSlot(index, "endTime", e.target.value)}

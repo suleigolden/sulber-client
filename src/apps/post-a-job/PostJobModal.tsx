@@ -1,4 +1,10 @@
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
   Box,
   Button,
   Checkbox,
@@ -22,7 +28,7 @@ import {
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { MdAdd, MdDelete } from "react-icons/md";
 import {
@@ -109,6 +115,12 @@ export function PostJobModal({
 }: PostJobModalProps) {
   const showToast = CustomToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRequirementsDialogOpen, setIsRequirementsDialogOpen] =
+    useState(false);
+  const [hasConfirmedRequirements, setHasConfirmedRequirements] =
+    useState(false);
+  const [showRequirementsWarning, setShowRequirementsWarning] = useState(false);
+  const cancelRef = useRef<HTMLButtonElement | null>(null);
   const mutedColor = useColorModeValue("gray.600", "gray.400");
   const sectionBorder = useColorModeValue("gray.200", "whiteAlpha.300");
   const bg = useColorModeValue("white", "#0b1437");
@@ -123,6 +135,10 @@ export function PostJobModal({
   } = useForm<FormValues>({
     defaultValues,
   });
+
+  const selectedServiceConfig = ProviderServiceTypesList.services.find(
+    (s) => s.type === watch("serviceType")
+  );
 
   const serviceType = watch("serviceType");
   const primaryLocation = watch("primaryLocation");
@@ -165,6 +181,10 @@ export function PostJobModal({
     (availabilitySlots ?? defaultSlots).length > 0 &&
     (availabilitySlots ?? defaultSlots).every((s) => s.selected);
   const someSelected = (availabilitySlots ?? defaultSlots).some((s) => s.selected);
+
+  const serviceTypeField = register("serviceType", {
+    required: "Select a service type",
+  });
 
   const onSubmit = async (data: FormValues) => {
     if (!data.primaryLocation?.street?.trim()) {
@@ -258,12 +278,122 @@ export function PostJobModal({
       <ModalContent borderRadius="2xl" maxH="90vh" bg={bg}>
         <ModalHeader fontWeight="600" fontSize="lg">
           Post a service
-          <Text fontSize="sm" mt={2} borderWidth="1px" borderColor="gray.200" borderRadius="md" p={2}>
+          <Text mt={2} borderWidth="1px" borderColor="gray.200" borderRadius="md" p={2}>
             Important: The currency type is based on your current country location.
           </Text>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody pb={6}>
+          <AlertDialog
+            isOpen={isRequirementsDialogOpen}
+            leastDestructiveRef={cancelRef}
+            onClose={() => setIsRequirementsDialogOpen(false)}
+          >
+            <AlertDialogOverlay>
+              <AlertDialogContent>
+                <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                  {selectedServiceConfig
+                    ? `${selectedServiceConfig.title} requirements`
+                    : "Service requirements"}
+                </AlertDialogHeader>
+                <AlertDialogBody bg={bg}>
+                  {selectedServiceConfig?.requirements_for_provider && (
+                    <VStack align="start" spacing={2} mb={4}>
+                      {selectedServiceConfig.requirements_for_provider
+                        .equipment && (
+                        <Text>
+                          <Text as="span" fontWeight="bold">
+                            Equipment:
+                          </Text>{" "}
+                          {
+                            selectedServiceConfig.requirements_for_provider
+                              .equipment
+                          }
+                        </Text>
+                      )}
+                      {selectedServiceConfig.requirements_for_provider
+                        .experience && (
+                        <Text>
+                          <Text as="span" fontWeight="bold">
+                            Experience:
+                          </Text>{" "}
+                          {
+                            selectedServiceConfig.requirements_for_provider
+                              .experience
+                          }
+                        </Text>
+                      )}
+                      {selectedServiceConfig.requirements_for_provider
+                        .license && (
+                        <Text>
+                          <Text as="span" fontWeight="bold">
+                            License:
+                          </Text>{" "}
+                          {
+                            selectedServiceConfig.requirements_for_provider
+                              .license
+                          }
+                        </Text>
+                      )}
+                      {selectedServiceConfig.requirements_for_provider
+                        .physical && (
+                        <Text>
+                          <Text as="span" fontWeight="bold">
+                            Physical:
+                          </Text>{" "}
+                          {
+                            selectedServiceConfig.requirements_for_provider
+                              .physical
+                          }
+                        </Text>
+                      )}
+                      {selectedServiceConfig.requirements_for_provider
+                        .availability && (
+                        <Text>
+                          <Text as="span" fontWeight="bold">
+                            Availability:
+                          </Text>{" "}
+                          {
+                            selectedServiceConfig.requirements_for_provider
+                              .availability
+                          }
+                        </Text>
+                      )}
+                    </VStack>
+                  )}
+                  <Text>
+                    Do you have all the required equipment, experience, license,
+                    and availability to provide this service?
+                  </Text>
+                </AlertDialogBody>
+
+                <AlertDialogFooter>
+                  <Button
+                    ref={cancelRef}
+                    onClick={() => {
+                      setIsRequirementsDialogOpen(false);
+                      setHasConfirmedRequirements(false);
+                      setShowRequirementsWarning(true);
+                    }}
+                  >
+                    No
+                  </Button>
+                  <Button
+                    colorScheme="brand"
+                    onClick={() => {
+                      setHasConfirmedRequirements(true);
+                      setShowRequirementsWarning(false);
+                      setIsRequirementsDialogOpen(false);
+                    }}
+                    ml={3}
+                  >
+                    Yes, I have everything
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialogOverlay>
+          </AlertDialog>
+
           <VStack
             as="form"
             onSubmit={handleSubmit(onSubmit)}
@@ -271,12 +401,20 @@ export function PostJobModal({
             spacing={6}
           >
             <FormControl isInvalid={!!errors.serviceType} isRequired>
-              <FormLabel fontWeight="600" fontSize="sm">
+              <FormLabel fontWeight="600">
                 Service type
               </FormLabel>
               <Select
                 placeholder="Select service type"
-                {...register("serviceType", { required: "Select a service type" })}
+                {...serviceTypeField}
+                onChange={(e) => {
+                  serviceTypeField.onChange(e);
+                  setHasConfirmedRequirements(false);
+                  setShowRequirementsWarning(false);
+                  if (e.target.value) {
+                    setIsRequirementsDialogOpen(true);
+                  }
+                }}
                 size="md"
                 borderRadius="lg"
                 borderColor="gray.200"
@@ -293,9 +431,15 @@ export function PostJobModal({
                   {errors.serviceType.message}
                 </FormHelperText>
               )}
+              {showRequirementsWarning && (
+                <FormHelperText color="red.500">
+                  You need to have all the required equipment, experience, and
+                  license to offer this service.
+                </FormHelperText>
+              )}
             </FormControl>
 
-            {isDrivewayCarWash ? (
+            {serviceType && hasConfirmedRequirements && isDrivewayCarWash ? (
               <>
                 <Box
                   p={4}
@@ -303,15 +447,15 @@ export function PostJobModal({
                   borderWidth="1px"
                   borderColor={sectionBorder}
                 >
-                  <Text fontWeight="600" fontSize="sm" mb={1} color={mutedColor}>
+                  <Text fontWeight="600" mb={1} color={mutedColor}>
                     Vehicle prices (per vehicle type)
                   </Text>
-                  <Text mt={0} mb={3} color={mutedColor} fontSize="sm">
+                  <Text mt={0} mb={3} color={mutedColor}>
                     Set your base price for each vehicle type in dollars.
                   </Text>
                   <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={4}>
                     <FormControl>
-                      <FormLabel fontSize="sm" fontWeight="500">
+                      <FormLabel fontWeight="500">
                         Sedan Price
                       </FormLabel>
                       <Input
@@ -327,7 +471,7 @@ export function PostJobModal({
                       />
                     </FormControl>
                     <FormControl>
-                      <FormLabel fontSize="sm" fontWeight="500">
+                      <FormLabel fontWeight="500">
                         SUV Price
                       </FormLabel>
                       <Input
@@ -343,7 +487,7 @@ export function PostJobModal({
                       />
                     </FormControl>
                     <FormControl>
-                      <FormLabel fontSize="sm" fontWeight="500">
+                      <FormLabel fontWeight="500">
                         Truck Price
                       </FormLabel>
                       <Input
@@ -359,7 +503,7 @@ export function PostJobModal({
                       />
                     </FormControl>
                     <FormControl>
-                      <FormLabel fontSize="sm" fontWeight="500">
+                      <FormLabel fontWeight="500">
                         Van Price
                       </FormLabel>
                       <Input
@@ -382,16 +526,16 @@ export function PostJobModal({
                   borderWidth="1px"
                   borderColor={sectionBorder}
                 >
-                  <Text fontWeight="600" fontSize="sm" mb={1} color={mutedColor}>
+                  <Text fontWeight="600" mb={1} color={mutedColor}>
                     Add-on prices (optional)
                   </Text>
-                  <Text mt={0} mb={3} color={mutedColor} fontSize="sm">
+                  <Text mt={0} mb={3} color={mutedColor}>
                     Charge extra for add-ons; leave 0 if not offered.
                   </Text>
                   <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
                     {CarWashServiceAddOnPriceEntries.map((key) => (
                       <FormControl key={key}>
-                        <FormLabel fontSize="sm" fontWeight="500">
+                        <FormLabel fontWeight="500">
                           {ADD_ON_LABELS[key]} Price
                         </FormLabel>
                         <Input
@@ -410,9 +554,9 @@ export function PostJobModal({
                   </SimpleGrid>
                 </Box>
               </>
-            ) : (
+            ) : serviceType && hasConfirmedRequirements ? (
               <FormControl isInvalid={!!errors.priceDollars} isRequired>
-                <FormLabel fontWeight="600" fontSize="sm">
+                <FormLabel fontWeight="600">
                   Price (How much do you charge for this service?)
                 </FormLabel>
                 <Input
@@ -435,10 +579,12 @@ export function PostJobModal({
                   </FormHelperText>
                 )}
               </FormControl>
-            )}
+            ) : null}
 
+            {serviceType && hasConfirmedRequirements && (
+              <>
             <FormControl isRequired>
-              <FormLabel fontWeight="600" fontSize="sm">
+              <FormLabel fontWeight="600">
                 Primary location (where you will be offering your service)
               </FormLabel>
               <Box mt={1}>
@@ -458,7 +604,7 @@ export function PostJobModal({
             </FormControl>
 
             <FormControl>
-              <FormLabel fontWeight="600" fontSize="sm">
+              <FormLabel fontWeight="600">
                 Other locations (optional)
               </FormLabel>
               <VStack align="stretch" spacing={3} mt={2}>
@@ -501,7 +647,7 @@ export function PostJobModal({
             </FormControl>
 
             <FormControl>
-              <FormLabel fontWeight="600" fontSize="sm">
+              <FormLabel fontWeight="600">
                 Description (optional)
               </FormLabel>
               <Textarea
@@ -516,7 +662,7 @@ export function PostJobModal({
             </FormControl>
 
             <FormControl>
-              <FormLabel fontWeight="600" fontSize="sm">
+              <FormLabel fontWeight="600">
                 Internal notes (optional)
               </FormLabel>
               <Textarea
@@ -529,9 +675,12 @@ export function PostJobModal({
                 _dark={{ borderColor: "whiteAlpha.300" }}
               />
             </FormControl>
+              </>
+            )}
 
-            <FormControl>
-              <FormLabel fontWeight="600" fontSize="sm">
+            {serviceType && hasConfirmedRequirements && (
+              <FormControl>
+              <FormLabel fontWeight="600">
                 Availability
               </FormLabel>
               <FormHelperText color={mutedColor} mb={3}>
@@ -555,13 +704,13 @@ export function PostJobModal({
                       onChange={(e) => updateSlot(index, "selected", e.target.checked)}
                       colorScheme="brand"
                       fontWeight="500"
-                      fontSize="sm"
+                     
                       w="200px"
                     >
                       {slot.day}
                     </Checkbox>
                     <HStack spacing={0} flex={1} w="full" ml={{base: 0, sm: -40}}>
-                    <Text as="span" fontSize="sm" color={mutedColor} mr={1}>
+                    <Text as="span" color={mutedColor} mr={1}>
                         From:
                       </Text>
                       <Input
@@ -572,7 +721,7 @@ export function PostJobModal({
                         {...register(`availabilitySlots.${index}.startTime`)}
                         onChange={(e) => updateSlot(index, "startTime", e.target.value)}
                       />
-                      <Text as="span" fontSize="sm" color={mutedColor} mr={1} ml={1}>
+                      <Text as="span" color={mutedColor} mr={1} ml={1}>
                         To:
                       </Text>
                       <Input
@@ -589,6 +738,7 @@ export function PostJobModal({
                 ))}
               </VStack>
             </FormControl>
+            )}
           </VStack>
         </ModalBody>
         <ModalFooter gap={2}>

@@ -39,14 +39,54 @@ export const ProviderVerification = forwardRef<
   const [isVerified, setIsVerified] = useState(false);
   const [verificationSessionId, setVerificationSessionId] = useState<string | null>(null);
 
-  // Check for verified parameter in URL (from Stripe redirect)
+  // When returning from Stripe with ?verified=true: fetch session and check status (no reliance on verificationSessionId state)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("verified") === "true" && verificationSessionId) {
-      checkVerificationStatus(verificationSessionId);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verificationSessionId]);
+    if (urlParams.get("verified") !== "true" || !user?.id) return;
+
+    let cancelled = false;
+    setIsCheckingStatus(true);
+
+    const confirmVerification = async () => {
+      try {
+        const verifications = await api
+          .service("identity-verification")
+          .findByUserId(user.id);
+        const stripeVerification = verifications.find(
+          (v) => v.provider === "STRIPE_IDENTITY"
+        );
+       
+        const sessionId = stripeVerification?.external_session_id;
+        if (cancelled) return;
+        console.log("sessionId: ", stripeVerification);
+        if (sessionId) {
+          setVerificationSessionId(sessionId);
+          const status = await api
+            .service("identity-verification")
+            .getStripeVerificationStatus(sessionId);
+            
+          console.log("status: ", status);
+          if (cancelled) return;
+          if (status.verified) {
+            setIsVerified(true);
+            showToast("Success", "Identity verified successfully!", "success");
+          }
+        }
+      } catch (e) {
+        if (!cancelled) {
+          console.error("Error confirming verification:", e);
+          showToast("Error", "Failed to confirm verification status", "error");
+        }
+      } finally {
+        if (!cancelled) setIsCheckingStatus(false);
+      }
+    };
+
+    confirmVerification();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   // Notify parent component about verification status
   useEffect(() => {
@@ -62,13 +102,12 @@ export const ProviderVerification = forwardRef<
         const verifications = await api
           .service("identity-verification")
           .findByUserId(user.id);
-
         const stripeVerification = verifications.find(
           (v) => v.provider === "STRIPE_IDENTITY"
         );
 
         if (stripeVerification) {
-          setVerificationSessionId(stripeVerification.externalSessionId || null);
+          setVerificationSessionId(stripeVerification.external_session_id || null);
 
           if (stripeVerification.status === "VERIFIED") {
             setIsVerified(true);
@@ -79,9 +118,9 @@ export const ProviderVerification = forwardRef<
           // Check status if pending
           if (
             stripeVerification.status === "PENDING" &&
-            stripeVerification.externalSessionId
+            stripeVerification.external_session_id
           ) {
-            checkVerificationStatus(stripeVerification.externalSessionId);
+            checkVerificationStatus(stripeVerification.external_session_id);
           }
         }
       } catch (error) {
@@ -130,11 +169,11 @@ export const ProviderVerification = forwardRef<
           documentType: "driver_license" as DocumentType,
         });
 
-      setVerificationUrl(response.verificationSession.url);
-      setVerificationSessionId(response.verificationSession.id);
+      setVerificationUrl(response.verification_session.url);
+      setVerificationSessionId(response.verification_session.id);
 
       // Open Stripe verification in a new window
-      window.open(response.verificationSession.url, "_blank", "width=800,height=600");
+      window.open(response.verification_session.url, "_blank", "width=800,height=600");
 
       showToast(
         "Verification Started",

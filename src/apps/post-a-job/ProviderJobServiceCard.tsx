@@ -35,6 +35,7 @@ import {
   FaStickyNote,
   FaCalendarAlt,
 } from "react-icons/fa";
+import { formatNumberWithCommasAndDecimals } from "~/common/utils/currency-formatter";
 
 const DRIVEWAY_CAR_WASH = "DRIVEWAY_CAR_WASH";
 
@@ -142,7 +143,7 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
       availability?: string;
     };
   })?.requirements_for_provider;
-  const priceDollars = (priceCents / 100).toFixed(2);
+  const priceDollars = (priceCents).toFixed(2);
   const isDrivewayCarWash = serviceType === DRIVEWAY_CAR_WASH;
   const statusColor = statusColorMap[job.status] ?? "gray";
   const IconComponent = getServiceIcon(serviceType);
@@ -319,14 +320,14 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
                 <Text as="span" fontWeight="bold">
                   Sedan:
                 </Text>{" "}
-                ${((sedanPriceCents ?? basePriceCents ?? priceCents) / 100).toFixed(2)}
+                ${formatNumberWithCommasAndDecimals((sedanPriceCents ?? basePriceCents ?? priceCents))}
               </Text>
               {suvPriceCents != null && suvPriceCents > 0 && (
                 <Text fontSize="sm" color={requirementsColor}>
                   <Text as="span" fontWeight="bold">
                     SUV:
                   </Text>{" "}
-                  ${(suvPriceCents / 100).toFixed(2)}
+                  ${formatNumberWithCommasAndDecimals(suvPriceCents)}
                 </Text>
               )}
               {truckPriceCents != null && truckPriceCents > 0 && (
@@ -334,7 +335,7 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
                   <Text as="span" fontWeight="bold">
                     Truck:
                   </Text>{" "}
-                  ${(truckPriceCents / 100).toFixed(2)}
+                  ${formatNumberWithCommasAndDecimals(truckPriceCents)}
                 </Text>
               )}
               {vanPriceCents != null && vanPriceCents > 0 && (
@@ -342,7 +343,7 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
                   <Text as="span" fontWeight="bold">
                     Van:
                   </Text>{" "}
-                  ${(vanPriceCents / 100).toFixed(2)}
+                  ${formatNumberWithCommasAndDecimals(vanPriceCents)}
                 </Text>
               )}
             </VStack>
@@ -351,7 +352,7 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
           <Box>
             <FieldLabel>Price</FieldLabel>
             <Text fontSize="lg" fontWeight="bold" color="brand.500" mt={1}>
-              ${priceDollars}
+              ${formatNumberWithCommasAndDecimals((priceCents))}
             </Text>
             <Text fontSize="xs" color={mutedColor}>
               Base price
@@ -373,7 +374,7 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
                     <Text as="span" fontWeight="bold">
                       {ADD_ON_LABELS[key]}:
                     </Text>{" "}
-                    ${(cents / 100).toFixed(2)}
+                    ${formatNumberWithCommasAndDecimals(cents)}
                   </Text>
                 );
               })}

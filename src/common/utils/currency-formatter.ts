@@ -37,8 +37,14 @@ export const formatNumberWithCommas = (number: number) => {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
-export const formatNumberWithCommasAndDecimals = (number: string) => {
-  const parts = number.split('.');
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  return parts.join('.');
+/**
+ * Formats a value (cents) as dollars with thousands separators and exactly 2 decimal places.
+ * e.g. 123456 -> "1,234.56", 1000 -> "10.00"
+ */
+export const formatNumberWithCommasAndDecimals = (number: number): string => {
+  const dollars = number / 100;
+  const fixed = Number.isFinite(dollars) ? dollars.toFixed(2) : "0.00";
+  const [intPart, decPart = "00"] = fixed.split(".");
+  const intWithCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return `${intWithCommas}.${decPart}`;
 };

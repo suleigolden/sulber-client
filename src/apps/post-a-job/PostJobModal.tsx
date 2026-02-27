@@ -192,9 +192,33 @@ export function PostJobModal({
       return;
     }
 
+    const slots = data.availabilitySlots ?? defaultSlots;
+    const selectedSlots = slots.filter((s) => s.selected);
+
+    if (selectedSlots.length === 0) {
+      showToast(
+        "Error",
+        "Select at least one day and time slot for availability.",
+        "error"
+      );
+      return;
+    }
+
+    const slotWithMissingTime = selectedSlots.find(
+      (s) => !s.startTime || !s.endTime
+    );
+    if (slotWithMissingTime) {
+      showToast(
+        "Error",
+        `Please set both start and end time for ${slotWithMissingTime.day}.`,
+        "error"
+      );
+      return;
+    }
+
     const primary = data.primaryLocation!;
     const others = data.otherLocations?.filter((l) => l?.street?.trim()) ?? [];
-    const daysOfWeek = slotsToDaysOfWeekAvailable(data.availabilitySlots ?? defaultSlots);
+    const daysOfWeek = slotsToDaysOfWeekAvailable(slots);
 
     let priceCents: number;
     let basePriceCents: number | undefined;
@@ -205,14 +229,43 @@ export function PostJobModal({
     let addOnPrice: AddOnPriceEntry[] | undefined;
 
     if (data.serviceType === DRIVEWAY_CAR_WASH) {
-      const sedan = Math.round(parseFloat(data.sedanPriceDollars || "0") * 100);
-      const suv = Math.round(parseFloat(data.suvPriceDollars || "0") * 100);
-      const truck = Math.round(parseFloat(data.truckPriceDollars || "0") * 100);
-      const van = Math.round(parseFloat(data.vanPriceDollars || "0") * 100);
+      const sedanStr = String(data.sedanPriceDollars ?? "").trim();
+      const suvStr = String(data.suvPriceDollars ?? "").trim();
+      const truckStr = String(data.truckPriceDollars ?? "").trim();
+      const vanStr = String(data.vanPriceDollars ?? "").trim();
+
+      if (!sedanStr || !suvStr || !truckStr || !vanStr) {
+        showToast(
+          "Error",
+          "Please fill out all vehicle prices (Sedan, SUV, Truck, Van).",
+          "error"
+        );
+        return;
+      }
+
+      const sedan = Math.round(parseFloat(sedanStr) * 100);
+      const suv = Math.round(parseFloat(suvStr) * 100);
+      const truck = Math.round(parseFloat(truckStr) * 100);
+      const van = Math.round(parseFloat(vanStr) * 100);
       if (sedan < 0 || suv < 0 || truck < 0 || van < 0) {
         showToast("Error", "Vehicle prices must be zero or positive.", "error");
         return;
       }
+
+      const missingAddOn = CarWashServiceAddOnPriceEntries.find(
+        (key) =>
+          data.addOnPriceDollars?.[key] == null ||
+          String(data.addOnPriceDollars[key]).trim() === ""
+      );
+      if (missingAddOn) {
+        showToast(
+          "Error",
+          "Please fill out all add-on price fields (use 0 if not offered).",
+          "error"
+        );
+        return;
+      }
+
       priceCents = sedan;
       basePriceCents = sedan;
       sedanPriceCents = sedan;
@@ -468,6 +521,7 @@ export function PostJobModal({
                         borderRadius="lg"
                         borderColor="gray.200"
                         _dark={{ borderColor: "whiteAlpha.300" }}
+                        required
                       />
                     </FormControl>
                     <FormControl>
@@ -484,6 +538,7 @@ export function PostJobModal({
                         borderRadius="lg"
                         borderColor="gray.200"
                         _dark={{ borderColor: "whiteAlpha.300" }}
+                        required
                       />
                     </FormControl>
                     <FormControl>
@@ -500,6 +555,7 @@ export function PostJobModal({
                         borderRadius="lg"
                         borderColor="gray.200"
                         _dark={{ borderColor: "whiteAlpha.300" }}
+                        required
                       />
                     </FormControl>
                     <FormControl>
@@ -516,6 +572,7 @@ export function PostJobModal({
                         borderRadius="lg"
                         borderColor="gray.200"
                         _dark={{ borderColor: "whiteAlpha.300" }}
+                        required
                       />
                     </FormControl>
                   </SimpleGrid>
@@ -548,6 +605,7 @@ export function PostJobModal({
                           borderRadius="lg"
                           borderColor="gray.200"
                           _dark={{ borderColor: "whiteAlpha.300" }}
+                          required
                         />
                       </FormControl>
                     ))}
@@ -572,6 +630,7 @@ export function PostJobModal({
                   borderRadius="lg"
                   borderColor="gray.200"
                   _dark={{ borderColor: "whiteAlpha.300" }}
+                  required
                 />
                 {errors.priceDollars && (
                   <FormHelperText color="red.500">
@@ -720,6 +779,7 @@ export function PostJobModal({
                         isDisabled={!slot.selected}
                         {...register(`availabilitySlots.${index}.startTime`)}
                         onChange={(e) => updateSlot(index, "startTime", e.target.value)}
+                        required
                       />
                       <Text as="span" color={mutedColor} mr={1} ml={1}>
                         To:
@@ -732,6 +792,7 @@ export function PostJobModal({
                         isDisabled={!slot.selected}
                         {...register(`availabilitySlots.${index}.endTime`)}
                         onChange={(e) => updateSlot(index, "endTime", e.target.value)}
+                        required
                       />
                     </HStack>
                   </SimpleGrid>

@@ -250,6 +250,7 @@ export const PostAJob = () => {
         onClose={onClose}
         onSuccess={fetchJobs}
         providerId={user.id}
+        usedServiceTypes={jobs.map((job) => (job as any).serviceType ?? (job as any).service_type).filter(Boolean)}
       />
 
       <EditProviderJobModal

@@ -105,6 +105,7 @@ type PostJobModalProps = {
   onClose: () => void;
   onSuccess: () => void;
   providerId: string;
+  usedServiceTypes: string[];
 };
 
 export function PostJobModal({
@@ -112,6 +113,7 @@ export function PostJobModal({
   onClose,
   onSuccess,
   providerId,
+  usedServiceTypes,
 }: PostJobModalProps) {
   const showToast = CustomToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -124,6 +126,8 @@ export function PostJobModal({
   const mutedColor = useColorModeValue("gray.600", "gray.400");
   const sectionBorder = useColorModeValue("gray.200", "whiteAlpha.300");
   const bg = useColorModeValue("white", "#0b1437");
+
+  const usedServiceTypesSet = new Set(usedServiceTypes);
 
   const {
     register,
@@ -473,11 +477,26 @@ export function PostJobModal({
                 borderColor="gray.200"
                 _dark={{ borderColor: "whiteAlpha.300" }}
               >
-                {ProviderServiceTypesList.services.map((s) => (
-                  <option key={s.type} value={s.type}>
-                    {s.title}
-                  </option>
-                ))}
+                {ProviderServiceTypesList.services.map((s) => {
+                  const isUsed = usedServiceTypesSet.has(s.type);
+                  const label = isUsed
+                    ? `${s.title} - you already added this service`
+                    : s.title;
+                  return (
+                    <option
+                      key={s.type}
+                      value={s.type}
+                      disabled={isUsed}
+                      style={
+                        isUsed
+                          ? { backgroundColor: "red", color: "white" }
+                          : undefined
+                      }
+                    >
+                      {label}
+                    </option>
+                  );
+                })}
               </Select>
               {errors.serviceType && (
                 <FormHelperText color="red.500">

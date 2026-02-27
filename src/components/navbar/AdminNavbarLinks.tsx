@@ -180,23 +180,25 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
             </Text>
           </Flex>
           <Flex flexDirection="column" p="10px">
+            {user?.role !== "provider" && (
             <MenuItem
               _hover={{ bg: 'none' }}
               _focus={{ bg: 'none' }}
               borderRadius="8px"
               px="14px"
               as={"a"}
-              href={`/${user?.role}/${userProfile?.userId}/my-vehicles`}
+              href={`/${user?.role}/${user?.id}/my-vehicles`}
             >
               <Text fontSize="sm">My Vehicles</Text>
             </MenuItem>
+            )}
             <MenuItem
               _hover={{ bg: 'none' }}
               _focus={{ bg: 'none' }}
               borderRadius="8px"
               px="14px"
               as={"a"}
-              href={`/${user?.role}/${userProfile?.userId}/profile-settings`}
+              href={`/${user?.role}/${user?.id}/profile-settings`}
             >
               <Text fontSize="sm">Profile Settings</Text>
             </MenuItem>

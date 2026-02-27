@@ -146,7 +146,7 @@ export const UserInformation = forwardRef<
               Share some information to help customers get to know you better.
             </Text>
           </Box>
-          <VStack spacing={6} w="full" align="stretch" p={{ base: 6, md: 10 }}>
+          <VStack spacing={6} w="full" align="stretch" p={{ base: 6, md: 10 }} border="1px #333333 solid" borderRadius="0 0 8px 8px">
             <AvatarUploadSection userProfile={userProfile as UserProfile} />
 
             <CustomInputField

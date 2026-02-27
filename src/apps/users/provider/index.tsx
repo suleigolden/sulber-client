@@ -70,11 +70,11 @@ export const ProviderProfileSettings = () => {
           Settings
         </Heading>
 
-        <Box w="full" bg="white" borderRadius="xl" boxShadow="xl" p={6}>
+        <Box w="full" borderRadius="xl" boxShadow="xl" p={6}>
           <Tabs colorScheme="brand" index={tabIndex} onChange={setTabIndex} w="full">
             <TabList>
               <Tab>Location</Tab>
-              <Tab>Services</Tab>
+              {/* <Tab>Services</Tab> */}
               <Tab>Personal Information</Tab>
             </TabList>
 
@@ -89,7 +89,7 @@ export const ProviderProfileSettings = () => {
               </TabPanel>
 
               {/* Services Tab */}
-              <TabPanel px={0} py={6}>
+              {/* <TabPanel px={0} py={6}>
                 <ProviderServices
                   ref={servicesFormRef}
                   activeStep={0}
@@ -97,7 +97,7 @@ export const ProviderProfileSettings = () => {
                   onServicesSelectedChange={() => {}}
                   isProviderProfileSettings={true}
                 />
-              </TabPanel>
+              </TabPanel> */}
 
               {/* Personal Information Tab */}
               <TabPanel px={0} py={6}>

@@ -40,10 +40,12 @@ type AvatarUploadSectionProps = {
 const AvatarUploadSection = ({ userProfile }: AvatarUploadSectionProps) => {
   const { watch, setValue } = useFormContext();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const avatarUrl = watch("avatar_url") || userProfile?.avatarUrl || "";
+  const avatarUrl = watch("avatar_url") || userProfile?.avatar_url || "";
   const { uploadAvatar, isUploading } = useAvatarUpload((url) => {
     setValue("avatar_url", url);
   });
+  const labelColor = useColorModeValue(undefined, "gray.200");
+  const hintColor = useColorModeValue("gray.500", "gray.400");
 
   const handleFileSelect = (file: File) => {
     uploadAvatar(file);
@@ -52,14 +54,14 @@ const AvatarUploadSection = ({ userProfile }: AvatarUploadSectionProps) => {
 
   return (
     <FormControl>
-      <FormLabel>Profile Photo</FormLabel>
+      <FormLabel color={labelColor}>Profile Photo</FormLabel>
       <Flex align="center" gap={4}>
         <Avatar size="xl" src={avatarUrl || undefined} name="User" />
         <VStack align="start" spacing={2}>
           <Button size="sm" onClick={onOpen} isLoading={isUploading}>
             {avatarUrl ? "Change Photo" : "Upload Photo"}
           </Button>
-          <Text fontSize="xs" color="gray.500">
+          <Text fontSize="xs" color={hintColor}>
             PNG, JPG or JPEG (max. 5MB)
           </Text>
         </VStack>
@@ -125,20 +127,28 @@ export const CustomerProfileSettings = () => {
     (addressCity || addressState || addressCountry)
   );
 
+  const cardBg = useColorModeValue("white", "#0b1437");
+  const headingColor = useColorModeValue("gray.800", "white");
+  const bodyColor = useColorModeValue("gray.600", "gray.300");
+  const loadingColor = useColorModeValue("gray.600", "gray.400");
+  const labelColor = useColorModeValue("gray.700", "gray.200");
+  const inputBg = useColorModeValue("gray.50", "whiteAlpha.200");
+  const inputBorder = useColorModeValue("gray.200", "whiteAlpha.300");
+
   // Initialize form with existing user profile data
   useEffect(() => {
     if (userProfile) {
-      setValue("first_name", userProfile.firstName || "");
-      setValue("last_name", userProfile.lastName || "");
-      setValue("phone_number", userProfile.phoneNumber || "");
+      setValue("first_name", userProfile.first_name || "");
+      setValue("last_name", userProfile.last_name || "");
+      setValue("phone_number", userProfile.phone_number || "");
       // Format date for input field (YYYY-MM-DD)
-      const dateOfBirth = userProfile.dateOfBirth
-        ? new Date(userProfile.dateOfBirth).toISOString().split('T')[0]
+      const dateOfBirth = userProfile.date_of_birth
+        ? new Date(userProfile.date_of_birth).toISOString().split('T')[0]
         : "";
       setValue("date_of_birth", dateOfBirth);
       setValue("gender", userProfile.gender || "");
       setValue("bio", userProfile.bio || "");
-      setValue("avatar_url", userProfile.avatarUrl || "");
+      setValue("avatar_url", userProfile.avatar_url || "");
 
       // Set address fields
       if (userProfile.address) {
@@ -146,7 +156,7 @@ export const CustomerProfileSettings = () => {
         setValue("address.city", userProfile.address.city || "");
         setValue("address.state", userProfile.address.state || "");
         setValue("address.country", userProfile.address.country || "");
-        setValue("address.postal_code", userProfile.address.postalCode || "");
+        setValue("address.postal_code", userProfile.address.postal_code || "");
       }
     }
   }, [userProfile, setValue]);
@@ -159,11 +169,11 @@ export const CustomerProfileSettings = () => {
       }
 
       const userProfilePayload = {
-        userId: user.id,
-        firstName: data.first_name,
-        lastName: data.last_name,
-        dateOfBirth: data.date_of_birth && data.date_of_birth.trim() !== '' ? data.date_of_birth : null,
-        phoneNumber: data.phone_number,
+        user_id: user.id,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        date_of_birth: data.date_of_birth && data.date_of_birth.trim() !== '' ? data.date_of_birth : null,
+        phone_number: data.phone_number,
         gender: data.gender as Gender,
         bio: data.bio,
         address: {
@@ -171,11 +181,11 @@ export const CustomerProfileSettings = () => {
           city: data.address?.city || "",
           state: data.address?.state || "",
           country: data.address?.country || "",
-          postalCode: data.address?.postal_code || "",
+          postal_code: data.address?.postal_code || "",
         },
       };
 
-      await api.service('user-profile').update(userProfile.id as string, userProfilePayload as UserProfile);
+      await api.service('user-profile').update(userProfile.id as string, userProfilePayload as unknown as UserProfile);
       showToast('Success', 'Profile updated successfully', 'success');
     } catch (error: unknown) {
       const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
@@ -188,7 +198,7 @@ export const CustomerProfileSettings = () => {
   if (isLoading) {
     return (
       <Container maxW="1500px" px={[4, 8]} py={8}>
-        <Text>Loading profile...</Text>
+        <Text color={loadingColor}>Loading profile...</Text>
       </Container>
     );
   }
@@ -197,10 +207,10 @@ export const CustomerProfileSettings = () => {
     <Container maxW="1500px" px={[4, 8]} py={8}>
       <VStack align="start" spacing={8} w="full" mt={10}>
         <Box w="full">
-          <Heading size="lg" mb={2}>
+          <Heading size="lg" mb={2} color={headingColor}>
             Customer Profile Settings
           </Heading>
-          <Text color="gray.600" mb={6}>
+          <Text color={bodyColor} mb={6}>
             Manage your profile information and vehicles.
           </Text>
 
@@ -270,7 +280,7 @@ export const CustomerProfileSettings = () => {
                   <Box
                     w="full"
                     maxW="720px"
-                    bg="white"
+                    bg={cardBg}
                     borderRadius="2xl"
                     boxShadow="lg"
                     p={{ base: 4, sm: 6, md: 8 }}
@@ -278,7 +288,7 @@ export const CustomerProfileSettings = () => {
                     <VStack spacing={6} align="stretch">
                       {/* Email (Read-only) */}
                       <Box>
-                        <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
+                        <Text fontSize="sm" fontWeight="medium" mb={2} color={labelColor}>
                           Email
                         </Text>
                         <Input
@@ -286,8 +296,8 @@ export const CustomerProfileSettings = () => {
                           value={user?.email || ""}
                           isDisabled={true}
                           placeholder="Email address"
-                          bg="gray.50"
-                          borderColor="gray.200"
+                          bg={inputBg}
+                          borderColor={inputBorder}
                           _disabled={{
                             opacity: 0.7,
                             cursor: "not-allowed",
@@ -352,7 +362,7 @@ export const CustomerProfileSettings = () => {
 
                       {/* Address */}
                       <Box>
-                        <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
+                        <Text fontSize="sm" fontWeight="medium" mb={2} color={labelColor}>
                           Address <Text as="span" fontSize="sm" color="red">*</Text>
                         </Text>
                         <LocationSearchInput
@@ -372,7 +382,7 @@ export const CustomerProfileSettings = () => {
                                 userProfile.address.city,
                                 userProfile.address.state,
                                 userProfile.address.country,
-                                userProfile.address.postalCode,
+                                userProfile.address.postal_code,
                               ]
                                 .filter(Boolean)
                                 .join(", ")

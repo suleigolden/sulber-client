@@ -11,7 +11,7 @@ import {
   VStack,
   HStack,
   Badge,
-  Divider,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { VehicleTypesList } from "@suleigolden/sulber-api-client";
 
@@ -21,12 +21,21 @@ type VehicleTypeDetailsProps = {
 };
 
 export const VehicleTypeDetails = ({ isOpen, onClose }: VehicleTypeDetailsProps) => {
+  const modalBg = useColorModeValue("white", "#0b1437");
+  const headerColor = useColorModeValue(undefined, "white");
+  const cardBg = useColorModeValue("white", "whiteAlpha.200");
+  const cardBorder = useColorModeValue("gray.200", "whiteAlpha.300");
+  const cardHoverBorder = useColorModeValue("brand.300", "brand.400");
+  const headingColor = useColorModeValue(undefined, "white");
+  const bodyColor = useColorModeValue("gray.600", "gray.300");
+  const labelColor = useColorModeValue("gray.700", "gray.200");
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "2xl" }} isCentered scrollBehavior="inside">
       <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>
-          <Heading size="md">Vehicle Types</Heading>
+      <ModalContent bg={modalBg}>
+        <ModalHeader color={headerColor}>
+          <Heading size="md" color={headerColor}>Vehicle Types</Heading>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody pb={6}>
@@ -35,16 +44,16 @@ export const VehicleTypeDetails = ({ isOpen, onClose }: VehicleTypeDetailsProps)
               <Box
                 key={vehicleType.type}
                 p={{ base: 4, sm: 5 }}
-                bg="white"
+                bg={cardBg}
                 borderWidth="1px"
                 borderRadius="lg"
-                borderColor="gray.200"
-                _hover={{ boxShadow: "md", borderColor: "brand.300" }}
+                borderColor={cardBorder}
+                _hover={{ boxShadow: "md", borderColor: cardHoverBorder }}
                 transition="all 0.2s"
               >
                 <VStack align="start" spacing={3}>
                   <HStack spacing={3} flexWrap="wrap">
-                    <Heading size={{ base: "sm", sm: "md" }} fontWeight="semibold">
+                    <Heading size={{ base: "sm", sm: "md" }} fontWeight="semibold" color={headingColor}>
                       {vehicleType.title}
                     </Heading>
                     {/* <Badge
@@ -59,13 +68,13 @@ export const VehicleTypeDetails = ({ isOpen, onClose }: VehicleTypeDetailsProps)
                     </Badge> */}
                   </HStack>
                   
-                  <Text fontSize={{ base: "sm", sm: "md" }} color="gray.600" lineHeight="tall">
+                  <Text fontSize={{ base: "sm", sm: "md" }} color={bodyColor} lineHeight="tall">
                     {vehicleType.description}
                   </Text>
 
                   {vehicleType.examples && vehicleType.examples.length > 0 && (
                     <Box w="full">
-                      <Text fontSize={{ base: "xs", sm: "sm" }} fontWeight="medium" color="gray.700" mb={2}>
+                      <Text fontSize={{ base: "xs", sm: "sm" }} fontWeight="medium" color={labelColor} mb={2}>
                         Examples:
                       </Text>
                       <HStack spacing={2} flexWrap="wrap">

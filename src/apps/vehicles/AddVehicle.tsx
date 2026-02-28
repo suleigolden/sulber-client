@@ -10,6 +10,7 @@ import {
   FormControl,
   HStack,
   Link,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -81,7 +82,10 @@ export const AddVehicle = ({
   const licensePlate = watch("licensePlate");
 
   const isFormValid = !!(make && model && color && licensePlate);
- 
+
+  const modalBg = useColorModeValue("white", "#0b1437");
+  const headerColor = useColorModeValue(undefined, "white");
+
   // Initialize form with vehicle data when editing
   useEffect(() => {
     if (vehicleToEdit && isOpen) {
@@ -115,20 +119,22 @@ export const AddVehicle = ({
           model: data.model || null,
           // year: data.year || undefined,
           color: data.color || null,
-          licensePlate: data.licensePlate || null,
+          license_plate: data.licensePlate || null,
           notes: data.notes || null,
         });
         showToast("Success", "Vehicle updated successfully", "success");
       } else {
         await api.service("customer-vehicle").create({
-          userId: user.id,
+          user_id: user.id,
           type: data.vehicleType as VehicleType || null,
           make: data.make || null,
           model: data.model || null,
           // year: data.year || null,
           color: data.color || null,
-          licensePlate: data.licensePlate || null,
+          license_plate: data.licensePlate || null,
           notes: data.notes || null,
+          created_at: new Date(),
+          updated_at: new Date(),
         });
         showToast("Success", "Vehicle added successfully", "success");
       }
@@ -146,8 +152,8 @@ export const AddVehicle = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "xl" }} isCentered>
       <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>
+      <ModalContent bg={modalBg}>
+        <ModalHeader color={headerColor}>
           {isEditing ? "Edit Vehicle" : "Add Vehicle"}
           {" "}
           <Link

@@ -7,6 +7,7 @@ import {
   Button,
   HStack,
   Icon,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { RequestACarService } from "../car-service/RequestACarService";
@@ -19,22 +20,38 @@ export const CustomerDashboard = () => {
   const { user } = useUser();
   const navigate = useNavigate();
 
+  const cardBg = useColorModeValue("white", "#0b1437");
+  const headingColor = useColorModeValue("gray.800", "white");
+  const bodyColor = useColorModeValue("gray.600", "gray.300");
+  const loadingColor = useColorModeValue("gray.600", "gray.400");
+  const iconBoxBg = useColorModeValue("brand.50", "whiteAlpha.200");
+  const infoBoxBg = useColorModeValue("blue.50", "whiteAlpha.200");
+  const infoBoxBorder = useColorModeValue("blue.500", "blue.300");
+  const infoTitleColor = useColorModeValue("blue.900", "blue.100");
+  const infoItemColor = useColorModeValue("blue.800", "blue.200");
+
   // Check if user profile is complete
   const isProfileComplete = () => {
     if (!userProfile) return false;
 
     const hasRequiredFields =
-      userProfile.firstName &&
-      userProfile.lastName &&
-      userProfile.phoneNumber &&
-      userProfile.dateOfBirth &&
-      userProfile.gender;
+      userProfile.first_name &&
+      userProfile.last_name &&
+      userProfile.phone_number &&
+      userProfile.date_of_birth &&
+      userProfile.gender &&
+      userProfile.address &&
+      (userProfile.address.city ||
+        userProfile.address.state ||
+        userProfile.address.country ||
+        userProfile.address.postal_code);
 
     const hasAddress =
       userProfile.address &&
       (userProfile.address.city ||
         userProfile.address.state ||
-        userProfile.address.country);
+        userProfile.address.country ||
+        userProfile.address.postal_code);
 
     return !!(hasRequiredFields && hasAddress);
   };
@@ -49,7 +66,7 @@ export const CustomerDashboard = () => {
     return (
       <Container maxW="1500px" px={[4, 8]} py={8}>
         <VStack align="start" spacing={8} w="full" mt={10}>
-          <Text>Loading...</Text>
+          <Text color={loadingColor}>Loading...</Text>
         </VStack>
       </Container>
     );
@@ -62,7 +79,7 @@ export const CustomerDashboard = () => {
           <Box
             w="full"
             maxW="720px"
-            bg="white"
+            bg={cardBg}
             borderRadius="2xl"
             boxShadow="lg"
             p={{ base: 6, sm: 8, md: 10 }}
@@ -71,7 +88,7 @@ export const CustomerDashboard = () => {
               <HStack spacing={4}>
                 <Box
                   p={3}
-                  bg="brand.50"
+                  bg={iconBoxBg}
                   borderRadius="full"
                   display="flex"
                   alignItems="center"
@@ -79,41 +96,41 @@ export const CustomerDashboard = () => {
                 >
                   <Icon as={FaUser} color="brand.500" boxSize={6} />
                 </Box>
-                <Heading size="lg" color="gray.800">
+                <Heading size="lg" color={headingColor}>
                   Complete Your Profile
                 </Heading>
               </HStack>
 
-              <Text fontSize="md" color="gray.600" lineHeight="tall">
+              <Text fontSize="md" color={bodyColor} lineHeight="tall">
                 To start booking services, please complete your profile by providing:
               </Text>
 
               <Box
-                bg="blue.50"
+                bg={infoBoxBg}
                 borderLeft="4px solid"
-                borderColor="blue.500"
+                borderColor={infoBoxBorder}
                 p={4}
                 borderRadius="md"
                 w="full"
               >
                 <VStack align="start" spacing={2} pl={2}>
-                  <Text fontSize="sm" color="blue.900" fontWeight="medium">
+                  <Text fontSize="sm" color={infoTitleColor} fontWeight="medium">
                     Required Information:
                   </Text>
                   <VStack align="start" spacing={1} pl={4}>
-                    <Text fontSize="sm" color="blue.800">
+                    <Text fontSize="sm" color={infoItemColor}>
                       • First Name and Last Name
                     </Text>
-                    <Text fontSize="sm" color="blue.800">
+                    <Text fontSize="sm" color={infoItemColor}>
                       • Phone Number
                     </Text>
-                    <Text fontSize="sm" color="blue.800">
+                    <Text fontSize="sm" color={infoItemColor}>
                       • Date of Birth
                     </Text>
-                    <Text fontSize="sm" color="blue.800">
+                    <Text fontSize="sm" color={infoItemColor}>
                       • Gender
                     </Text>
-                    <Text fontSize="sm" color="blue.800">
+                    <Text fontSize="sm" color={infoItemColor}>
                       • Address (City, State, or Country)
                     </Text>
                   </VStack>

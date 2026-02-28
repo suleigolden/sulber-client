@@ -21,6 +21,7 @@ import {
     MenuButton,
     MenuList,
     MenuItem,
+    useColorModeValue,
 } from "@chakra-ui/react";
 import { FaPlus, FaExclamationTriangle, FaEllipsisV } from "react-icons/fa";
 import { useCustomerVehicles } from "~/hooks/use-customer-vehicles";
@@ -99,6 +100,21 @@ export const Vehicles = () => {
         return vehicleTypeData?.title || vehicleType;
     };
 
+    const headingColor = useColorModeValue("gray.800", "white");
+    const subtextColor = useColorModeValue("gray.500", "gray.400");
+    const emptyStateBg = useColorModeValue("gray.50", "whiteAlpha.200");
+    const emptyStateBorder = useColorModeValue("gray.200", "whiteAlpha.300");
+    const emptyStateTextColor = useColorModeValue("gray.500", "gray.400");
+    const cardBg = useColorModeValue("white", "#0b1437");
+    const cardBorder = useColorModeValue("gray.200", "whiteAlpha.300");
+    const cardHoverBorder = useColorModeValue("brand.300", "brand.400");
+    const vehicleNotesColor = useColorModeValue("gray.600", "gray.400");
+    const menuListBg = useColorModeValue("white", "gray.800");
+    const alertBodyTextColor = useColorModeValue("gray.600", "gray.300");
+    const alertPreviewBg = useColorModeValue("gray.50", "whiteAlpha.200");
+    const alertPreviewTextColor = useColorModeValue("gray.800", "white");
+    const alertPreviewSubtextColor = useColorModeValue("gray.600", "gray.400");
+
     return (
         <Box w="full" p={{ base: 4, sm: 6, md: 8 }}>
             <Flex
@@ -109,10 +125,10 @@ export const Vehicles = () => {
                 gap={4}
             >
                 <Box>
-                    <Heading size={{ base: "md", sm: "lg" }} fontWeight="bold" mb={2}>
+                    <Heading size={{ base: "md", sm: "lg" }} fontWeight="bold" mb={2} color={headingColor}>
                         My Vehicles
                     </Heading>
-                    <Text fontSize={{ base: "xs", sm: "sm" }} color="gray.500">
+                    <Text fontSize={{ base: "xs", sm: "sm" }} color={subtextColor}>
                         Manage your vehicles here.
                     </Text>
                 </Box>
@@ -134,13 +150,13 @@ export const Vehicles = () => {
             ) : vehicles.length === 0 ? (
                 <Box
                     p={8}
-                    bg="gray.50"
+                    bg={emptyStateBg}
                     borderRadius="lg"
                     textAlign="center"
                     border="2px dashed"
-                    borderColor="gray.200"
+                    borderColor={emptyStateBorder}
                 >
-                    <Text fontSize={{ base: "sm", sm: "md" }} color="gray.500" mb={4}>
+                    <Text fontSize={{ base: "sm", sm: "md" }} color={emptyStateTextColor} mb={4}>
                         No vehicles added yet.
                     </Text>
                     <Button
@@ -158,11 +174,11 @@ export const Vehicles = () => {
                         <Box
                             key={vehicle.id}
                             p={{ base: 4, sm: 6 }}
-                            bg="white"
+                            bg={cardBg}
                             borderWidth="1px"
                             borderRadius="lg"
-                            borderColor="gray.200"
-                            _hover={{ boxShadow: "md", borderColor: "brand.300" }}
+                            borderColor={cardBorder}
+                            _hover={{ boxShadow: "md", borderColor: cardHoverBorder }}
                             transition="all 0.2s"
                         >
                             <Flex
@@ -173,7 +189,7 @@ export const Vehicles = () => {
                             >
                                 <Box flex={1}>
                                     <HStack spacing={2} mb={2} flexWrap="wrap">
-                                        <Heading size={{ base: "sm", sm: "md" }} fontWeight="semibold">
+                                        <Heading size={{ base: "sm", sm: "md" }} fontWeight="semibold" color={headingColor}>
                                             {formatVehicleLabel(vehicle)}
                                         </Heading>
                                         {vehicle.type && (
@@ -188,7 +204,7 @@ export const Vehicles = () => {
                                                 {getVehicleTypeTitle(vehicle.type)}
                                             </Badge>
                                         )}
-                                        {vehicle.licensePlate && (
+                                        {vehicle.license_plate && (
                                             <Badge
                                                 colorScheme="blue"
                                                 variant="subtle"
@@ -197,14 +213,14 @@ export const Vehicles = () => {
                                                 py={1}
                                                 borderRadius="md"
                                             >
-                                                {vehicle.licensePlate}
+                                                {vehicle.license_plate}
                                             </Badge>
                                         )}
                                     </HStack>
                                     {vehicle.notes && (
                                         <Text
                                             fontSize={{ base: "xs", sm: "sm" }}
-                                            color="gray.600"
+                                            color={vehicleNotesColor}
                                             mt={2}
                                             noOfLines={2}
                                         >
@@ -228,7 +244,7 @@ export const Vehicles = () => {
                                             aria-label="Options"
                                         />
                                         <MenuList
-                                            bg="white"
+                                            bg={menuListBg}
                                             shadow="xl"
                                             borderRadius="lg"
                                             minW="160px"
@@ -274,24 +290,24 @@ export const Vehicles = () => {
 
                         <AlertDialogBody>
                             <VStack align="start" spacing={3}>
-                                <Text fontSize={{ base: "sm", sm: "md" }} color="gray.600">
+                                <Text fontSize={{ base: "sm", sm: "md" }} color={alertBodyTextColor}>
                                     Are you sure you want to delete this vehicle? This action cannot be undone.
                                 </Text>
                                 {vehicleToDelete && (
                                     <Box
                                         p={3}
-                                        bg="gray.50"
+                                        bg={alertPreviewBg}
                                         borderRadius="md"
                                         borderLeft="4px solid"
                                         borderColor="red.500"
                                         w="full"
                                     >
-                                        <Text fontSize={{ base: "sm", sm: "md" }} fontWeight="semibold" color="gray.800">
+                                        <Text fontSize={{ base: "sm", sm: "md" }} fontWeight="semibold" color={alertPreviewTextColor}>
                                             {formatVehicleLabel(vehicleToDelete)}
                                         </Text>
-                                        {vehicleToDelete.licensePlate && (
-                                            <Text fontSize="xs" color="gray.600" mt={1}>
-                                                License Plate: {vehicleToDelete.licensePlate}
+                                        {vehicleToDelete.license_plate && (
+                                            <Text fontSize="xs" color={alertPreviewSubtextColor} mt={1}>
+                                                License Plate: {vehicleToDelete.license_plate}
                                             </Text>
                                         )}
                                     </Box>

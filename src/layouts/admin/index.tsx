@@ -31,7 +31,7 @@ export const DashboardNavBar = (props: Record<string, unknown>) => {
   const { user } = useUser();
 
   if (!user) {
-    // window.location.href = '/';
+    window.location.href = '/';
   }
 
   const navRoutes = navBarRoutes(user?.role, user as User);

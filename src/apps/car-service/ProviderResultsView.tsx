@@ -58,13 +58,48 @@ function formatPrices(service: ProviderJobService): string {
   return `$${(service.price / 100).toFixed(0)}`;
 }
 
+/** Format 24h time string (e.g. "10:33", "19:00") to 12h (e.g. "10:33 AM", "7:00 PM") */
+function formatTime12h(timeStr: string): string {
+  if (!timeStr?.trim()) return "";
+  const [h, m] = timeStr.trim().split(":").map(Number);
+  const hour = Number.isNaN(h) ? 0 : h % 24;
+  const min = Number.isNaN(m) ? 0 : m % 60;
+  const isPm = hour >= 12;
+  const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  const amPm = isPm ? " PM" : " AM";
+  const mm = min === 0 ? "00" : String(min).padStart(2, "0");
+  return `${hour12}:${mm}${amPm}`;
+}
+
 const DAY_ORDER = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+const DEFAULT_START = "9:00";
+const DEFAULT_END = "17:00";
+
 function sortedDayLabels(days: string[]): string[] {
   if (!days?.length) return [];
   const sorted = [...days].sort(
     (a, b) => DAY_ORDER.indexOf(a.toLowerCase()) - DAY_ORDER.indexOf(b.toLowerCase())
   );
   return sorted.map((d) => d.charAt(0).toUpperCase() + d.slice(1).toLowerCase());
+}
+
+/** Availability slot with optional times (API may add these later). */
+type AvailabilitySlot = { day: string; start_time?: string; end_time?: string };
+
+function formatAvailabilityBadge(slot: AvailabilitySlot): string {
+  const day = slot.day.charAt(0).toUpperCase() + slot.day.slice(1).toLowerCase();
+  const start = formatTime12h(slot.start_time ?? DEFAULT_START);
+  const end = formatTime12h(slot.end_time ?? DEFAULT_END);
+  return `${day} ${start} - ${end}`;
+}
+
+function toAvailabilitySlots(days: string[]): AvailabilitySlot[] {
+  if (!days?.length) return [];
+  return sortedDayLabels(days).map((day) => ({
+    day: day.toLowerCase(),
+    start_time: DEFAULT_START,
+    end_time: DEFAULT_END,
+  }));
 }
 
 /** Provider object as returned by the API when listing provider-job-services with relation */
@@ -292,24 +327,25 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                   Availability
                 </Text>
                 <Wrap spacing={2}>
-                  {sortedDayLabels(service.days_of_week_available ?? []).length > 0 ? (
-                    sortedDayLabels(service.days_of_week_available ?? []).map((day) => (
-                      <WrapItem key={day}>
+                  {toAvailabilitySlots(service.days_of_week_available ?? []).length > 0 ? (
+                    toAvailabilitySlots(service.days_of_week_available ?? []).map((slot) => (
+                      <WrapItem key={slot.day}>
                         <Badge
                           colorScheme="brand"
                           variant="subtle"
                           px={2}
                           py={1}
                           borderRadius="md"
-                          fontSize="sm" 
+                          fontSize="xs"
                           fontWeight="medium"
+                          whiteSpace="normal"
                         >
-                          {day}
+                          {formatAvailabilityBadge(slot)}
                         </Badge>
                       </WrapItem>
                     ))
                   ) : (
-                    <Badge colorScheme="gray" variant="subtle" px={2} py={1} borderRadius="md" fontSize="sm" >
+                    <Badge colorScheme="gray" variant="subtle" px={2} py={1} borderRadius="md" fontSize="xs">
                       Not set
                     </Badge>
                   )}

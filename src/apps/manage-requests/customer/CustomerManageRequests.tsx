@@ -30,15 +30,18 @@ import { fullAddress } from "~/common/utils/address";
 import { useState, useRef } from "react";
 import { getStatusColor } from "~/common/utils/status-color";
 import { formatDateToStringWithoutTime, formatDateToStringWithTime } from "~/common/utils/date-time";
+import { useIsCustomerProfileComplete } from "~/hooks/use-is-customer-profile-complete";
+import { IsProfileComplete } from "~/apps/users/customer/IsProfileComplete";
 
 export const CustomerManageRequests = () => {
   const { jobs, isLoading } = useJobs();
+  const { isProfileComplete, isLoading: isProfileCompleteLoading } = useIsCustomerProfileComplete();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
   const [isCancelling, setIsCancelling] = useState(false);
-
+  const loadingColor = useColorModeValue("gray.600", "gray.400");
   const cardBg = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
 
@@ -75,6 +78,22 @@ export const CustomerManageRequests = () => {
       setIsCancelling(false);
     }
   };
+
+
+  if (isProfileCompleteLoading) {
+    return (
+      <Container maxW="1500px" px={[4, 8]} py={8}>
+        <VStack align="start" spacing={8} w="full" mt={10}>
+          <Text color={loadingColor}>Loading...</Text>
+        </VStack>
+      </Container>
+    );
+  }
+
+  if (!isProfileComplete()) {
+    return <IsProfileComplete />;
+  }
+
 
   if (isLoading) {
     return (
@@ -122,8 +141,8 @@ export const CustomerManageRequests = () => {
 
   // Sort jobs by created date (newest first)
   const sortedJobs = [...jobs].sort((a, b) => {
-    const dateA = new Date(a.createdAt).getTime();
-    const dateB = new Date(b.createdAt).getTime();
+    const dateA = new Date(a.created_at).getTime();
+    const dateB = new Date(b.created_at).getTime();
     return dateB - dateA;
   });
 
@@ -136,8 +155,8 @@ export const CustomerManageRequests = () => {
 
         <VStack spacing={4} w="full" align="stretch">
           {sortedJobs.map((job) => {
-            const selectedService = job.serviceType
-              ? ProviderServiceTypesList.services.find((s) => s.type === job.serviceType)
+            const selectedService = job.service_type
+              ? ProviderServiceTypesList.services.find((s) => s.type === job.service_type)
               : null;
 
             const canCancel = job.status === "PENDING" || job.status === "ACCEPTED";
@@ -159,7 +178,7 @@ export const CustomerManageRequests = () => {
                       <VStack align="start" spacing={1} flex={1}>
                         <HStack>
                           <Heading size="md" fontWeight="bold">
-                            {selectedService?.title || job.serviceType || "Service Request"}
+                            {selectedService?.title || job.service_type || "Service Request"}
                           </Heading>
                           <Badge
                             colorScheme={getStatusColor(job.status)}
@@ -219,13 +238,13 @@ export const CustomerManageRequests = () => {
                             Schedule
                           </Text>
                           <Text fontSize="sm" color="gray.800" fontWeight="medium">
-                            {formatDateToStringWithTime(job?.scheduledStart as string)}
+                            {formatDateToStringWithTime(job?.scheduled_start as string)}
                           </Text>
                         </VStack>
                       </HStack>
 
                       {/* Price */}
-                      {job.totalPriceCents && (
+                      {job.total_price_cents && (
                         <HStack align="start" spacing={3}>
                           <Icon as={FaDollarSign} color="brand.500" mt={1} />
                           <VStack align="start" spacing={0}>
@@ -233,7 +252,7 @@ export const CustomerManageRequests = () => {
                               Price
                             </Text>
                             <Text fontSize="sm" color="gray.800" fontWeight="bold">
-                              ${formatNumberWithCommas(Number(job.totalPriceCents) / 100)}{" "}
+                              ${formatNumberWithCommas(Number(job.total_price_cents) / 100)}{" "}
                               {job.currency || "CAD"}
                             </Text>
                           </VStack>
@@ -248,7 +267,7 @@ export const CustomerManageRequests = () => {
                             Created
                           </Text>
                           <Text fontSize="sm" color="gray.800" fontWeight="medium">
-                            {formatDateToStringWithoutTime(job?.createdAt.toLocaleString())}
+                            {formatDateToStringWithoutTime(job?.created_at.toLocaleString())}
                           </Text>
                         </VStack>
                       </HStack>

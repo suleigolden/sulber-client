@@ -1,4 +1,4 @@
-import { Box, FormControl, FormLabel, FormErrorMessage } from '@chakra-ui/react';
+import { Box, FormControl, FormLabel, FormErrorMessage, useColorModeValue } from '@chakra-ui/react';
 import { Controller, Control } from 'react-hook-form';
 import ReactSelect from 'react-select';
 import CountryList from 'react-select-country-list';
@@ -18,16 +18,27 @@ const options = CountryList().getData().map(option => ({
   flag: option.value,
 }));
 
-export const CountrySelect = ({ 
-  control, 
-  name, 
-  label = "Country", 
+export const CountrySelect = ({
+  control,
+  name,
+  label = "Country",
   error,
-  isRequired 
+  isRequired
 }: CountrySelectProps) => {
+  const labelColor = useColorModeValue(undefined, '#FFF');
+  const controlBorder = useColorModeValue('#E2E8F0', 'rgba(255,255,255,0.3)');
+  const controlBg = useColorModeValue('white', '#0b1437');
+  const menuBg = useColorModeValue('white', '#0b1437');
+  const optionColor = useColorModeValue('gray.800', '#FFF');
+  const optionHoverBg = useColorModeValue('gray.50', 'rgba(255,255,255,0.1)');
+  const singleValueColor = useColorModeValue('gray.800', '#FFF');
+  const inputColor = useColorModeValue('gray.800', '#FFF');
+  const placeholderColor = useColorModeValue('#718096', '#FFF');
+  const menuBorderColor = useColorModeValue('#E2E8F0', 'rgba(255,255,255,0.3)');
+
   return (
     <FormControl isInvalid={!!error} isRequired={isRequired}>
-      <FormLabel>{label}</FormLabel>
+      <FormLabel color={labelColor}>{label}</FormLabel>
       <Controller
         name={name}
         control={control}
@@ -40,7 +51,7 @@ export const CountrySelect = ({
             onChange={(option) => onChange(option?.value)}
             placeholder="Select a country"
             formatOptionLabel={(option) => (
-              <Box display="flex" alignItems="center">
+              <Box display="flex" alignItems="center" color={optionColor}>
                 <ReactCountryFlag
                   countryCode={option.flag}
                   svg
@@ -58,7 +69,30 @@ export const CountrySelect = ({
             styles={{
               control: (base) => ({
                 ...base,
-                border: '1px solid #000',
+                borderColor: controlBorder,
+                backgroundColor: controlBg,
+              }),
+              menu: (base) => ({
+                ...base,
+                backgroundColor: menuBg,
+                border: `1px solid ${menuBorderColor}`,
+              }),
+              option: (base, state) => ({
+                ...base,
+                backgroundColor: state.isFocused ? optionHoverBg : menuBg,
+                color: optionColor,
+              }),
+              singleValue: (base) => ({
+                ...base,
+                color: singleValueColor,
+              }),
+              input: (base) => ({
+                ...base,
+                color: inputColor,
+              }),
+              placeholder: (base) => ({
+                ...base,
+                color: placeholderColor,
               }),
             }}
           />

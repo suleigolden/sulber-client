@@ -1,4 +1,5 @@
 import {
+  AlertDialog,
   Avatar,
   Badge,
   Box,
@@ -13,17 +14,19 @@ import {
   WrapItem,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   api,
   ProviderJobService,
   ProviderServiceType,
+  ProviderServiceTypesList,
 } from "@suleigolden/sulber-api-client";
 import { LocationMap } from "~/components/location-map/LocationMap";
 import { useUser } from "~/hooks/use-user";
 import { CustomToast } from "~/hooks/CustomToast";
 import type { ConfirmServiceRequestData } from "./ConfirmServiceRequest";
+import { ServiceDetailsDialogContent } from "./ServiceDetailsDialogContent";
 
 const RADIUS_KM = 100;
 function haversineKm(
@@ -142,6 +145,18 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
   const [loading, setLoading] = useState(true);
   const [providers, setProviders] = useState<ProviderCardItem[]>([]);
   const [sendingId, setSendingId] = useState<string | null>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [selectedForDetails, setSelectedForDetails] = useState<{
+    service: ProviderJobService;
+    providerName: string;
+  } | null>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+
+  const serviceTypeDefinition = ProviderServiceTypesList.services.find(
+    (s) => s.type === data.serviceType
+  );
+  const included = serviceTypeDefinition?.included ?? [];
+  const requirements = serviceTypeDefinition?.requirements_for_customer ?? [];
 
   const cardBg = useColorModeValue("white", "#0b1437");
   const cardBorder = useColorModeValue("gray.200", "whiteAlpha.300");
@@ -335,6 +350,21 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                   </Text>
                 </Box>
 
+                <Button
+                  as="button"
+                  type="button"
+                  fontSize="sm"
+                  fontWeight="medium"
+                  _hover={{ color: "brand.600" }}
+                  mb={2}
+                  onClick={() => {
+                    setSelectedForDetails({ service, providerName });
+                    setDetailsDialogOpen(true);
+                  }}
+                >
+                  See What's Included ?
+                </Button>
+
                 <Text fontSize="md" color={priceLabelColor} fontWeight="medium" mb={2}>
                   Availability
                 </Text>
@@ -379,6 +409,35 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
           </VStack>
         )}
       </Box>
+
+      <AlertDialog
+        isOpen={detailsDialogOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={() => {
+          setDetailsDialogOpen(false);
+          setSelectedForDetails(null);
+        }}
+      >
+        <ServiceDetailsDialogContent
+          included={included}
+          requirements={requirements}
+          onCancel={() => {
+            setDetailsDialogOpen(false);
+            setSelectedForDetails(null);
+          }}
+          onSendRequest={() => {
+            if (selectedForDetails) {
+              handleSendRequest(selectedForDetails.service.provider_id, selectedForDetails.service);
+              setDetailsDialogOpen(false);
+              setSelectedForDetails(null);
+            }
+          }}
+          isSending={selectedForDetails ? sendingId === selectedForDetails.service.provider_id : false}
+          cancelRef={cancelRef}
+          providerName={selectedForDetails?.providerName ?? ""}
+        />
+      </AlertDialog>
+
       <Box
         flex={1}
         minH={{ base: "300px", md: "100%" }}

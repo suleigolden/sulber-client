@@ -1,4 +1,6 @@
 import {
+  Avatar,
+  Badge,
   Box,
   Button,
   Flex,
@@ -7,6 +9,8 @@ import {
   Spinner,
   Text,
   VStack,
+  Wrap,
+  WrapItem,
   useColorModeValue,
 } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
@@ -54,20 +58,42 @@ function formatPrices(service: ProviderJobService): string {
   return `$${(service.price / 100).toFixed(0)}`;
 }
 
-function formatDays(days: string[]): string {
-  if (!days?.length) return "—";
-  const order = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+const DAY_ORDER = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+function sortedDayLabels(days: string[]): string[] {
+  if (!days?.length) return [];
   const sorted = [...days].sort(
-    (a, b) => order.indexOf(a.toLowerCase()) - order.indexOf(b.toLowerCase())
+    (a, b) => DAY_ORDER.indexOf(a.toLowerCase()) - DAY_ORDER.indexOf(b.toLowerCase())
   );
-  return sorted.map((d) => d.charAt(0).toUpperCase() + d.slice(1).toLowerCase()).join(", ");
+  return sorted.map((d) => d.charAt(0).toUpperCase() + d.slice(1).toLowerCase());
 }
 
-type ProviderWithProfile = {
+/** Provider object as returned by the API when listing provider-job-services with relation */
+type ProviderFromList = {
+  id?: string;
+  profile?: {
+    first_name?: string | null;
+    last_name?: string | null;
+    avatar_url?: string | null;
+  } | null;
+};
+
+type ProviderJobServiceWithProvider = ProviderJobService & {
+  provider?: ProviderFromList | null;
+};
+
+type ProviderCardItem = {
   service: ProviderJobService;
   distanceKm: number;
   providerName: string;
+  avatarUrl: string | null;
 };
+
+function fromProvider(p: ProviderFromList | undefined | null): { name: string; avatarUrl: string | null } {
+  if (!p?.profile) return { name: "Provider", avatarUrl: null };
+  const { first_name, last_name, avatar_url } = p.profile;
+  const name = [first_name, last_name].filter(Boolean).join(" ").trim() || "Provider";
+  return { name, avatarUrl: avatar_url ?? null };
+}
 
 type ProviderResultsViewProps = {
   data: ConfirmServiceRequestData;
@@ -79,7 +105,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
   const navigate = useNavigate();
   const showToast = CustomToast();
   const [loading, setLoading] = useState(true);
-  const [providers, setProviders] = useState<ProviderWithProfile[]>([]);
+  const [providers, setProviders] = useState<ProviderCardItem[]>([]);
   const [sendingId, setSendingId] = useState<string | null>(null);
 
   const cardBg = useColorModeValue("white", "#0b1437");
@@ -88,17 +114,18 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
   const valueColor = useColorModeValue("gray.800", "white");
   const listBg = useColorModeValue("gray.50", "#0b1437");
   const mapBg = useColorModeValue("gray.100", "gray.800");
+  const priceLabelColor = useColorModeValue("gray.500", "gray.400");
 
   const fetchProviders = useCallback(async () => {
     if (!data.serviceLocationData || !data.serviceType) return;
     setLoading(true);
     try {
-      const list = await api.service("provider-job-service").list(undefined, "active");
+      const list = (await api.service("provider-job-service").list(undefined, "active")) as ProviderJobServiceWithProvider[];
       const serviceType = data.serviceType as ProviderServiceType;
       const lat = data.serviceLocationData.lat;
       const lng = data.serviceLocationData.lng;
 
-      const filtered: { service: ProviderJobService; distanceKm: number }[] = [];
+      const filtered: { service: ProviderJobServiceWithProvider; distanceKm: number }[] = [];
       for (const s of list) {
         if (s.service_type !== serviceType) continue;
         const loc = s.primary_location;
@@ -110,7 +137,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
       }
       filtered.sort((a, b) => a.distanceKm - b.distanceKm);
 
-      const uniqueByProvider = new Map<string, { service: ProviderJobService; distanceKm: number }>();
+      const uniqueByProvider = new Map<string, { service: ProviderJobServiceWithProvider; distanceKm: number }>();
       for (const item of filtered) {
         const pid = item.service.provider_id;
         if (!uniqueByProvider.has(pid)) {
@@ -118,20 +145,11 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
         }
       }
 
-      const withNames: ProviderWithProfile[] = [];
-      for (const [, item] of uniqueByProvider) {
-        let name = "Provider";
-        try {
-          const profile = await api.service("user-profile").findByUserId(item.service.provider_id);
-          if (profile?.first_name || profile?.last_name) {
-            name = [profile.first_name, profile.last_name].filter(Boolean).join(" ");
-          }
-        } catch {
-          // keep "Provider"
-        }
-        withNames.push({ ...item, providerName: name });
-      }
-      setProviders(withNames);
+      const cards: ProviderCardItem[] = Array.from(uniqueByProvider.values()).map(({ service, distanceKm }) => {
+        const { name: providerName, avatarUrl } = fromProvider(service.provider);
+        return { service, distanceKm, providerName, avatarUrl };
+      });
+      setProviders(cards);
     } catch (e) {
       console.error(e);
       showToast("Error", "Failed to load providers", "error");
@@ -233,36 +251,74 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
           <Text color={labelColor}>No providers found for this service in your area.</Text>
         ) : (
           <VStack align="stretch" spacing={4}>
-            {providers.map(({ service, distanceKm, providerName }) => (
+            {providers.map(({ service, distanceKm, providerName, avatarUrl }) => (
               <Box
                 key={service.id}
                 p={4}
                 bg={cardBg}
-                borderRadius="lg"
+                borderRadius="xl"
                 borderWidth="1px"
                 borderColor={cardBorder}
+                shadow="sm"
               >
-                <Text fontWeight="semibold" color={valueColor} fontSize="md">
-                  {providerName}
-                </Text>
-                <HStack mt={2} spacing={4} flexWrap="wrap">
-                  <Text fontSize="sm" color={labelColor}>
-                    Rating: —
-                  </Text>
-                  <Text fontSize="sm" color={labelColor}>
-                    {distanceKm < 1 ? `${(distanceKm * 1000).toFixed(0)} m away` : `${distanceKm.toFixed(1)} km away`}
-                  </Text>
+                <HStack align="center" spacing={3} mb={3}>
+                  <Avatar
+                    size="lg"
+                    name={providerName}
+                    src={avatarUrl ?? undefined}
+                    bg="brand.100"
+                    color="brand.600"
+                  />
+                  <VStack align="start" spacing={0} flex={1} minW={0}>
+                    <Text fontWeight="semibold" color={valueColor} fontSize="md" noOfLines={1}>
+                      {providerName}
+                    </Text>
+                    <Text fontSize="sm"  color={labelColor}>
+                      {distanceKm < 1 ? `${(distanceKm * 1000).toFixed(0)} m away` : `${distanceKm.toFixed(1)} km away`}
+                      {" · "}
+                      Rating: —
+                    </Text>
+                  </VStack>
                 </HStack>
-                <Text fontSize="sm" color={valueColor} mt={2}>
+
+                <Text fontSize="sm"  color={priceLabelColor} fontWeight="medium" mb={1}>
+                  Price
+                </Text>
+                <Text fontSize="sm" color={valueColor} mb={3}>
                   {formatPrices(service)}
                 </Text>
-                <Text fontSize="sm" color={labelColor} mt={1}>
-                  Available: {formatDays(service.days_of_week_available ?? [])}
+
+                <Text fontSize="sm"  color={priceLabelColor} fontWeight="medium" mb={2}>
+                  Availability
                 </Text>
+                <Wrap spacing={2}>
+                  {sortedDayLabels(service.days_of_week_available ?? []).length > 0 ? (
+                    sortedDayLabels(service.days_of_week_available ?? []).map((day) => (
+                      <WrapItem key={day}>
+                        <Badge
+                          colorScheme="brand"
+                          variant="subtle"
+                          px={2}
+                          py={1}
+                          borderRadius="md"
+                          fontSize="sm" 
+                          fontWeight="medium"
+                        >
+                          {day}
+                        </Badge>
+                      </WrapItem>
+                    ))
+                  ) : (
+                    <Badge colorScheme="gray" variant="subtle" px={2} py={1} borderRadius="md" fontSize="sm" >
+                      Not set
+                    </Badge>
+                  )}
+                </Wrap>
+
                 <Button
                   size="sm"
                   colorScheme="brand"
-                  mt={3}
+                  mt={4}
                   w="full"
                   onClick={() => handleSendRequest(service.provider_id, service)}
                   isLoading={sendingId === service.provider_id}

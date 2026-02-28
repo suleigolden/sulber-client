@@ -1,5 +1,8 @@
 import {
   AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogHeader,
   Avatar,
   Badge,
   Box,
@@ -24,9 +27,11 @@ import {
   ProviderServiceTypesList,
 } from "@suleigolden/sulber-api-client";
 import { LocationMap } from "~/components/location-map/LocationMap";
+import { useCustomerVehicles } from "~/hooks/use-customer-vehicles";
 import { useUser } from "~/hooks/use-user";
 import { CustomToast } from "~/hooks/CustomToast";
 import type { ConfirmServiceRequestData } from "./ConfirmServiceRequest";
+import { SelectAdditionalCarDialog } from "./SelectAdditionalCarDialog";
 import { ServiceDetailsDialogContent } from "./ServiceDetailsDialogContent";
 
 const RADIUS_KM = 100;
@@ -219,7 +224,16 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
   const [cardSelections, setCardSelections] = useState<
     Record<string, { carType: string | null; addOns: string[] }>
   >({});
+  const [confirmSendOpen, setConfirmSendOpen] = useState(false);
+  const [addCarDialogOpen, setAddCarDialogOpen] = useState(false);
+  const [pendingSend, setPendingSend] = useState<{
+    providerId: string;
+    service: ProviderJobService;
+    selection: { carType: string | null; addOns: string[] };
+    requestLines: { vehicleId: string | null }[];
+  } | null>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
+  const { vehicles } = useCustomerVehicles();
 
   const getSelection = (serviceId: string) =>
     cardSelections[serviceId] ?? { carType: null, addOns: [] };
@@ -315,10 +329,30 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
     return { totalCents: base + addOnTotal, addOnPrices };
   };
 
+  const buildBaseNotes = (): string[] => {
+    const parts: string[] = [];
+    if (data.serviceRequestType === "monthly") {
+      parts.push("Monthly subscription service (4 times per month)");
+    }
+    return parts;
+  };
+
+  const getVehicleLabel = (vehicleId: string): string => {
+    const v = vehicles.find((x) => x.id === vehicleId);
+    if (!v) return `Vehicle ${vehicleId}`;
+    const parts: string[] = [];
+    if (v.year) parts.push(String(v.year));
+    if (v.make) parts.push(v.make);
+    if (v.model) parts.push(v.model);
+    if (v.color) parts.push(v.color);
+    return parts.length > 0 ? parts.join(" ") : "Vehicle";
+  };
+
   const handleSendRequest = async (
     providerId: string,
     service: ProviderJobService,
-    selection: { carType: string | null; addOns: string[] }
+    selection: { carType: string | null; addOns: string[] },
+    requestLines?: { vehicleId: string | null }[]
   ) => {
     if (!user?.id || !data.serviceLocationData) return;
     const isCarWash = isCarWashService(service.service_type ?? "");
@@ -327,6 +361,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
       showToast("Error", "Please select a car type", "error");
       return;
     }
+    const lines = requestLines ?? [{ vehicleId: data.selectedVehicleId ?? null }];
     setSendingId(providerId);
     try {
       const address = {
@@ -345,35 +380,62 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
         end.setHours(end.getHours() + 2);
         scheduledEnd = end.toISOString();
       }
-      const notesParts: string[] = [];
-      if (data.serviceRequestType === "monthly") {
-        notesParts.push("Monthly subscription service (4 times per month)");
-      }
       const { totalCents, addOnPrices } = computeTotalAndAddOns(
         service,
         selection.carType,
         selection.addOns
       );
+      const baseNotes = buildBaseNotes();
 
-      const job = await api.service("job").create({
-        customer_id: user.id,
-        provider_id: providerId,
-        service_type: data.serviceType as ProviderServiceType,
-        address,
-        scheduled_start: scheduledStart,
-        scheduled_end: scheduledEnd,
-        total_price_cents: String(totalCents),
-        add_on_prices: addOnPrices.length > 0 ? addOnPrices : undefined,
-        currency: "CAD",
-        notes: notesParts.length > 0 ? notesParts.join(". ") : undefined,
-      });
-      showToast("Success", "Request sent to provider", "success");
-      navigate(`/${user.id}/waiting-to-connect-with-provider?jobId=${job.id}`);
+      if (lines.length > 1) {
+        const jobs = lines.map((line) => {
+          const noteParts = [...baseNotes];
+          if (line.vehicleId) {
+            noteParts.push(`Vehicle: ${getVehicleLabel(line.vehicleId)}`);
+          }
+          return {
+            customer_id: user.id,
+            provider_id: providerId,
+            service_type: data.serviceType as ProviderServiceType,
+            address,
+            scheduled_start: scheduledStart,
+            scheduled_end: scheduledEnd,
+            total_price_cents: String(totalCents),
+            add_on_prices: addOnPrices.length > 0 ? addOnPrices : undefined,
+            currency: "CAD",
+            notes: noteParts.length > 0 ? noteParts.join(". ") : undefined,
+          };
+        });
+        const created = await api.service("job").createMany(jobs);
+        showToast("Success", `${created.length} requests sent to provider`, "success");
+        navigate(`/${user.id}/waiting-to-connect-with-provider?jobId=${created[0].id}`);
+      } else {
+        const noteParts = [...baseNotes];
+        if (lines[0].vehicleId) {
+          noteParts.push(`Vehicle: ${getVehicleLabel(lines[0].vehicleId)}`);
+        }
+        const job = await api.service("job").create({
+          customer_id: user.id,
+          provider_id: providerId,
+          service_type: data.serviceType as ProviderServiceType,
+          address,
+          scheduled_start: scheduledStart,
+          scheduled_end: scheduledEnd,
+          total_price_cents: String(totalCents),
+          add_on_prices: addOnPrices.length > 0 ? addOnPrices : undefined,
+          currency: "CAD",
+          notes: noteParts.length > 0 ? noteParts.join(". ") : undefined,
+        });
+        showToast("Success", "Request sent to provider", "success");
+        navigate(`/${user.id}/waiting-to-connect-with-provider?jobId=${job.id}`);
+      }
     } catch (err: unknown) {
       const msg = err && typeof err === "object" && "message" in err ? String((err as { message: string }).message) : "Failed to send request";
       showToast("Error", msg, "error");
     } finally {
       setSendingId(null);
+      setPendingSend(null);
+      setConfirmSendOpen(false);
     }
   };
 
@@ -627,9 +689,21 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                   colorScheme="brand"
                   mt={4}
                   w="full"
-                  onClick={() =>
-                    handleSendRequest(service.provider_id, service, getSelection(service.id))
-                  }
+                  onClick={() => {
+                    const selection = getSelection(service.id);
+                    const isCarWash = isCarWashService(service.service_type ?? "");
+                    if (isCarWash) {
+                      setPendingSend({
+                        providerId: service.provider_id,
+                        service,
+                        selection,
+                        requestLines: [{ vehicleId: data.selectedVehicleId ?? null }],
+                      });
+                      setConfirmSendOpen(true);
+                    } else {
+                      handleSendRequest(service.provider_id, service, selection);
+                    }
+                  }}
                   isLoading={sendingId === service.provider_id}
                   loadingText="Sending..."
                 >
@@ -658,13 +732,27 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
           }}
           onSendRequest={() => {
             if (selectedForDetails) {
-              handleSendRequest(
-                selectedForDetails.service.provider_id,
-                selectedForDetails.service,
-                getSelection(selectedForDetails.service.id)
-              );
-              setDetailsDialogOpen(false);
-              setSelectedForDetails(null);
+              const sel = getSelection(selectedForDetails.service.id);
+              const isCarWash = isCarWashService(selectedForDetails.service.service_type ?? "");
+              if (isCarWash) {
+                setPendingSend({
+                  providerId: selectedForDetails.service.provider_id,
+                  service: selectedForDetails.service,
+                  selection: sel,
+                  requestLines: [{ vehicleId: data.selectedVehicleId ?? null }],
+                });
+                setConfirmSendOpen(true);
+                setDetailsDialogOpen(false);
+                setSelectedForDetails(null);
+              } else {
+                handleSendRequest(
+                  selectedForDetails.service.provider_id,
+                  selectedForDetails.service,
+                  sel
+                );
+                setDetailsDialogOpen(false);
+                setSelectedForDetails(null);
+              }
             }
           }}
           isSending={selectedForDetails ? sendingId === selectedForDetails.service.provider_id : false}
@@ -672,6 +760,76 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
           providerName={selectedForDetails?.providerName ?? ""}
         />
       </AlertDialog>
+
+      <AlertDialog
+        isOpen={confirmSendOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={() => {
+          setConfirmSendOpen(false);
+          setPendingSend(null);
+        }}
+      >
+        <AlertDialogContent bg={cardBg}>
+          <AlertDialogHeader fontSize="lg" fontWeight="bold" color={valueColor}>
+            Send car wash request(s)
+          </AlertDialogHeader>
+          <AlertDialogBody>
+            <Text fontSize="sm" color={labelColor} mb={4}>
+              You're about to send {pendingSend?.requestLines.length ?? 0} car wash request(s).
+              Add another car to request multiple washes at once.
+            </Text>
+            <HStack spacing={3}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setAddCarDialogOpen(true);
+                }}
+              >
+                Add another car
+              </Button>
+              <Button
+                colorScheme="brand"
+                onClick={() => {
+                  if (pendingSend) {
+                    handleSendRequest(
+                      pendingSend.providerId,
+                      pendingSend.service,
+                      pendingSend.selection,
+                      pendingSend.requestLines
+                    );
+                  }
+                }}
+                isLoading={pendingSend ? sendingId === pendingSend.providerId : false}
+                loadingText="Sending..."
+              >
+                Send {pendingSend?.requestLines.length ?? 0} request(s)
+              </Button>
+              <Button ref={cancelRef} onClick={() => { setConfirmSendOpen(false); setPendingSend(null); }}>
+                Cancel
+              </Button>
+            </HStack>
+          </AlertDialogBody>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <SelectAdditionalCarDialog
+        isOpen={addCarDialogOpen}
+        onClose={() => setAddCarDialogOpen(false)}
+        vehicles={vehicles}
+        excludeVehicleIds={pendingSend?.requestLines
+          .map((l) => l.vehicleId)
+          .filter((id): id is string => id != null) ?? []}
+        onSelect={(vehicleId) => {
+          if (pendingSend) {
+            setPendingSend({
+              ...pendingSend,
+              requestLines: [...pendingSend.requestLines, { vehicleId }],
+            });
+          }
+          setAddCarDialogOpen(false);
+        }}
+        isLoading={false}
+      />
 
       <Box
         flex={1}

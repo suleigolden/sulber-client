@@ -47,8 +47,8 @@ function haversineKm(
   const a =
     Math.sin(dLat / 2) ** 2 +
     Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) ** 2;
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLng / 2) ** 2;
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
@@ -441,12 +441,12 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
 
   const mapAddress = data.serviceLocationData
     ? {
-        street: data.serviceLocationData.street || "",
-        city: data.serviceLocationData.city || "",
-        state: data.serviceLocationData.state || "",
-        country: data.serviceLocationData.country || "",
-        postal_code: data.serviceLocationData.postalCode || "",
-      }
+      street: data.serviceLocationData.street || "",
+      city: data.serviceLocationData.city || "",
+      state: data.serviceLocationData.state || "",
+      country: data.serviceLocationData.country || "",
+      postal_code: data.serviceLocationData.postalCode || "",
+    }
     : { street: "", city: "", state: "", country: "", postal_code: "" };
 
   return (
@@ -502,7 +502,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                     <Text fontWeight="semibold" color={valueColor} fontSize="md" noOfLines={1}>
                       {providerName}
                     </Text>
-                    <Text fontSize="md"  color={labelColor}>
+                    <Text fontSize="md" color={labelColor}>
                       {distanceKm < 1 ? `${(distanceKm * 1000).toFixed(0)} m away` : `${distanceKm.toFixed(1)} km away`}
                       {" · "}
                       Rating: ***
@@ -529,6 +529,14 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                     <>
                       {showCarType && (
                         <Box mb={3}>
+                          {data.selectedVehicleId && (
+                            <Text fontSize="sm" color={priceLabelColor} fontWeight="medium" mb={2}>
+                              Selected car:{" "}
+                              <Text as="span" color={valueColor} fontWeight="semibold">
+                                {getVehicleLabel(data.selectedVehicleId)}
+                              </Text>
+                            </Text>
+                          )}
                           <Text fontSize="sm" color={priceLabelColor} fontWeight="medium" mb={2}>
                             Car type
                           </Text>
@@ -627,11 +635,11 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                 })()}
 
                 <Button
-                   as="button"
-                   type="button"
-                   fontSize="md"
-                   variant="outline"
-                   fontWeight="medium"
+                  as="button"
+                  type="button"
+                  fontSize="md"
+                  variant="outline"
+                  fontWeight="medium"
                   _hover={{ color: "brand.600" }}
                   mb={2}
                   onClick={() => {

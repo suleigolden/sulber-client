@@ -29,22 +29,24 @@ const TabOption = ({
   icon,
   title,
   description,
+  titleColor,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any;
   title: string;
   description: string;
+  titleColor: string;
 }) => (
   <VStack spacing={1} align="start" p={2}>
     <Flex align="center" gap={2}>
       <Circle size="32px" bg="brand.100" color="brand.500">
         <Icon as={icon} />
       </Circle>
-      <Text fontWeight="600" fontSize="lg">
+      <Text fontWeight="600" fontSize="lg" color={titleColor}>
         {title}
       </Text>
     </Flex>
-    <Text color="gray.900" fontSize="xs" pl={10} maxW="400px">
+    <Text color={titleColor} fontSize="xs" pl={10} maxW="400px" opacity={0.9}>
       {/* {description} */}
     </Text>
   </VStack>
@@ -52,28 +54,32 @@ const TabOption = ({
 
 const AccountTypeDescription = ({
   type,
+  boxBg,
+  textColor,
 }: {
   type: "customer" | "provider";
+  boxBg: string;
+  textColor: string;
 }) => {
   const serviceTypes = ProviderServiceTypesList.services.map((service: { title: string }) => service.title);
-  
+
   const descriptions = {
     customer: (
-      <VStack spacing={3} align="start" p={4} bg="gray.50" borderRadius="md">
+      <VStack spacing={3} align="start" p={4} bg={boxBg} borderRadius="md">
         <VStack spacing={2} align="start" pl={4}>
-          <Text color="gray.700">
-            <Text as="span" color="brand.500" fontWeight="bold">Request for trusted</Text> 
-            {" "}<Text as="span" fontWeight="bold">{serviceTypes.join(', ')}</Text> 
-           {" "}services</Text>
+          <Text color={textColor}>
+            <Text as="span" color="brand.500" fontWeight="bold">Request for trusted</Text>
+            {" "}<Text as="span" fontWeight="bold">{serviceTypes.join(', ')}</Text>
+            {" "}services</Text>
         </VStack>
       </VStack>
     ),
     provider: (
-      <VStack spacing={3} align="start" p={4} bg="gray.50" borderRadius="md">
+      <VStack spacing={3} align="start" p={4} bg={boxBg} borderRadius="md">
         <VStack spacing={2} align="start" pl={4}>
-          <Text color="gray.700"> 
-            <Text as="span" color="brand.500" fontWeight="bold">Earn money with SulBer by offering trusted</Text> 
-            {" "}<Text as="span" fontWeight="bold">{serviceTypes.join(', ')}</Text> 
+          <Text color={textColor}>
+            <Text as="span" color="brand.500" fontWeight="bold">Earn money with SulBer by offering trusted</Text>
+            {" "}<Text as="span" fontWeight="bold">{serviceTypes.join(', ')}</Text>
             {" "}services.</Text>
         </VStack>
       </VStack>
@@ -90,14 +96,20 @@ type SignUpProps = {
 export const SignUp = ({ onSignInClick }: SignUpProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [tabIndex, setTabIndex] = useState(0);
-  const borderColor = useColorModeValue("gray.200", "gray.700");
-  const tabBg = useColorModeValue("gray.50", "gray.800");
-  const activeTabBg = useColorModeValue("white", "gray.700");
+  const modalBg = useColorModeValue("white", "#0b1437");
+  const headingColor = useColorModeValue("gray.800", "white");
+  const footerTextColor = useColorModeValue("gray.700", "gray.300");
+  const tabOptionTitleColor = useColorModeValue("gray.900", "gray.100");
+  const descBoxBg = useColorModeValue("gray.50", "whiteAlpha.200");
+  const descTextColor = useColorModeValue("gray.700", "gray.300");
+  const borderColor = useColorModeValue("gray.200", "gray.600");
+  const tabBg = useColorModeValue("gray.50", "whiteAlpha.100");
+  const activeTabBg = useColorModeValue("white", "whiteAlpha.200");
   const serviceTypes = ProviderServiceTypesList.services.map((service: { title: string }) => service.title);
 
   return (
     <Box>
-      <Text color="gray.700" fontWeight="400" fontSize="14px">
+      <Text color={footerTextColor} fontWeight="400" fontSize="14px">
         Not registered yet?{" "}
         <Text
           color="brand.500"
@@ -113,24 +125,23 @@ export const SignUp = ({ onSignInClick }: SignUpProps) => {
 
       <Modal isOpen={isOpen} onClose={onClose} size="4xl">
         <ModalOverlay backdropFilter="blur(4px)" />
-        <ModalContent p={5}>
+        <ModalContent p={5} bg={modalBg}>
         <ModalCloseButton />
           <ModalBody>
             <Flex
               direction="column"
               maxW="100%"
-              background="white"
               borderRadius="20px"
               p={6}
             >
               <Box mb={8}>
                 <Heading
-                  color="gray.800"
+                  color={headingColor}
                   fontSize="2xl"
                   mb={3}
                   fontWeight="700"
                 >
-                  Sign up to SulBer 
+                  Sign up to SulBer
                 </Heading>
               </Box>
 
@@ -160,6 +171,7 @@ export const SignUp = ({ onSignInClick }: SignUpProps) => {
                       icon={FaUser}
                       title="Customer Account"
                       description={`Request for ${serviceTypes.join(', ')} services in minutes`}
+                      titleColor={tabOptionTitleColor}
                     />
                   </Tab>
                   <Tab
@@ -178,15 +190,16 @@ export const SignUp = ({ onSignInClick }: SignUpProps) => {
                       icon={FaBuilding}
                       title="Provider Account"
                       description={`Earn money with SulBer by offering trusted ${serviceTypes.join(', ')} services`}
+                      titleColor={tabOptionTitleColor}
                     />
                   </Tab>
                 </TabList>
 
                 <Box mb={6}>
                   {tabIndex === 0 ? (
-                    <AccountTypeDescription type="customer" />
+                    <AccountTypeDescription type="customer" boxBg={descBoxBg} textColor={descTextColor} />
                   ) : (
-                    <AccountTypeDescription type="provider" />
+                    <AccountTypeDescription type="provider" boxBg={descBoxBg} textColor={descTextColor} />
                   )}
                 </Box>
 
@@ -207,7 +220,7 @@ export const SignUp = ({ onSignInClick }: SignUpProps) => {
                 maxW="100%"
                 mt={6}
               >
-                <Text color="gray.700" fontWeight="400" fontSize="14px">
+                <Text color={footerTextColor} fontWeight="400" fontSize="14px">
                   Already have an account?{" "}
                   <Text
                     color="brand.500"

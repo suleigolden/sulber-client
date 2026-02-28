@@ -10,6 +10,7 @@ import {
   Icon,
   Button,
   Text,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -47,6 +48,8 @@ export const CustomerSignUp = () => {
     },
   });
   const showToast = CustomToast();
+  const labelColor = useColorModeValue(undefined, 'gray.200');
+  const eyeIconColor = useColorModeValue('gray.400', 'gray.500');
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit = async (data: any) => {
@@ -80,7 +83,7 @@ export const CustomerSignUp = () => {
     <Box as="form" onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={4}>
         <FormControl isInvalid={!!errors.first_name}>
-          <FormLabel>First Name</FormLabel>
+          <FormLabel color={labelColor}>First Name</FormLabel>
           <Input
             type="text"
             {...register('first_name', {
@@ -93,7 +96,7 @@ export const CustomerSignUp = () => {
           </FormErrorMessage>
         </FormControl>
         <FormControl isInvalid={!!errors.last_name}>
-          <FormLabel>Last Name</FormLabel>
+          <FormLabel color={labelColor}>Last Name</FormLabel>
           <Input
             type="text"
             {...register('last_name', {
@@ -107,7 +110,7 @@ export const CustomerSignUp = () => {
         </FormControl>
 
         <FormControl isInvalid={!!errors.email}>
-          <FormLabel>Email</FormLabel>
+          <FormLabel color={labelColor}>Email</FormLabel>
           <Input
             type="email"
             {...register('email', {
@@ -133,7 +136,7 @@ export const CustomerSignUp = () => {
         </FormControl>
 
         <FormControl isInvalid={!!errors.password}>
-          <FormLabel>Password</FormLabel>
+          <FormLabel color={labelColor}>Password</FormLabel>
           <InputGroup>
             <Input
               type={show ? 'text' : 'password'}
@@ -148,7 +151,7 @@ export const CustomerSignUp = () => {
             <InputRightElement>
               <Icon
                 as={show ? RiEyeCloseLine : MdOutlineRemoveRedEye}
-                color="gray.400"
+                color={eyeIconColor}
                 cursor="pointer"
                 onClick={handleClick}
               />

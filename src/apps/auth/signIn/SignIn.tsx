@@ -13,6 +13,7 @@ import {
   InputGroup,
   InputRightElement,
   Text,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { HSeparator } from '../../../components/separator/Separator';
 import { FcGoogle } from 'react-icons/fc';
@@ -39,6 +40,16 @@ export const SignIn = ({ onClose }: SignInProps) => {
   const handleClick = () => setShow(!show);
   const showToast = CustomToast();
   const { navigateToDashboard } = useLogInNavigation();
+
+  const modalBg = useColorModeValue('white', '#0b1437');
+  const headingColor = useColorModeValue('navy.700', 'white');
+  const labelColor = useColorModeValue('navy.700', 'gray.200');
+  const separatorColor = useColorModeValue('gray.500', 'gray.400');
+  const googleBtnBg = useColorModeValue('white', 'whiteAlpha.200');
+  const googleBtnBorder = useColorModeValue('gray.200', 'whiteAlpha.300');
+  const googleBtnHover = useColorModeValue('gray.50', 'whiteAlpha.300');
+  const googleBtnActive = useColorModeValue('white', 'whiteAlpha.400');
+  const eyeIconColor = useColorModeValue('gray.400', 'gray.500');
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -73,22 +84,24 @@ export const SignIn = ({ onClose }: SignInProps) => {
       mx="auto"
       alignItems="center"
       justifyContent="center"
-      px={{ base: '25px', md: '0px' }}
+      // px={{ base: '25px', md: '0px' }}
       flexDirection="column"
+      background={modalBg}
+      // borderRadius={9}
     >
       <Flex
         zIndex="2"
         direction="column"
         w="100%"
         maxW="100%"
-        background="white"
+        // background={modalBg}
         borderRadius="20px"
         mx="auto"
         p={9}
       >
         <Box me="auto">
           <Heading
-            color="navy.700"
+            color={headingColor}
             fontSize="36px"
             mb="10px"
             fontWeight="700"
@@ -104,7 +117,7 @@ export const SignIn = ({ onClose }: SignInProps) => {
                 ms="4px"
                 fontSize="sm"
                 fontWeight="500"
-                color="navy.700"
+                color={labelColor}
                 mb="8px"
                 htmlFor="email-input"
               >
@@ -126,7 +139,7 @@ export const SignIn = ({ onClose }: SignInProps) => {
                 ms="4px"
                 fontSize="sm"
                 fontWeight="500"
-                color="navy.700"
+                color={labelColor}
                 display="flex"
                 htmlFor="password-input"
               >
@@ -149,7 +162,7 @@ export const SignIn = ({ onClose }: SignInProps) => {
                   mt="4px"
                 >
                   <Icon
-                    color="gray.400"
+                    color={eyeIconColor}
                     _hover={{ cursor: 'pointer' }}
                     as={show ? RiEyeCloseLine : MdOutlineRemoveRedEye}
                     onClick={handleClick}
@@ -167,7 +180,7 @@ export const SignIn = ({ onClose }: SignInProps) => {
                     htmlFor="remember-login"
                     mb="0"
                     fontWeight="normal"
-                    color="navy.700"
+                    color={labelColor}
                     fontSize="sm"
                   >
                     Keep me logged in
@@ -208,7 +221,7 @@ export const SignIn = ({ onClose }: SignInProps) => {
         </FormProvider>
         <Flex align="center" mb="25px">
           <HSeparator />
-          <Text color="gray.500" mx="14px">
+          <Text color={separatorColor} mx="14px">
             or
           </Text>
           <HSeparator />
@@ -219,11 +232,11 @@ export const SignIn = ({ onClose }: SignInProps) => {
           py="15px"
           h="50px"
           borderRadius="16px"
-          bg="white"
+          bg={googleBtnBg}
           border="1px solid"
-          borderColor="gray.200"
-          _hover={{ bg: 'gray.50' }}
-          _active={{ bg: 'white' }}
+          borderColor={googleBtnBorder}
+          _hover={{ bg: googleBtnHover }}
+          _active={{ bg: googleBtnActive }}
           _focus={{ boxShadow: 'none' }}
           // onClick={() => handleGoogleSignIn()}
           isLoading={isSubmitting}

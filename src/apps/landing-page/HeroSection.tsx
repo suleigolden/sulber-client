@@ -24,12 +24,14 @@ export const HeroSection = () => {
     const [serviceLocation, setServiceLocation] = useState<string>("");
     const [serviceType, setServiceType] = useState<ProviderServiceType | "">("");
 
-    const bgBase = useColorModeValue("white", "darkBg");
+    const bgBase = useColorModeValue("white", "#0b1437");
     const headlineDark = useColorModeValue("gray.800", "white");
     const bodyColor = useColorModeValue("gray.700", "gray.300");
-    const inputBg = useColorModeValue("gray.50", "gray.700");
-    const inputBorder = useColorModeValue("gray.200", "gray.600");
-    const availabilityColor = useColorModeValue("gray.600", "gray.400");
+    const inputBg = useColorModeValue("gray.50", "whiteAlpha.200");
+    const inputBorder = useColorModeValue("gray.200", "whiteAlpha.300");
+    const searchRowBg = useColorModeValue("#FFFFFF", "#0b1437");
+    const searchRowBorder = useColorModeValue("#E0E0E0", "whiteAlpha.300");
+    const benefitIconColor = useColorModeValue("gray.500", "gray.400");
 
     const handleSearch = () => {
         navigate("/car-service", {
@@ -113,11 +115,12 @@ export const HeroSection = () => {
                             direction={{ base: "column", md: "row" }}
                             gap={3}
                             mb={8}
-                            bg={'#FFFFFF'}
+                            bg={searchRowBg}
                             p={2}
-                            border={'1px solid #E0E0E0'}
-                            borderRadius={'10px'}
-                            maxW={'710px'}
+                            border="1px solid"
+                            borderColor={searchRowBorder}
+                            borderRadius="10px"
+                            maxW="710px"
                         >
                             <Box flex={{ base: "1 1 100%", md: "0 0 300px" }}>
                                 <LocationSearchInput
@@ -177,7 +180,7 @@ export const HeroSection = () => {
                             align="center"
                         >
                             <Flex align="center" gap={2}>
-                                <Box color="gray.500">
+                                <Box color={benefitIconColor}>
                                     <FiCalendar size={18} />
                                 </Box>
                                 <Text
@@ -189,7 +192,7 @@ export const HeroSection = () => {
                                 </Text>
                             </Flex>
                             <Flex align="center" gap={2}>
-                                <Box color="gray.500">
+                                <Box color={benefitIconColor}>
                                     <FiCheck size={18} />
                                 </Box>
                                 <Text
@@ -201,7 +204,7 @@ export const HeroSection = () => {
                                 </Text>
                             </Flex>
                             <Flex align="center" gap={2}>
-                                <Box color="gray.500">
+                                <Box color={benefitIconColor}>
                                     <FiShield size={18} />
                                 </Box>
                                 <Text

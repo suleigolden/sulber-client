@@ -150,6 +150,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
     service: ProviderJobService;
     providerName: string;
   } | null>(null);
+  const [expandedAvailabilityId, setExpandedAvailabilityId] = useState<string | null>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
 
   const serviceTypeDefinition = ProviderServiceTypesList.services.find(
@@ -326,10 +327,10 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                     <Text fontWeight="semibold" color={valueColor} fontSize="md" noOfLines={1}>
                       {providerName}
                     </Text>
-                    <Text fontSize="sm"  color={labelColor}>
+                    <Text fontSize="md"  color={labelColor}>
                       {distanceKm < 1 ? `${(distanceKm * 1000).toFixed(0)} m away` : `${distanceKm.toFixed(1)} km away`}
                       {" · "}
-                      Rating: —
+                      Rating: ***
                     </Text>
                   </VStack>
                 </HStack>
@@ -351,10 +352,11 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                 </Box>
 
                 <Button
-                  as="button"
-                  type="button"
-                  fontSize="sm"
-                  fontWeight="medium"
+                   as="button"
+                   type="button"
+                   fontSize="md"
+                   variant="outline"
+                   fontWeight="medium"
                   _hover={{ color: "brand.600" }}
                   mb={2}
                   onClick={() => {
@@ -365,33 +367,47 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                   See What's Included ?
                 </Button>
 
-                <Text fontSize="md" color={priceLabelColor} fontWeight="medium" mb={2}>
-                  Availability
-                </Text>
-                <Wrap spacing={2}>
-                  {toAvailabilitySlots(service.days_of_week_available ?? []).length > 0 ? (
-                    toAvailabilitySlots(service.days_of_week_available ?? []).map((slot) => (
-                      <WrapItem key={slot.day}>
-                        <Badge
-                          colorScheme="brand"
-                          variant="subtle"
-                          px={2}
-                          py={1}
-                          borderRadius="md"
-                          fontSize="xs"
-                          fontWeight="medium"
-                          whiteSpace="normal"
-                        >
-                          {formatAvailabilityBadge(slot)}
-                        </Badge>
-                      </WrapItem>
-                    ))
-                  ) : (
-                    <Badge colorScheme="gray" variant="subtle" px={2} py={1} borderRadius="md" fontSize="xs">
-                      Not set
-                    </Badge>
-                  )}
-                </Wrap>
+                <Button
+                  ml={4}
+                  mt={expandedAvailabilityId === service.id ? 0 : -2}
+                  as="button"
+                  type="button"
+                  fontSize="md"
+                  variant="outline"
+                  fontWeight="medium"
+                  mb={expandedAvailabilityId === service.id ? 2 : 0}
+                  onClick={() =>
+                    setExpandedAvailabilityId((id) => (id === service.id ? null : service.id))
+                  }
+                >
+                  {expandedAvailabilityId === service.id ? "Hide availability" : "See Availability"}
+                </Button>
+                {expandedAvailabilityId === service.id && (
+                  <Wrap spacing={2} mb={2}>
+                    {toAvailabilitySlots(service.days_of_week_available ?? []).length > 0 ? (
+                      toAvailabilitySlots(service.days_of_week_available ?? []).map((slot) => (
+                        <WrapItem key={slot.day}>
+                          <Badge
+                            colorScheme="brand"
+                            variant="subtle"
+                            px={2}
+                            py={1}
+                            borderRadius="md"
+                            fontSize="xs"
+                            fontWeight="medium"
+                            whiteSpace="normal"
+                          >
+                            {formatAvailabilityBadge(slot)}
+                          </Badge>
+                        </WrapItem>
+                      ))
+                    ) : (
+                      <Badge colorScheme="gray" variant="subtle" px={2} py={1} borderRadius="md" fontSize="xs">
+                        Not set
+                      </Badge>
+                    )}
+                  </Wrap>
+                )}
 
                 <Button
                   size="sm"

@@ -150,6 +150,9 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
   const listBg = useColorModeValue("gray.50", "#0b1437");
   const mapBg = useColorModeValue("gray.100", "gray.800");
   const priceLabelColor = useColorModeValue("gray.500", "gray.400");
+  const priceBoxBg = useColorModeValue("brand.50", "whiteAlpha.100");
+  const priceBoxBorder = useColorModeValue("brand.200", "brand.500");
+  const priceValueColor = useColorModeValue("brand.600", "brand.300");
 
   const fetchProviders = useCallback(async () => {
     if (!data.serviceLocationData || !data.serviceType) return;
@@ -316,14 +319,23 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                   </VStack>
                 </HStack>
 
-                <Text fontSize="sm"  color={priceLabelColor} fontWeight="medium" mb={1}>
-                  Price
-                </Text>
-                <Text fontSize="sm" color={valueColor} mb={3}>
-                  {formatPrices(service)}
-                </Text>
+                <Box
+                  p={3}
+                  borderRadius="lg"
+                  bg={priceBoxBg}
+                  borderWidth="1px"
+                  borderColor={priceBoxBorder}
+                  mb={3}
+                >
+                  <Text fontSize="md" color={priceLabelColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" mb={1}>
+                    Price
+                  </Text>
+                  <Text fontSize="md" fontWeight="bold" color={priceValueColor}>
+                    {formatPrices(service)}
+                  </Text>
+                </Box>
 
-                <Text fontSize="sm"  color={priceLabelColor} fontWeight="medium" mb={2}>
+                <Text fontSize="md" color={priceLabelColor} fontWeight="medium" mb={2}>
                   Availability
                 </Text>
                 <Wrap spacing={2}>

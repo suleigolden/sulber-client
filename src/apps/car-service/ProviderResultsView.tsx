@@ -4,6 +4,7 @@ import {
   Badge,
   Box,
   Button,
+  Checkbox,
   Flex,
   Heading,
   HStack,
@@ -47,9 +48,73 @@ function haversineKm(
   return R * c;
 }
 
+const CAR_TYPES = [
+  { id: "sedan", label: "Sedan", key: "sedan_price" as const },
+  { id: "suv", label: "SUV", key: "suv_price" as const },
+  { id: "truck", label: "Truck", key: "truck_price" as const },
+  { id: "van", label: "Van", key: "van_price" as const },
+] as const;
+
+const ADDON_LABELS: Record<string, string> = {
+  interior_deep_cleaning: "Interior deep cleaning",
+  wax_polish: "Wax polish",
+  engine_bay_cleaning: "Engine bay cleaning",
+  odor_removal: "Odor removal",
+  multiple_vehicles_discount: "Multiple vehicles discount",
+};
+
+function isCarWashService(serviceType: string): boolean {
+  return (serviceType ?? "").toLowerCase().includes("car");
+}
+
+function getCarTypeOptions(service: ProviderJobService): { id: string; label: string; price: number }[] {
+  if (!isCarWashService(service.service_type ?? "")) return [];
+  return CAR_TYPES.filter((ct) => {
+    const p = service[ct.key];
+    return p != null && Number(p) > 0;
+  }).map((ct) => ({ id: ct.id, label: ct.label, price: Number(service[ct.key]) }));
+}
+
+function getAddOnOptions(service: ProviderJobService): { id: string; label: string; price: number }[] {
+  const raw = service.add_on_prices;
+  if (!Array.isArray(raw) || raw.length === 0) return [];
+  const out: { id: string; label: string; price: number }[] = [];
+  for (const entry of raw) {
+    if (entry && typeof entry === "object") {
+      for (const key of Object.keys(entry)) {
+        const val = (entry as Record<string, { price?: number }>)[key]?.price;
+        if (val != null) {
+          out.push({ id: key, label: ADDON_LABELS[key] ?? key, price: Number(val) });
+        }
+      }
+    }
+  }
+  return out;
+}
+
+function getBasePriceCents(service: ProviderJobService, carType: string | null): number {
+  if (isCarWashService(service.service_type ?? "") && carType) {
+    const ct = CAR_TYPES.find((c) => c.id === carType);
+    if (ct) {
+      const p = service[ct.key];
+      if (p != null) return Number(p);
+    }
+  }
+  return Number(service.price) || 0;
+}
+
+function getAddOnPriceCents(service: ProviderJobService, addOnId: string): number {
+  const raw = service.add_on_prices;
+  if (!Array.isArray(raw)) return 0;
+  for (const entry of raw) {
+    const val = (entry as Record<string, { price?: number }>)[addOnId]?.price;
+    if (val != null) return Number(val);
+  }
+  return 0;
+}
+
 function formatPrices(service: ProviderJobService): string {
-  const isCarWash =
-    service.service_type?.toLowerCase().includes("car") ?? false;
+  const isCarWash = isCarWashService(service.service_type ?? "");
   if (isCarWash && (service.sedan_price || service.suv_price || service.truck_price || service.van_price)) {
     const parts: string[] = [];
     if (service.sedan_price) parts.push(`Sedan: $${(service.sedan_price / 100).toFixed(0)}`);
@@ -151,7 +216,22 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
     providerName: string;
   } | null>(null);
   const [expandedAvailabilityId, setExpandedAvailabilityId] = useState<string | null>(null);
+  const [cardSelections, setCardSelections] = useState<
+    Record<string, { carType: string | null; addOns: string[] }>
+  >({});
   const cancelRef = useRef<HTMLButtonElement>(null);
+
+  const getSelection = (serviceId: string) =>
+    cardSelections[serviceId] ?? { carType: null, addOns: [] };
+  const setSelection = (
+    serviceId: string,
+    patch: Partial<{ carType: string | null; addOns: string[] }>
+  ) => {
+    setCardSelections((prev) => ({
+      ...prev,
+      [serviceId]: { ...getSelection(serviceId), ...patch },
+    }));
+  };
 
   const serviceTypeDefinition = ProviderServiceTypesList.services.find(
     (s) => s.type === data.serviceType
@@ -217,8 +297,36 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
     fetchProviders();
   }, []);
 
-  const handleSendRequest = async (providerId: string, service: ProviderJobService) => {
+  const computeTotalAndAddOns = (
+    service: ProviderJobService,
+    carType: string | null,
+    addOns: string[]
+  ): { totalCents: number; addOnPrices: Record<string, { price: number }>[] } => {
+    const base = getBasePriceCents(service, carType);
+    const addOnPrices: Record<string, { price: number }>[] = [];
+    let addOnTotal = 0;
+    for (const id of addOns) {
+      const p = getAddOnPriceCents(service, id);
+      if (p > 0) {
+        addOnPrices.push({ [id]: { price: p } });
+        addOnTotal += p;
+      }
+    }
+    return { totalCents: base + addOnTotal, addOnPrices };
+  };
+
+  const handleSendRequest = async (
+    providerId: string,
+    service: ProviderJobService,
+    selection: { carType: string | null; addOns: string[] }
+  ) => {
     if (!user?.id || !data.serviceLocationData) return;
+    const isCarWash = isCarWashService(service.service_type ?? "");
+    const carTypeOptions = getCarTypeOptions(service);
+    if (isCarWash && carTypeOptions.length > 0 && !selection.carType) {
+      showToast("Error", "Please select a car type", "error");
+      return;
+    }
     setSendingId(providerId);
     try {
       const address = {
@@ -241,7 +349,11 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
       if (data.serviceRequestType === "monthly") {
         notesParts.push("Monthly subscription service (4 times per month)");
       }
-      const priceCents = String(service.price ?? 0);
+      const { totalCents, addOnPrices } = computeTotalAndAddOns(
+        service,
+        selection.carType,
+        selection.addOns
+      );
 
       const job = await api.service("job").create({
         customer_id: user.id,
@@ -250,7 +362,8 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
         address,
         scheduled_start: scheduledStart,
         scheduled_end: scheduledEnd,
-        total_price_cents: priceCents,
+        total_price_cents: String(totalCents),
+        add_on_prices: addOnPrices.length > 0 ? addOnPrices : undefined,
         currency: "CAD",
         notes: notesParts.length > 0 ? notesParts.join(". ") : undefined,
       });
@@ -331,25 +444,125 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                       {distanceKm < 1 ? `${(distanceKm * 1000).toFixed(0)} m away` : `${distanceKm.toFixed(1)} km away`}
                       {" · "}
                       Rating: ***
+                      {" · "}
+                      Completed: **
                     </Text>
                   </VStack>
                 </HStack>
 
-                <Box
-                  p={3}
-                  borderRadius="lg"
-                  bg={priceBoxBg}
-                  borderWidth="1px"
-                  borderColor={priceBoxBorder}
-                  mb={3}
-                >
-                  <Text fontSize="md" color={priceLabelColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" mb={1}>
-                    Price
-                  </Text>
-                  <Text fontSize="md" fontWeight="bold" color={priceValueColor}>
-                    {formatPrices(service)}
-                  </Text>
-                </Box>
+                {(() => {
+                  const selection = getSelection(service.id);
+                  const carTypeOptions = getCarTypeOptions(service);
+                  const addOnOptions = getAddOnOptions(service);
+                  const isCarWash = isCarWashService(service.service_type ?? "");
+                  const { totalCents } = computeTotalAndAddOns(
+                    service,
+                    selection.carType,
+                    selection.addOns
+                  );
+                  const baseCents = getBasePriceCents(service, selection.carType);
+                  const showCarType = isCarWash && carTypeOptions.length > 0;
+                  const showAddOns = addOnOptions.length > 0;
+                  return (
+                    <>
+                      {showCarType && (
+                        <Box mb={3}>
+                          <Text fontSize="sm" color={priceLabelColor} fontWeight="medium" mb={2}>
+                            Car type
+                          </Text>
+                          <VStack align="stretch" spacing={2}>
+                            {carTypeOptions.map((ct) => (
+                              <Checkbox
+                                key={ct.id}
+                                size="sm"
+                                colorScheme="brand"
+                                isChecked={selection.carType === ct.id}
+                                onChange={() =>
+                                  setSelection(service.id, {
+                                    carType: selection.carType === ct.id ? null : ct.id,
+                                  })
+                                }
+                              >
+                                <Text fontSize="sm" color={valueColor}>
+                                  {ct.label} — ${(ct.price / 100).toFixed(2)}
+                                </Text>
+                              </Checkbox>
+                            ))}
+                          </VStack>
+                        </Box>
+                      )}
+
+                      {showAddOns && (
+                        <Box mb={3}>
+                          <Text fontSize="sm" color={priceLabelColor} fontWeight="medium" mb={2}>
+                            Add-ons
+                          </Text>
+                          <VStack align="stretch" spacing={2}>
+                            {addOnOptions.map((addon) => (
+                              <Checkbox
+                                key={addon.id}
+                                size="sm"
+                                colorScheme="brand"
+                                isChecked={selection.addOns.includes(addon.id)}
+                                onChange={() => {
+                                  const next = selection.addOns.includes(addon.id)
+                                    ? selection.addOns.filter((x) => x !== addon.id)
+                                    : [...selection.addOns, addon.id];
+                                  setSelection(service.id, { addOns: next });
+                                }}
+                              >
+                                <Text fontSize="sm" color={valueColor}>
+                                  {addon.label} — ${(addon.price / 100).toFixed(2)}
+                                </Text>
+                              </Checkbox>
+                            ))}
+                          </VStack>
+                        </Box>
+                      )}
+
+                      {!showCarType && (
+                        <Box
+                          p={3}
+                          borderRadius="lg"
+                          bg={priceBoxBg}
+                          borderWidth="1px"
+                          borderColor={priceBoxBorder}
+                          mb={3}
+                        >
+                          <Text fontSize="xs" color={priceLabelColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" mb={1}>
+                            Price
+                          </Text>
+                          <Text fontSize="md" fontWeight="bold" color={priceValueColor}>
+                            {formatPrices(service)}
+                          </Text>
+                        </Box>
+                      )}
+
+                      <Box
+                        p={3}
+                        borderRadius="lg"
+                        bg={priceBoxBg}
+                        borderWidth="1px"
+                        borderColor={priceBoxBorder}
+                        mb={3}
+                      >
+                        <Text fontSize="xs" color={priceLabelColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" mb={1}>
+                          Total price
+                        </Text>
+                        <Text fontSize="lg" fontWeight="bold" color={priceValueColor}>
+                          ${(totalCents / 100).toFixed(2)}
+                        </Text>
+                        {showCarType && selection.carType && (
+                          <Text fontSize="xs" color={labelColor} mt={1}>
+                            Base: ${(baseCents / 100).toFixed(2)}
+                            {selection.addOns.length > 0 &&
+                              ` · Add-ons: $${((totalCents - baseCents) / 100).toFixed(2)}`}
+                          </Text>
+                        )}
+                      </Box>
+                    </>
+                  );
+                })()}
 
                 <Button
                    as="button"
@@ -414,7 +627,9 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                   colorScheme="brand"
                   mt={4}
                   w="full"
-                  onClick={() => handleSendRequest(service.provider_id, service)}
+                  onClick={() =>
+                    handleSendRequest(service.provider_id, service, getSelection(service.id))
+                  }
                   isLoading={sendingId === service.provider_id}
                   loadingText="Sending..."
                 >
@@ -443,7 +658,11 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
           }}
           onSendRequest={() => {
             if (selectedForDetails) {
-              handleSendRequest(selectedForDetails.service.provider_id, selectedForDetails.service);
+              handleSendRequest(
+                selectedForDetails.service.provider_id,
+                selectedForDetails.service,
+                getSelection(selectedForDetails.service.id)
+              );
               setDetailsDialogOpen(false);
               setSelectedForDetails(null);
             }

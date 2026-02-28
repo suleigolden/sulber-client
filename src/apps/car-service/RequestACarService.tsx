@@ -10,7 +10,8 @@ import { useState, useEffect } from "react";
 import { ProviderServiceType } from "@suleigolden/sulber-api-client";
 import { LocationMap } from "~/components/location-map/LocationMap";
 import { useCurrentLocation } from "~/hooks/use-current-location";
-import { ConfirmServiceRequest } from "./ConfirmServiceRequest";
+import { ConfirmServiceRequest, type ConfirmServiceRequestData } from "./ConfirmServiceRequest";
+import { ProviderResultsView } from "./ProviderResultsView";
 import { RequestServiceCard } from "./RequestServiceCard";
 
 type ServiceRequestType = "one-time" | "monthly";
@@ -18,6 +19,7 @@ type ServiceRequestType = "one-time" | "monthly";
 export const RequestACarService = () => {
     const { currentLocation, isLoadingLocation, locationError } = useCurrentLocation();
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const [providerResultsData, setProviderResultsData] = useState<ConfirmServiceRequestData | null>(null);
     const [serviceLocation, setServiceLocation] = useState<string>("");
     const [serviceLocationData, setServiceLocationData] = useState<{
         lat: number;
@@ -69,8 +71,16 @@ export const RequestACarService = () => {
         };
 
     const handleSearch = () => {
-        // Open the confirmation modal
         onOpen();
+    };
+
+    const handleFindProviders = (data: ConfirmServiceRequestData) => {
+        setProviderResultsData(data);
+        onClose();
+    };
+
+    const handleBackFromProviderResults = () => {
+        setProviderResultsData(null);
     };
 
     const isSearchDisabled = !serviceLocation || !serviceDate || !serviceTime || !serviceType;
@@ -82,6 +92,14 @@ export const RequestACarService = () => {
     const loadingStateBg = useColorModeValue("gray.200", "whiteAlpha.200");
     const loadingTextColor = useColorModeValue("gray.500", "gray.400");
     const loadingSubtextColor = useColorModeValue("gray.400", "gray.500");
+
+    if (providerResultsData) {
+        return (
+            <Box w="full" minH="100vh" bg={pageBg}>
+                <ProviderResultsView data={providerResultsData} onBack={handleBackFromProviderResults} />
+            </Box>
+        );
+    }
 
     return (
         <Box w="full" minH="100vh" bg={pageBg}>
@@ -184,16 +202,17 @@ export const RequestACarService = () => {
             </Flex>
 
             {/* Confirm Service Request Modal */}
-                    <ConfirmServiceRequest
-                        isOpen={isOpen}
-                        onClose={onClose}
-                        serviceLocation={serviceLocation}
-                        serviceLocationData={serviceLocationData}
-                        serviceDate={serviceDate}
-                        serviceTime={serviceTime}
-                        serviceType={serviceType}
-                        serviceRequestType={serviceRequestType}
-                    />
+            <ConfirmServiceRequest
+                isOpen={isOpen}
+                onClose={onClose}
+                serviceLocation={serviceLocation}
+                serviceLocationData={serviceLocationData}
+                serviceDate={serviceDate}
+                serviceTime={serviceTime}
+                serviceType={serviceType}
+                serviceRequestType={serviceRequestType}
+                onFindProviders={handleFindProviders}
+            />
         </Box>
     );
 };

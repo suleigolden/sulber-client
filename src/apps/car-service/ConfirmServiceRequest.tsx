@@ -15,29 +15,21 @@ import {
   FormControl,
   FormLabel,
   Button,
-  Badge,
-  Wrap,
-  WrapItem,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { api, 
-    CustomerVehicle, 
-    ProviderServiceType, 
-    ProviderServiceTypesList,
-   } from "@suleigolden/sulber-api-client";
+import {
+  CustomerVehicle,
+  ProviderServiceType,
+  ProviderServiceTypesList,
+} from "@suleigolden/sulber-api-client";
 import { useCustomerVehicles } from "~/hooks/use-customer-vehicles";
-import { useUser } from "~/hooks/use-user";
 import { useState, useEffect } from "react";
 import { CustomToast } from "~/hooks/CustomToast";
-import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
-import { useNavigate } from "react-router-dom";
 
 
 type ServiceRequestType = "one-time" | "monthly";
 
-type ConfirmServiceRequestProps = {
-  isOpen: boolean;
-  onClose: () => void;
+export type ConfirmServiceRequestData = {
   serviceLocation: string;
   serviceLocationData: {
     lat: number;
@@ -53,6 +45,19 @@ type ConfirmServiceRequestProps = {
   serviceTime: string;
   serviceType: ProviderServiceType | "";
   serviceRequestType: ServiceRequestType;
+  selectedVehicleId: string;
+};
+
+type ConfirmServiceRequestProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  serviceLocation: string;
+  serviceLocationData: ConfirmServiceRequestData["serviceLocationData"];
+  serviceDate: string;
+  serviceTime: string;
+  serviceType: ProviderServiceType | "";
+  serviceRequestType: ServiceRequestType;
+  onFindProviders: (data: ConfirmServiceRequestData) => void;
 };
 
 
@@ -65,13 +70,11 @@ export const ConfirmServiceRequest = ({
   serviceTime,
   serviceType,
   serviceRequestType,
+  onFindProviders,
 }: ConfirmServiceRequestProps) => {
   const { vehicles, isLoading: isLoadingVehicles } = useCustomerVehicles();
-  const { user } = useUser();
-  const navigate = useNavigate();
   const showToast = CustomToast();
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const requiresVehicle = Boolean(serviceType && serviceType.includes("CAR"));
 
   // Reset vehicle selection when modal closes or service type changes
@@ -97,110 +100,36 @@ export const ConfirmServiceRequest = ({
     return parts.length > 0 ? parts.join(" ") : "Unnamed Vehicle";
   };
 
-  const handleConfirm = async () => {
-    if (!user?.id) {
-      showToast("Error", "User not authenticated", "error");
-      return;
-    }
-
+  const handleFindProviders = () => {
     if (!serviceType) {
       showToast("Error", "Service type is required", "error");
       return;
     }
-
     if (!serviceLocationData) {
       showToast("Error", "Service location is required", "error");
       return;
     }
-
-    // Validate address fields
     if (!serviceLocationData.city && !serviceLocationData.state && !serviceLocationData.country) {
       showToast("Error", "Please provide a complete address", "error");
       return;
     }
-
-    setIsSubmitting(true);
-
-    try {
-      // Parse address from location data
-      const address = {
-        street: serviceLocationData.street || serviceLocationData.address || "",
-        city: serviceLocationData.city || "",
-        state: serviceLocationData.state || "",
-        country: serviceLocationData.country || "",
-        postal_code: serviceLocationData.postalCode || "",
-      };
-
-      // Combine date and time for scheduledStart
-      let scheduledStart: string | undefined;
-      let scheduledEnd: string | undefined;
-
-      if (serviceDate && serviceTime) {
-        const startDateTime = new Date(`${serviceDate}T${serviceTime}`);
-        scheduledStart = startDateTime.toISOString();
-        
-        // Set end time to 2 hours after start (default duration)
-        const endDateTime = new Date(startDateTime);
-        endDateTime.setHours(endDateTime.getHours() + 2);
-        scheduledEnd = endDateTime.toISOString();
-      }
-
-      // Calculate price in cents (as string to match API)
-      const selectedService = ProviderServiceTypesList.services.find(
-        (s) => s.type === serviceType
-      );
-      const price = formatNumberWithCommas(selectedService?.price || 0);
-
-      // Build notes
-      const notesParts: string[] = [];
-      if (serviceRequestType === "monthly") {
-        notesParts.push("Monthly subscription service (4 times per month)");
-      }
-      if (requiresVehicle && selectedVehicleId) {
-        const vehicle = vehicles.find((v) => v.id === selectedVehicleId);
-        if (vehicle) {
-          notesParts.push(`Vehicle: ${formatVehicleLabel(vehicle)}`);
-        }
-      }
-
-      // Create job
-      const jobData = {
-        customer_id: user.id,
-        serviceType: serviceType as ProviderServiceType,
-        address,
-        scheduledStart,
-        scheduledEnd,
-        totalprice: price,
-        currency: "CAD",
-        notes: notesParts.length > 0 ? notesParts.join(". ") : undefined,
-      };
-
-      // Create job using the API client
-      const job = await api.service('job').create(jobData);
-      if (!job) {
-        throw new Error("Failed to create job");
-      }
-
-      showToast("Success", "Service request created successfully!", "success");
-      onClose();
-      
-      // Redirect to waiting page with job ID
-      if (user?.id && user?.role) {
-        navigate(`/${user.role}/${user.id}/waiting-to-connect-with-provider?jobId=${job.id}`);
-      }
-    } catch (error: any) {
-      console.error("Error creating job:", error);
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to create service request. Please try again.";
-      showToast("Error", errorMessage, "error");
-    } finally {
-      setIsSubmitting(false);
+    if (requiresVehicle && !selectedVehicleId) {
+      showToast("Error", "Please select a vehicle", "error");
+      return;
     }
+    onFindProviders({
+      serviceLocation,
+      serviceLocationData,
+      serviceDate,
+      serviceTime,
+      serviceType,
+      serviceRequestType,
+      selectedVehicleId,
+    });
+    onClose();
   };
 
-  const isConfirmDisabled = requiresVehicle && !selectedVehicleId;
+  const isFindProvidersDisabled = requiresVehicle && !selectedVehicleId;
 
   const modalBg = useColorModeValue("white", "#0b1437");
   const headerColor = useColorModeValue(undefined, "white");
@@ -255,62 +184,6 @@ export const ConfirmServiceRequest = ({
                 </HStack>
               </VStack>
             </Box>
-            <Divider />
-
-            {/* Service Included Items */}
-            {selectedService?.included && selectedService.included.length > 0 && (
-              <Box>
-                <Text fontSize="sm" fontWeight="bold" color={sectionTitleColor} mb={3}>
-                  What's Included
-                </Text>
-                <Wrap spacing={2}>
-                  {selectedService.included.map((item, index) => (
-                    <WrapItem key={index}>
-                      <Badge
-                        colorScheme="brand"
-                        variant="outline"
-                        px={3}
-                        py={1.5}
-                        borderRadius="lg"
-                        fontSize="xs"
-                        fontWeight="medium"
-                        textTransform="none"
-                      >
-                        {item}
-                      </Badge>
-                    </WrapItem>
-                  ))}
-                </Wrap>
-              </Box>
-            )}
-
-            {/* Service Requirements */}
-            {selectedService?.requirements_for_customer && selectedService.requirements_for_customer.length > 0 && (
-              <Box>
-                <Text fontSize="sm" fontWeight="bold" color={sectionTitleColor} mb={3}>
-                  Customer Requirements
-                </Text>
-                <Wrap spacing={2}>
-                  {selectedService.requirements_for_customer.map((requirement, index) => (
-                    <WrapItem key={index}>
-                      <Badge
-                        colorScheme="brand"
-                        variant="outline"
-                        px={3}
-                        py={1.5}
-                        borderRadius="lg"
-                        fontSize="xs"
-                        fontWeight="medium"
-                        textTransform="none"
-                      >
-                        {requirement}
-                      </Badge>
-                    </WrapItem>
-                  ))}
-                </Wrap>
-              </Box>
-            )}
-
             <Divider />
 
             {/* Vehicle Selection (only for car-related services) */}
@@ -368,13 +241,6 @@ export const ConfirmServiceRequest = ({
               </FormControl>
             )}
 
-              {/* Service Price */}
-              <Box>
-                <Text fontSize="sm" fontWeight="bold" color={sectionTitleColor} mb={3}>
-                  Price: ${selectedService?.price || 0}
-                </Text>
-              </Box>
-
             {/* Action Buttons */}
             <HStack spacing={3} pt={2}>
               <Button variant="outline" onClick={onClose} flex={1}>
@@ -382,13 +248,11 @@ export const ConfirmServiceRequest = ({
               </Button>
               <Button
                 colorScheme="brand"
-                onClick={handleConfirm}
+                onClick={handleFindProviders}
                 flex={1}
-                isDisabled={isConfirmDisabled || isSubmitting}
-                isLoading={isSubmitting}
-                loadingText="Creating..."
+                isDisabled={isFindProvidersDisabled}
               >
-                Confirm Request
+                Find Providers
               </Button>
             </HStack>
           </VStack>

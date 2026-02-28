@@ -33,12 +33,10 @@ export const ProviderProfileSettings = () => {
     setIsSubmitting(true);
     try {
       // Only submit the form for the currently active tab
-      // tabIndex 0 = Location, 1 = Services, 2 = Personal Information
+      // tabIndex 0 = Location, 1 = Personal Information (Services tab is commented out)
       if (tabIndex === 0 && locationFormRef.current) {
         await locationFormRef.current.submitForm();
-      } else if (tabIndex === 1 && servicesFormRef.current) {
-        await servicesFormRef.current.submitForm();
-      } else if (tabIndex === 2 && userInfoFormRef.current) {
+      } else if (tabIndex === 1 && userInfoFormRef.current) {
         await userInfoFormRef.current.submitForm();
       }
     } catch (error) {

@@ -27,7 +27,7 @@ export const AvailableJobsTab = ({
 }: AvailableJobsTabProps) => {
   const { userProfile } = useUserProfile();
   const providerAddress = userProfile?.address
-    ? [userProfile.address.street, userProfile.address.city, userProfile.address.state, userProfile.address.country, userProfile.address.postalCode]
+    ? [userProfile.address.street, userProfile.address.city, userProfile.address.state, userProfile.address.country, userProfile.address.postal_code]
         .filter(Boolean)
         .join(", ")
     : null;

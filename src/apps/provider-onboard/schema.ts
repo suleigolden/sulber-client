@@ -1,6 +1,8 @@
 import { array, InferType, object, string } from "yup";
 
 export const ProviderOnboardingSchema =  object().shape({
+  first_name: string().required("First name is required").trim(),
+  last_name: string().required("Last name is required").trim(),
   date_of_birth: string().optional(),
   phone_number: string().optional(),
   gender: string().optional(),

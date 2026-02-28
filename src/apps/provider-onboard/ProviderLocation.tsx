@@ -43,7 +43,7 @@ export const ProviderLocation = forwardRef(
       city?: string;
       state?: string;
       country?: string;
-      postalCode?: string;
+      postal_code?: string;
     } | null>(null);
     const {
       formState: { errors },
@@ -58,7 +58,7 @@ export const ProviderLocation = forwardRef(
         savedAddress.city,
         savedAddress.state,
         savedAddress.country,
-        savedAddress.postalCode,
+        savedAddress.postal_code,
       ]
         .filter(Boolean)
         .join(', ')
@@ -104,8 +104,8 @@ export const ProviderLocation = forwardRef(
         if (savedAddress.country) {
           setValue('address.country', savedAddress.country);
         }
-        if (savedAddress.postalCode) {
-          setValue('address.postal_code', savedAddress.postalCode);
+        if (savedAddress.postal_code) {
+          setValue('address.postal_code', savedAddress.postal_code);
         }
       }
     }, [savedAddress, setValue]);
@@ -122,8 +122,8 @@ export const ProviderLocation = forwardRef(
         if (selectedLocation.country) {
           setValue('address.country', selectedLocation.country);
         }
-        if (selectedLocation.postalCode) {
-          setValue('address.postal_code', selectedLocation.postalCode);
+        if (selectedLocation.postal_code) {
+          setValue('address.postal_code', selectedLocation.postal_code);
         }
       }
     }, [selectedLocation, setValue]);

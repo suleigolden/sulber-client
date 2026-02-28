@@ -55,7 +55,7 @@ const AvatarUploadSection = ({ userProfile }: AvatarUploadSectionProps) => {
           <Button size="sm" onClick={onOpen} isLoading={isUploading}>
             {avatarUrl ? "Change Photo" : "Upload Photo"}
           </Button>
-            <Text fontSize="xs" color="gray.500">
+          <Text fontSize="xs" color="gray.500">
             PNG, JPG or JPEG (max. 5MB)
           </Text>
         </VStack>
@@ -84,12 +84,16 @@ export const UserInformation = forwardRef<
   } = methods;
 
   // Watch required fields to determine if user info is valid
+  const firstName = watch("first_name");
+  const lastName = watch("last_name");
   const avatarUrl = watch("avatar_url");
   const dateOfBirth = watch("date_of_birth");
   const phoneNumber = watch("phone_number");
   const gender = watch("gender");
 
   const isUserInfoValid = !!(
+    firstName?.trim() &&
+    lastName?.trim() &&
     avatarUrl &&
     dateOfBirth &&
     phoneNumber &&
@@ -104,15 +108,19 @@ export const UserInformation = forwardRef<
   // Initialize form with existing user profile data
   useEffect(() => {
     if (userProfile) {
-      setValue("avatar_url", userProfile.avatar_url || "");
+      const raw = userProfile as Record<string, unknown>;
+      setValue("first_name", (raw.first_name ?? raw.firstName ?? "") as string);
+      setValue("last_name", (raw.last_name ?? raw.lastName ?? "") as string);
+      setValue("avatar_url", (userProfile.avatar_url ?? (raw.avatar_url as string)) || "");
       // Format date for input field (YYYY-MM-DD)
-      const dateOfBirth = userProfile.date_of_birth
-        ? new Date(userProfile.date_of_birth).toISOString().split('T')[0]
+      const dob = userProfile.date_of_birth ?? (raw.date_of_birth as string);
+      const dateOfBirth = dob
+        ? new Date(dob).toISOString().split("T")[0]
         : "";
       setValue("date_of_birth", dateOfBirth);
-      setValue("phone_number", userProfile.phone_number || "");
-      setValue("gender", userProfile.gender || "");
-      setValue("bio", "");
+      setValue("phone_number", String(userProfile.phone_number ?? raw.phone_number ?? "").trim() || "");
+      setValue("gender", String(userProfile.gender ?? raw.gender ?? ""));
+      setValue("bio", String(userProfile.bio ?? raw.bio ?? ""));
     }
   }, [userProfile, setValue]);
 
@@ -148,7 +156,23 @@ export const UserInformation = forwardRef<
           </Box>
           <VStack spacing={6} w="full" align="stretch" p={{ base: 6, md: 10 }} border="1px #333333 solid" borderRadius="0 0 8px 8px">
             <AvatarUploadSection userProfile={userProfile as UserProfile} />
+            <CustomInputField
+              type="text"
+              label="First Name *"
+              registerName="first_name"
+              isError={errors?.first_name}
+              placeholder="Enter your first name"
+              autoComplete="given-name"
+            />
 
+            <CustomInputField
+              type="text"
+              label="Last Name *"
+              registerName="last_name"
+              isError={errors?.last_name}
+              placeholder="Enter your last name"
+              autoComplete="family-name"
+            />
             <CustomInputField
               type="date"
               label="Date of Birth *"

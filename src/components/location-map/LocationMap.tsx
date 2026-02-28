@@ -1,32 +1,33 @@
-import { Box } from "@chakra-ui/react";
+import { Box, useColorModeValue } from "@chakra-ui/react";
 import { Address } from "@suleigolden/sulber-api-client";
 
 type LocationMapProps = {
-    address: Address
+  address: Address;
 };
 
 export const LocationMap = ({ address }: LocationMapProps) => {
+  const mapFilter = useColorModeValue("none", "invert(1) hue-rotate(180deg)");
 
+  const getMapQuery = (location: Address) => {
+    const queryParts = [
+      location?.street,
+      location?.city,
+      location?.state,
+      location?.country,
+    ]
+      .filter(Boolean)
+      .join(" ");
 
-const getMapQuery = (location: Address) => {
-  const queryParts = [
-    location?.street,
-    location?.city,
-    location?.state,
-    location?.country,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  return `https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(queryParts)}`;
-};
+    return `https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(queryParts)}`;
+  };
 
   return (
-        <Box 
+    <Box w="full" h="full" overflow="hidden" boxShadow="lg">
+      <Box
         w="full"
         h="full"
-        overflow="hidden"
-        boxShadow="lg"
+        filter={mapFilter}
+        style={{ overflow: "hidden" }}
       >
         <iframe
           width="100%"
@@ -34,7 +35,8 @@ const getMapQuery = (location: Address) => {
           style={{ border: 0 }}
           loading="lazy"
           src={getMapQuery(address)}
-        ></iframe>
+        />
       </Box>
+    </Box>
   );
 };

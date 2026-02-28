@@ -71,6 +71,9 @@ export const RequestServiceCard = ({
     const { currentLocation } = useCurrentLocation();
     const textColor = useColorModeValue("black", "white");
     const linkColor = useColorModeValue("blue.500", "blue.300");
+    const subtextColor = useColorModeValue("gray.600", "gray.400");
+    const iconColor = useColorModeValue("gray.500", "gray.400");
+    const inputBorderColor = useColorModeValue("gray.300", "whiteAlpha.300");
     // Format location display
     const locationDisplay = currentLocation
         ? `${currentLocation.city || ""}, ${currentLocation.state || ""}, ${currentLocation.country || ""}`
@@ -87,8 +90,8 @@ export const RequestServiceCard = ({
         >
             {/* Location Header */}
             <HStack spacing={2} fontSize={{ base: "sm", md: "md" }}>
-                <Icon as={MdLocationOn} color="gray.500" />
-                <Text color="gray.600">{locationDisplay}</Text>
+                <Icon as={MdLocationOn} color={iconColor} />
+                <Text color={subtextColor}>{locationDisplay}</Text>
                 <Link
                     color={linkColor}
                     textDecoration="underline"
@@ -139,14 +142,14 @@ export const RequestServiceCard = ({
                 <HStack spacing={2} flexWrap={{ base: "wrap", sm: "nowrap" }}>
                     <InputGroup flex={{ base: "1 1 100%", sm: "1 1 auto" }}>
                         <InputLeftElement pointerEvents="none">
-                            <Icon as={FaCalendarAlt} color="gray.400" />
+                            <Icon as={FaCalendarAlt} color={iconColor} />
                         </InputLeftElement>
                         <Input
                             type="date"
                             placeholder="Select date"
                             value={serviceDate}
                             onChange={(e) => onServiceDateChange(e.target.value)}
-                            borderColor="gray.300"
+                            borderColor={inputBorderColor}
                             size={{ base: "md", sm: "md" }}
                             _focus={{ borderColor: "brand.500", boxShadow: "0 0 0 1px brand.500" }}
                         />
@@ -157,7 +160,7 @@ export const RequestServiceCard = ({
                             placeholder="Select time"
                             value={serviceTime}
                             onChange={(e) => onServiceTimeChange(e.target.value)}
-                            borderColor="gray.300"
+                            borderColor={inputBorderColor}
                             size={{ base: "md", sm: "md" }}
                             _focus={{ borderColor: "brand.500", boxShadow: "0 0 0 1px brand.500" }}
                         />
@@ -174,7 +177,7 @@ export const RequestServiceCard = ({
                     placeholder="Select service type"
                     value={serviceType}
                     onChange={(e) => onServiceTypeChange(e.target.value as ProviderServiceType)}
-                    borderColor="gray.300"
+                    borderColor={inputBorderColor}
                     _focus={{ borderColor: "brand.500", boxShadow: "0 0 0 1px brand.500" }}
                 >
                     {ProviderServiceTypesList.services.map((service) => (
@@ -204,6 +207,7 @@ export const RequestServiceCard = ({
                             colorScheme="brand"
                             size={{ base: "sm", sm: "md" }}
                             whiteSpace={{ base: "normal", sm: "nowrap" }}
+                            color={textColor}
                         >
                             One time service
                         </Radio>
@@ -212,6 +216,7 @@ export const RequestServiceCard = ({
                             colorScheme="brand"
                             size={{ base: "sm", sm: "md" }}
                             whiteSpace={{ base: "normal", sm: "nowrap" }}
+                            color={textColor}
                         >
                             Monthly service (4 times a month)
                         </Radio>

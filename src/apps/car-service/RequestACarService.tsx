@@ -4,6 +4,7 @@ import {
     Box,
     Flex,
     useDisclosure,
+    useColorModeValue,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { ProviderServiceType } from "@suleigolden/sulber-api-client";
@@ -74,8 +75,16 @@ export const RequestACarService = () => {
 
     const isSearchDisabled = !serviceLocation || !serviceDate || !serviceTime || !serviceType;
 
+    const pageBg = useColorModeValue("gray.50", "#0b1437");
+    const leftPanelBg = useColorModeValue("white", "#0b1437");
+    const mapBg = useColorModeValue("gray.100", "gray.800");
+    const mapBorder = useColorModeValue("white", "whiteAlpha.300");
+    const loadingStateBg = useColorModeValue("gray.200", "whiteAlpha.200");
+    const loadingTextColor = useColorModeValue("gray.500", "gray.400");
+    const loadingSubtextColor = useColorModeValue("gray.400", "gray.500");
+
     return (
-        <Box w="full" minH="100vh" bg="gray.50">
+        <Box w="full" minH="100vh" bg={pageBg}>
             <Flex
                 direction={{ base: "column", md: "row" }}
                 h={{ base: "auto", md: "100vh" }}
@@ -84,7 +93,7 @@ export const RequestACarService = () => {
                 {/* Left Panel - Reserve a Service */}
                 <Box
                     w={{ base: "100%", md: "400px", lg: "450px" }}
-                    bg="white"
+                    bg={leftPanelBg}
                     p={{ base: 4, sm: 5, md: 6 }}
                     overflowY="auto"
                     maxH={{ base: "60vh", md: "100vh" }}
@@ -112,24 +121,25 @@ export const RequestACarService = () => {
                     w={{ base: "100%", md: "auto" }}
                     h={{ base: "40vh", md: "100vh" }}
                     minH={{ base: "300px", md: "auto" }}
-                    bg="gray.100"
+                    bg={mapBg}
                     position="relative"
-                    border="2px solid white"
+                    border="2px solid"
+                    borderColor={mapBorder}
                 >
                     {isLoadingLocation ? (
                         <Box
                             w="full"
                             h="full"
-                            bg="gray.200"
+                            bg={loadingStateBg}
                             display="flex"
                             alignItems="center"
                             justifyContent="center"
                         >
                             <VStack spacing={2} px={4}>
-                                <Text color="gray.500" fontSize={{ base: "md", sm: "lg" }} textAlign="center">
+                                <Text color={loadingTextColor} fontSize={{ base: "md", sm: "lg" }} textAlign="center">
                                     Getting your current location...
                                 </Text>
-                                <Text color="gray.400" fontSize={{ base: "xs", sm: "sm" }} textAlign="center">
+                                <Text color={loadingSubtextColor} fontSize={{ base: "xs", sm: "sm" }} textAlign="center">
                                     Please allow location access
                                 </Text>
                             </VStack>
@@ -138,7 +148,7 @@ export const RequestACarService = () => {
                         <Box
                             w="full"
                             h="full"
-                            bg="gray.200"
+                            bg={loadingStateBg}
                             display="flex"
                             alignItems="center"
                             justifyContent="center"
@@ -147,7 +157,7 @@ export const RequestACarService = () => {
                                 <Text color="red.500" fontSize={{ base: "md", sm: "lg" }} fontWeight="medium" textAlign="center">
                                     {locationError}
                                 </Text>
-                                <Text color="gray.500" fontSize={{ base: "xs", sm: "sm" }} textAlign="center">
+                                <Text color={loadingTextColor} fontSize={{ base: "xs", sm: "sm" }} textAlign="center">
                                     You can still search for a location manually
                                 </Text>
                             </VStack>
@@ -160,12 +170,12 @@ export const RequestACarService = () => {
                         <Box
                             w="full"
                             h="full"
-                            bg="gray.200"
+                            bg={loadingStateBg}
                             display="flex"
                             alignItems="center"
                             justifyContent="center"
                         >
-                            <Text color="gray.500" fontSize={{ base: "md", sm: "lg" }} textAlign="center">
+                            <Text color={loadingTextColor} fontSize={{ base: "md", sm: "lg" }} textAlign="center">
                                 No location available
                             </Text>
                         </Box>

@@ -28,8 +28,18 @@ export const WaitingToConnectWithProvider = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const cardBg = useColorModeValue("white", "#0b1437");
+  const borderColor = useColorModeValue("gray.200", "whiteAlpha.300");
+  const headingColor = useColorModeValue("gray.700", "white");
+  const subHeadingColor = useColorModeValue("gray.800", "white");
+  const bodyColor = useColorModeValue("gray.600", "gray.300");
+  const labelColor = useColorModeValue("gray.600", "gray.400");
+  const valueColor = useColorModeValue("gray.800", "white");
+  const iconMutedColor = useColorModeValue("gray.400", "gray.500");
+  const errorTextColor = useColorModeValue("gray.600", "gray.400");
+  const infoBoxBg = useColorModeValue("blue.50", "whiteAlpha.200");
+  const infoBoxBorder = useColorModeValue("blue.200", "blue.700");
+  const infoBoxTextColor = useColorModeValue("blue.800", "blue.200");
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -71,10 +81,10 @@ export const WaitingToConnectWithProvider = () => {
             size="xl"
           />
           <VStack spacing={2}>
-            <Heading size="lg" fontWeight="bold" color="gray.700">
+            <Heading size="lg" fontWeight="bold" color={headingColor}>
               Waiting to connect with provider
             </Heading>
-            <Text color="gray.500" fontSize="md">
+            <Text color={bodyColor} fontSize="md">
               Please wait while we find a provider for your service...
             </Text>
           </VStack>
@@ -91,7 +101,7 @@ export const WaitingToConnectWithProvider = () => {
           <Heading size="lg" fontWeight="bold" color="red.500">
             Error
           </Heading>
-          <Text color="gray.600">{error}</Text>
+          <Text color={errorTextColor}>{error}</Text>
         </VStack>
       </Box>
     );
@@ -102,7 +112,7 @@ export const WaitingToConnectWithProvider = () => {
       <Box w="full" minH="80vh" display="flex" justifyContent="center" alignItems="center">
         <VStack spacing={4}>
           <Icon as={FaInfoCircle} boxSize={12} color="gray.400" />
-          <Heading size="lg" fontWeight="bold" color="gray.600">
+          <Heading size="lg" fontWeight="bold" color={headingColor}>
             Job not found
           </Heading>
         </VStack>
@@ -123,7 +133,7 @@ export const WaitingToConnectWithProvider = () => {
               color="brand.500"
               size="md"
             />
-            <Heading size="xl" fontWeight="bold" color="gray.800">
+            <Heading size="xl" fontWeight="bold" color={subHeadingColor}>
               Waiting to connect with provider
             </Heading>
           </HStack>
@@ -138,7 +148,7 @@ export const WaitingToConnectWithProvider = () => {
           >
             {job.status}
           </Badge>
-          <Text color="gray.600" fontSize="md" textAlign="center">
+          <Text color={bodyColor} fontSize="md" textAlign="center">
             Your service request has been submitted. We're matching you with a qualified provider.
           </Text>
         </VStack>
@@ -151,25 +161,25 @@ export const WaitingToConnectWithProvider = () => {
               <Box>
                 <HStack mb={2}>
                   <Icon as={FaInfoCircle} color="brand.500" />
-                  <Text fontSize="lg" fontWeight="bold" color="gray.700">
+                  <Text fontSize="lg" fontWeight="bold" color={headingColor}>
                     Service Details
                   </Text>
                 </HStack>
                 <VStack align="start" spacing={2} pl={8}>
                   <HStack>
-                    <Text fontSize="sm" fontWeight="medium" color="gray.600" minW="120px">
+                    <Text fontSize="sm" fontWeight="medium" color={labelColor} minW="120px">
                       Service Type:
                     </Text>
-                    <Text fontSize="sm" color="gray.800" fontWeight="medium">
+                    <Text fontSize="sm" color={valueColor} fontWeight="medium">
                       {selectedService?.title || job.serviceType || "Not specified"}
                     </Text>
                   </HStack>
                   {job.notes && (
                     <HStack align="start">
-                      <Text fontSize="sm" fontWeight="medium" color="gray.600" minW="120px">
+                      <Text fontSize="sm" fontWeight="medium" color={labelColor} minW="120px">
                         Notes:
                       </Text>
-                      <Text fontSize="sm" color="gray.800" flex={1}>
+                      <Text fontSize="sm" color={valueColor} flex={1}>
                         {job.notes}
                       </Text>
                     </HStack>
@@ -183,11 +193,11 @@ export const WaitingToConnectWithProvider = () => {
               <Box>
                 <HStack mb={2}>
                   <Icon as={FaMapMarkerAlt} color="brand.500" />
-                  <Text fontSize="lg" fontWeight="bold" color="gray.700">
+                  <Text fontSize="lg" fontWeight="bold" color={headingColor}>
                     Location
                   </Text>
                 </HStack>
-                <Text fontSize="sm" color="gray.800" pl={8}>
+                <Text fontSize="sm" color={valueColor} pl={8}>
                   {fullAddress(job.address)}
                 </Text>
               </Box>
@@ -198,26 +208,26 @@ export const WaitingToConnectWithProvider = () => {
               <Box>
                 <HStack mb={2}>
                   <Icon as={FaCalendarAlt} color="brand.500" />
-                  <Text fontSize="lg" fontWeight="bold" color="gray.700">
+                  <Text fontSize="lg" fontWeight="bold" color={headingColor}>
                     Schedule
                   </Text>
                 </HStack>
                 <VStack align="start" spacing={2} pl={8}>
                   <HStack>
-                    <Icon as={FaCalendarAlt} color="gray.400" boxSize={4} />
-                    <Text fontSize="sm" color="gray.600" minW="100px">
+                    <Icon as={FaCalendarAlt} color={iconMutedColor} boxSize={4} />
+                    <Text fontSize="sm" color={labelColor} minW="100px">
                       Date:
                     </Text>
-                    <Text fontSize="sm" color="gray.800" fontWeight="medium">
+                    <Text fontSize="sm" color={valueColor} fontWeight="medium">
                       {formatDateToStringWithTime(job?.scheduledStart as string)}
                     </Text>
                   </HStack>
                   <HStack>
-                    <Icon as={FaClock} color="gray.400" boxSize={4} />
-                    <Text fontSize="sm" color="gray.600" minW="100px">
+                    <Icon as={FaClock} color={iconMutedColor} boxSize={4} />
+                    <Text fontSize="sm" color={labelColor} minW="100px">
                       Time:
                     </Text>
-                    <Text fontSize="sm" color="gray.800" fontWeight="medium">
+                    <Text fontSize="sm" color={valueColor} fontWeight="medium">
                       {formatDateToStringWithTime(job?.scheduledStart as string)}
                     </Text>
                   </HStack>
@@ -232,7 +242,7 @@ export const WaitingToConnectWithProvider = () => {
                   <Box>
                     <HStack mb={2}>
                       <Icon as={FaDollarSign} color="brand.500" />
-                      <Text fontSize="lg" fontWeight="bold" color="gray.700">
+                      <Text fontSize="lg" fontWeight="bold" color={headingColor}>
                         Price
                       </Text>
                     </HStack>
@@ -240,7 +250,7 @@ export const WaitingToConnectWithProvider = () => {
                       <Text fontSize="2xl" fontWeight="bold" color="brand.500">
                         ${formatNumberWithCommas(Number(job.totalPriceCents))}
                       </Text>
-                      <Text fontSize="sm" color="gray.600">
+                      <Text fontSize="sm" color={bodyColor}>
                         {job.currency || "CAD"}
                       </Text>
                     </HStack>
@@ -253,16 +263,16 @@ export const WaitingToConnectWithProvider = () => {
 
         {/* Info Message */}
         <Box
-          bg="blue.50"
+          bg={infoBoxBg}
           borderWidth="1px"
-          borderColor="blue.200"
+          borderColor={infoBoxBorder}
           borderRadius="md"
           p={4}
           w="full"
         >
           <HStack spacing={3}>
             <Icon as={FaInfoCircle} color="blue.500" boxSize={5} />
-            <Text fontSize="sm" color="blue.800" flex={1}>
+            <Text fontSize="sm" color={infoBoxTextColor} flex={1}>
               You'll be notified once a provider accepts your service request. Please keep this page open or check back later.
             </Text>
           </HStack>

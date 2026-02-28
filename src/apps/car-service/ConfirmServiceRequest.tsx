@@ -18,6 +18,7 @@ import {
   Badge,
   Wrap,
   WrapItem,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { api, 
     CustomerVehicle, 
@@ -201,12 +202,26 @@ export const ConfirmServiceRequest = ({
 
   const isConfirmDisabled = requiresVehicle && !selectedVehicleId;
 
+  const modalBg = useColorModeValue("white", "#0b1437");
+  const headerColor = useColorModeValue(undefined, "white");
+  const labelColor = useColorModeValue("gray.600", "gray.300");
+  const valueColor = useColorModeValue("gray.800", "white");
+  const sectionTitleColor = useColorModeValue("gray.700", "gray.200");
+  const selectBorderColor = useColorModeValue("gray.300", "whiteAlpha.300");
+  const noVehicleBg = useColorModeValue("yellow.50", "whiteAlpha.200");
+  const noVehicleBorder = useColorModeValue("yellow.200", "yellow.700");
+  const noVehicleTextColor = useColorModeValue("yellow.800", "yellow.200");
+  const selectedVehicleBg = useColorModeValue("gray.50", "whiteAlpha.200");
+  const selectedVehicleTextColor = useColorModeValue("gray.600", "gray.300");
+  const selectedVehicleNotesColor = useColorModeValue("gray.500", "gray.400");
+  const loadingTextColor = useColorModeValue("gray.500", "gray.400");
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
       <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>
-          <Heading size="md">Confirm Service Request</Heading>
+      <ModalContent bg={modalBg}>
+        <ModalHeader color={headerColor}>
+          <Heading size="md" color={headerColor}>Confirm Service Request</Heading>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody pb={6}>
@@ -215,26 +230,26 @@ export const ConfirmServiceRequest = ({
             <Box>
               <VStack align="start" spacing={2} pl={2}>
                 <HStack>
-                  <Text fontSize="sm" fontWeight="medium" color="gray.600" minW="120px">
+                  <Text fontSize="sm" fontWeight="medium" color={labelColor} minW="120px">
                     Service Type:
                   </Text>
-                  <Text fontSize="sm" color="gray.800">
+                  <Text fontSize="sm" color={valueColor}>
                     {selectedService?.title || serviceType || "Not selected"}
                   </Text>
                 </HStack>
                 <HStack>
-                  <Text fontSize="sm" fontWeight="medium" color="gray.600" minW="120px">
+                  <Text fontSize="sm" fontWeight="medium" color={labelColor} minW="120px">
                     Request Type:
                   </Text>
-                  <Text fontSize="sm" color="gray.800">
+                  <Text fontSize="sm" color={valueColor}>
                     {serviceRequestType === "one-time" ? "One Time Service" : "Monthly Service (4 times/month)"}
                   </Text>
                 </HStack>
                 <HStack>
-                  <Text fontSize="sm" fontWeight="medium" color="gray.600" minW="120px">
+                  <Text fontSize="sm" fontWeight="medium" color={labelColor} minW="120px">
                     Location:
                   </Text>
-                  <Text fontSize="sm" color="gray.800" flex={1}>
+                  <Text fontSize="sm" color={valueColor} flex={1}>
                     {serviceLocation || "Not specified"}
                   </Text>
                 </HStack>
@@ -245,7 +260,7 @@ export const ConfirmServiceRequest = ({
             {/* Service Included Items */}
             {selectedService?.included && selectedService.included.length > 0 && (
               <Box>
-                <Text fontSize="sm" fontWeight="bold" color="gray.700" mb={3}>
+                <Text fontSize="sm" fontWeight="bold" color={sectionTitleColor} mb={3}>
                   What's Included
                 </Text>
                 <Wrap spacing={2}>
@@ -272,7 +287,7 @@ export const ConfirmServiceRequest = ({
             {/* Service Requirements */}
             {selectedService?.requirements_for_customer && selectedService.requirements_for_customer.length > 0 && (
               <Box>
-                <Text fontSize="sm" fontWeight="bold" color="gray.700" mb={3}>
+                <Text fontSize="sm" fontWeight="bold" color={sectionTitleColor} mb={3}>
                   Customer Requirements
                 </Text>
                 <Wrap spacing={2}>
@@ -301,22 +316,22 @@ export const ConfirmServiceRequest = ({
             {/* Vehicle Selection (only for car-related services) */}
             {requiresVehicle && (
               <FormControl isRequired>
-                <FormLabel fontSize="sm" fontWeight="bold" color="gray.700">
+                <FormLabel fontSize="sm" fontWeight="bold" color={sectionTitleColor}>
                   Select Vehicle
                 </FormLabel>
                 {isLoadingVehicles ? (
-                  <Text fontSize="sm" color="gray.500">
+                  <Text fontSize="sm" color={loadingTextColor}>
                     Loading vehicles...
                   </Text>
                 ) : vehicles.length === 0 ? (
                   <Box
                     p={4}
-                    bg="yellow.50"
+                    bg={noVehicleBg}
                     borderRadius="md"
                     border="1px solid"
-                    borderColor="yellow.200"
+                    borderColor={noVehicleBorder}
                   >
-                    <Text fontSize="sm" color="yellow.800">
+                    <Text fontSize="sm" color={noVehicleTextColor}>
                       No vehicles found. Please add a vehicle to your profile first.
                     </Text>
                   </Box>
@@ -325,7 +340,7 @@ export const ConfirmServiceRequest = ({
                     placeholder="Select a vehicle"
                     value={selectedVehicleId}
                     onChange={(e) => setSelectedVehicleId(e.target.value)}
-                    borderColor="gray.300"
+                    borderColor={selectBorderColor}
                     _focus={{ borderColor: "brand.500", boxShadow: "0 0 0 1px brand.500" }}
                   >
                     {vehicles.map((vehicle) => (
@@ -336,13 +351,13 @@ export const ConfirmServiceRequest = ({
                   </Select>
                 )}
                 {selectedVehicle && (
-                  <Box mt={2} p={3} bg="gray.50" borderRadius="md">
-                    <Text fontSize="xs" color="gray.600">
+                  <Box mt={2} p={3} bg={selectedVehicleBg} borderRadius="md">
+                    <Text fontSize="xs" color={selectedVehicleTextColor}>
                       <Text as="span" fontWeight="medium">Selected:</Text> {formatVehicleLabel(selectedVehicle)}
                       {selectedVehicle.notes && (
                         <>
                           <br />
-                          <Text as="span" fontSize="xs" color="gray.500">
+                          <Text as="span" fontSize="xs" color={selectedVehicleNotesColor}>
                             Notes: {selectedVehicle.notes}
                           </Text>
                         </>
@@ -355,7 +370,7 @@ export const ConfirmServiceRequest = ({
 
               {/* Service Price */}
               <Box>
-                <Text fontSize="sm" fontWeight="bold" color="gray.700" mb={3}>
+                <Text fontSize="sm" fontWeight="bold" color={sectionTitleColor} mb={3}>
                   Price: ${selectedService?.price || 0}
                 </Text>
               </Box>

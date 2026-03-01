@@ -60,6 +60,17 @@ const CAR_TYPES = [
   { id: "van", label: "Van", key: "van_price" as const },
 ] as const;
 
+/** Map vehicle type (from CustomerVehicle.type) to provider price key (sedan/suv/truck/van). */
+function vehicleTypeToCarType(vehicleType: string | null | undefined): "sedan" | "suv" | "truck" | "van" | null {
+  if (!vehicleType) return null;
+  const t = vehicleType.toUpperCase();
+  if (t === "SEDAN" || t === "COUPE" || t === "HATCHBACK") return "sedan";
+  if (t === "SUV" || t === "CROSSOVER") return "suv";
+  if (t === "PICKUP_TRUCK" || t === "SPORTS_CAR") return "truck";
+  if (t === "MINIVAN" || t === "VAN") return "van";
+  return null;
+}
+
 const ADDON_LABELS: Record<string, string> = {
   interior_deep_cleaning: "Interior deep cleaning",
   wax_polish: "Wax polish",
@@ -70,14 +81,6 @@ const ADDON_LABELS: Record<string, string> = {
 
 function isCarWashService(serviceType: string): boolean {
   return (serviceType ?? "").toLowerCase().includes("car");
-}
-
-function getCarTypeOptions(service: ProviderJobService): { id: string; label: string; price: number }[] {
-  if (!isCarWashService(service.service_type ?? "")) return [];
-  return CAR_TYPES.filter((ct) => {
-    const p = service[ct.key];
-    return p != null && Number(p) > 0;
-  }).map((ct) => ({ id: ct.id, label: ct.label, price: Number(service[ct.key]) }));
 }
 
 function getAddOnOptions(service: ProviderJobService): { id: string; label: string; price: number }[] {
@@ -348,6 +351,13 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
     return parts.length > 0 ? parts.join(" ") : "Vehicle";
   };
 
+  /** Derive car type (sedan/suv/truck/van) from selected vehicle for pricing. */
+  const getDerivedCarType = (vehicleId: string | null): string | null => {
+    if (!vehicleId) return null;
+    const v = vehicles.find((x) => x.id === vehicleId);
+    return vehicleTypeToCarType(v?.type ?? null);
+  };
+
   const handleSendRequest = async (
     providerId: string,
     service: ProviderJobService,
@@ -356,12 +366,11 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
   ) => {
     if (!user?.id || !data.serviceLocationData) return;
     const isCarWash = isCarWashService(service.service_type ?? "");
-    const carTypeOptions = getCarTypeOptions(service);
-    if (isCarWash && carTypeOptions.length > 0 && !selection.carType) {
-      showToast("Error", "Please select a car type", "error");
+    const lines = requestLines ?? [{ vehicleId: data.selectedVehicleId ?? null }];
+    if (isCarWash && lines.length > 0 && !lines[0].vehicleId) {
+      showToast("Error", "Please select a vehicle for the car wash request", "error");
       return;
     }
-    const lines = requestLines ?? [{ vehicleId: data.selectedVehicleId ?? null }];
     setSendingId(providerId);
     try {
       const address = {
@@ -380,15 +389,16 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
         end.setHours(end.getHours() + 2);
         scheduledEnd = end.toISOString();
       }
-      const { totalCents, addOnPrices } = computeTotalAndAddOns(
-        service,
-        selection.carType,
-        selection.addOns
-      );
       const baseNotes = buildBaseNotes();
 
       if (lines.length > 1) {
         const jobs = lines.map((line) => {
+          const carType = getDerivedCarType(line.vehicleId);
+          const { totalCents, addOnPrices } = computeTotalAndAddOns(
+            service,
+            carType,
+            selection.addOns
+          );
           const noteParts = [...baseNotes];
           if (line.vehicleId) {
             noteParts.push(`Vehicle: ${getVehicleLabel(line.vehicleId)}`);
@@ -410,6 +420,12 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
         showToast("Success", `${created.length} requests sent to provider`, "success");
         navigate(`/${user.id}/waiting-to-connect-with-provider?jobId=${created[0].id}`);
       } else {
+        const carType = getDerivedCarType(lines[0].vehicleId);
+        const { totalCents, addOnPrices } = computeTotalAndAddOns(
+          service,
+          carType,
+          selection.addOns
+        );
         const noteParts = [...baseNotes];
         if (lines[0].vehicleId) {
           noteParts.push(`Vehicle: ${getVehicleLabel(lines[0].vehicleId)}`);
@@ -514,51 +530,31 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
 
                 {(() => {
                   const selection = getSelection(service.id);
-                  const carTypeOptions = getCarTypeOptions(service);
                   const addOnOptions = getAddOnOptions(service);
                   const isCarWash = isCarWashService(service.service_type ?? "");
+                  const derivedCarType = isCarWash ? getDerivedCarType(data.selectedVehicleId ?? null) : null;
                   const { totalCents } = computeTotalAndAddOns(
                     service,
-                    selection.carType,
+                    derivedCarType,
                     selection.addOns
                   );
-                  const baseCents = getBasePriceCents(service, selection.carType);
-                  const showCarType = isCarWash && carTypeOptions.length > 0;
+                  const baseCents = getBasePriceCents(service, derivedCarType);
                   const showAddOns = addOnOptions.length > 0;
                   return (
                     <>
-                      {showCarType && (
+                      {isCarWash && data.selectedVehicleId && (
                         <Box mb={3}>
-                          {data.selectedVehicleId && (
-                            <Text fontSize="sm" color={priceLabelColor} fontWeight="medium" mb={2}>
-                              Selected car:{" "}
-                              <Text as="span" color={valueColor} fontWeight="semibold">
-                                {getVehicleLabel(data.selectedVehicleId)}
-                              </Text>
-                            </Text>
-                          )}
                           <Text fontSize="sm" color={priceLabelColor} fontWeight="medium" mb={2}>
-                            Car type
+                            Selected car:{" "}
+                            <Text as="span" color={valueColor} fontWeight="semibold">
+                              {getVehicleLabel(data.selectedVehicleId)}
+                            </Text>
+                            {derivedCarType && (
+                              <Text as="span" fontSize="xs" color={labelColor} ml={2}>
+                                ({CAR_TYPES.find((c) => c.id === derivedCarType)?.label ?? derivedCarType})
+                              </Text>
+                            )}
                           </Text>
-                          <VStack align="stretch" spacing={2}>
-                            {carTypeOptions.map((ct) => (
-                              <Checkbox
-                                key={ct.id}
-                                size="sm"
-                                colorScheme="brand"
-                                isChecked={selection.carType === ct.id}
-                                onChange={() =>
-                                  setSelection(service.id, {
-                                    carType: selection.carType === ct.id ? null : ct.id,
-                                  })
-                                }
-                              >
-                                <Text fontSize="sm" color={valueColor}>
-                                  {ct.label} — ${(ct.price / 100).toFixed(2)}
-                                </Text>
-                              </Checkbox>
-                            ))}
-                          </VStack>
                         </Box>
                       )}
 
@@ -590,7 +586,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                         </Box>
                       )}
 
-                      {!showCarType && (
+                      {!isCarWash && (
                         <Box
                           p={3}
                           borderRadius="lg"
@@ -599,7 +595,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                           borderColor={priceBoxBorder}
                           mb={3}
                         >
-                          <Text fontSize="xs" color={priceLabelColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" mb={1}>
+                          <Text fontSize="sm" color={priceLabelColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" mb={1}>
                             Price
                           </Text>
                           <Text fontSize="md" fontWeight="bold" color={priceValueColor}>
@@ -616,14 +612,14 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                         borderColor={priceBoxBorder}
                         mb={3}
                       >
-                        <Text fontSize="xs" color={priceLabelColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" mb={1}>
+                        <Text fontSize="sm" color={priceLabelColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" mb={1}>
                           Total price
                         </Text>
                         <Text fontSize="lg" fontWeight="bold" color={priceValueColor}>
                           ${(totalCents / 100).toFixed(2)}
                         </Text>
-                        {showCarType && selection.carType && (
-                          <Text fontSize="xs" color={labelColor} mt={1}>
+                        {isCarWash && derivedCarType && (
+                          <Text fontSize="sm" color={labelColor} mt={1}>
                             Base: ${(baseCents / 100).toFixed(2)}
                             {selection.addOns.length > 0 &&
                               ` · Add-ons: $${((totalCents - baseCents) / 100).toFixed(2)}`}
@@ -676,7 +672,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                             px={2}
                             py={1}
                             borderRadius="md"
-                            fontSize="xs"
+                            fontSize="sm" 
                             fontWeight="medium"
                             whiteSpace="normal"
                           >
@@ -685,7 +681,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                         </WrapItem>
                       ))
                     ) : (
-                      <Badge colorScheme="gray" variant="subtle" px={2} py={1} borderRadius="md" fontSize="xs">
+                      <Badge colorScheme="gray" variant="subtle" px={2} py={1} borderRadius="md" fontSize="sm" >
                         Not set
                       </Badge>
                     )}

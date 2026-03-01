@@ -172,7 +172,6 @@ export const AddVehicle = ({
             <VStack spacing={4} align="stretch">
               <FormControl>
                 <HStack justify="space-between" mb={2}>
-
                 </HStack>
                 <CustomInputField
                   type="select"

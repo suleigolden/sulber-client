@@ -404,21 +404,21 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
             noteParts.push(`Vehicle: ${getVehicleLabel(line.vehicleId)}`);
           }
           return {
-            customer_id: user.id,
-            provider_id: providerId,
-            service_type: data.serviceType as ProviderServiceType,
+            customerId: user.id,
+            providerId,
+            serviceType: data.serviceType as ProviderServiceType,
             address,
-            scheduled_start: scheduledStart,
-            scheduled_end: scheduledEnd,
-            total_price_cents: String(totalCents),
-            add_on_prices: addOnPrices.length > 0 ? addOnPrices : undefined,
+            scheduledStart: scheduledStart,
+            scheduledEnd: scheduledEnd,
+            totalPriceCents: String(totalCents),
+            addOnPrices: addOnPrices.length > 0 ? addOnPrices : undefined,
             currency: "CAD",
             notes: noteParts.length > 0 ? noteParts.join(". ") : undefined,
           };
         });
-        const created = await api.service("job").createMany(jobs);
+        const created = await api.service("job").createMany(jobs as any);
         showToast("Success", `${created.length} requests sent to provider`, "success");
-        navigate(`/${user.id}/waiting-to-connect-with-provider?jobId=${created[0].id}`);
+        navigate(`customer/${user.id}/waiting-to-connect-with-provider?jobId=${created[0].id}`);
       } else {
         const carType = getDerivedCarType(lines[0].vehicleId);
         const { totalCents, addOnPrices } = computeTotalAndAddOns(
@@ -431,17 +431,17 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
           noteParts.push(`Vehicle: ${getVehicleLabel(lines[0].vehicleId)}`);
         }
         const job = await api.service("job").create({
-          customer_id: user.id,
-          provider_id: providerId,
-          service_type: data.serviceType as ProviderServiceType,
+          customerId: user.id,
+          providerId,
+          serviceType: data.serviceType as ProviderServiceType,
           address,
-          scheduled_start: scheduledStart,
-          scheduled_end: scheduledEnd,
-          total_price_cents: String(totalCents),
-          add_on_prices: addOnPrices.length > 0 ? addOnPrices : undefined,
+          scheduledStart,
+          scheduledEnd,
+          totalPriceCents: String(totalCents),
+          addOnPrices: addOnPrices.length > 0 ? addOnPrices : undefined,
           currency: "CAD",
           notes: noteParts.length > 0 ? noteParts.join(". ") : undefined,
-        });
+        } as any);
         showToast("Success", "Request sent to provider", "success");
         navigate(`/${user.id}/waiting-to-connect-with-provider?jobId=${job.id}`);
       }

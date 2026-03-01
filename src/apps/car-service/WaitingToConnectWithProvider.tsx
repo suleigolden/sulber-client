@@ -15,8 +15,8 @@ import {
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { api, Job, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
-import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaDollarSign, FaInfoCircle } from "react-icons/fa";
-import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
+import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaInfoCircle } from "react-icons/fa";
+import { formatNumberWithCommasAndDecimals } from "~/common/utils/currency-formatter";
 import { fullAddress } from "~/common/utils/address";
 import { getStatusColor } from "~/common/utils/status-color";
 import { formatDateToStringWithTime } from "~/common/utils/date-time";
@@ -65,8 +65,8 @@ export const WaitingToConnectWithProvider = () => {
     fetchJob();
   }, [jobId]);
 
-  const selectedService = job?.serviceType
-    ? ProviderServiceTypesList.services.find((s) => s.type === job.serviceType)
+  const selectedService = job?.service_type
+    ? ProviderServiceTypesList.services.find((s) => s.type === job.service_type)
     : null;
 
   if (isLoading) {
@@ -171,7 +171,7 @@ export const WaitingToConnectWithProvider = () => {
                       Service Type:
                     </Text>
                     <Text fontSize="sm" color={valueColor} fontWeight="medium">
-                      {selectedService?.title || job.serviceType || "Not specified"}
+                      {selectedService?.title || job.service_type || "Not specified"}
                     </Text>
                   </HStack>
                   {job.notes && (
@@ -219,7 +219,7 @@ export const WaitingToConnectWithProvider = () => {
                       Date:
                     </Text>
                     <Text fontSize="sm" color={valueColor} fontWeight="medium">
-                      {formatDateToStringWithTime(job?.scheduledStart as string)}
+                      {formatDateToStringWithTime(job?.scheduled_start as string)}
                     </Text>
                   </HStack>
                   <HStack>
@@ -228,7 +228,7 @@ export const WaitingToConnectWithProvider = () => {
                       Time:
                     </Text>
                     <Text fontSize="sm" color={valueColor} fontWeight="medium">
-                      {formatDateToStringWithTime(job?.scheduledStart as string)}
+                      {formatDateToStringWithTime(job?.scheduled_start as string)}
                     </Text>
                   </HStack>
                 </VStack>
@@ -237,21 +237,20 @@ export const WaitingToConnectWithProvider = () => {
               <Divider />
 
               {/* Price */}
-              {job.totalPriceCents && (
+              {job.total_price_cents && (
                 <>
                   <Box>
                     <HStack mb={2}>
-                      <Icon as={FaDollarSign} color="brand.500" />
                       <Text fontSize="lg" fontWeight="bold" color={headingColor}>
                         Price
                       </Text>
                     </HStack>
                     <HStack pl={8}>
                       <Text fontSize="2xl" fontWeight="bold" color="brand.500">
-                        ${formatNumberWithCommas(Number(job.totalPriceCents))}
+                        ${formatNumberWithCommasAndDecimals(Number(job.total_price_cents))}
                       </Text>
                       <Text fontSize="sm" color={bodyColor}>
-                        {job.currency || "CAD"}
+                        {job.currency}
                       </Text>
                     </HStack>
                   </Box>

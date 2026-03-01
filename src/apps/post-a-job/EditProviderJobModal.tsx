@@ -337,8 +337,8 @@ export function EditProviderJobModal({
     }
 
     const payload: UpdateProviderJobServiceRequest = {
-      providerId: (raw.providerId ?? raw.provider_id) as string,
-      serviceType: jobServiceType as UpdateProviderJobServiceRequest["serviceType"],
+      provider_id: (raw.providerId ?? raw.provider_id) as string,
+      service_type: jobServiceType as UpdateProviderJobServiceRequest["service_type"],
       price: priceCents,
       base_price: basePriceCents,
       sedan_price: sedanPriceCents,

@@ -14,6 +14,8 @@ import {
   HStack,
   IconButton,
   Input,
+  List,
+  ListItem,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -289,8 +291,8 @@ export function PostJobModal({
     }
 
     const payload: CreateProviderJobServiceRequest = {
-      providerId,
-      serviceType: data.serviceType as CreateProviderJobServiceRequest["serviceType"],
+      provider_id: providerId,
+      service_type: data.serviceType as CreateProviderJobServiceRequest["service_type"],
       price:priceCents,
       base_price:basePriceCents,
       sedan_price:sedanPriceCents,
@@ -510,6 +512,48 @@ export function PostJobModal({
                 </FormHelperText>
               )}
             </FormControl>
+
+            {serviceType && selectedServiceConfig && (
+              <Box
+                p={4}
+                borderRadius="xl"
+                borderWidth="1px"
+                borderColor={sectionBorder}
+              >
+                <VStack align="stretch" spacing={4}>
+                  {selectedServiceConfig.included?.length > 0 && (
+                    <Box>
+                      <Text fontSize="sm" fontWeight="600" color={mutedColor} mb={2}>
+                        What's Included. What you will be providing to the customer.
+                      </Text>
+                      <List spacing={1}>
+                        {selectedServiceConfig.included.map((item, i) => (
+                          <ListItem key={i} fontSize="sm" display="flex" alignItems="flex-start" gap={2}>
+                            <Text as="span" color="brand.500">•</Text>
+                            {item}
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Box>
+                  )}
+                  {selectedServiceConfig.requirements_for_customer?.length > 0 && (
+                    <Box>
+                      <Text fontSize="sm" fontWeight="600" color={mutedColor} mb={2}>
+                        Customer Requirements. What the customer needs to provide to you.
+                      </Text>
+                      <List spacing={1}>
+                        {selectedServiceConfig.requirements_for_customer.map((item, i) => (
+                          <ListItem key={i} fontSize="sm" display="flex" alignItems="flex-start" gap={2}>
+                            <Text as="span" color="brand.500">•</Text>
+                            {item}
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Box>
+                  )}
+                </VStack>
+              </Box>
+            )}
 
             {serviceType && hasConfirmedRequirements && isDrivewayCarWash ? (
               <>

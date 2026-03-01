@@ -218,7 +218,7 @@ export const ConfirmServiceRequest = ({
                   >
                     {vehicles.map((vehicle) => (
                       <option key={vehicle.id} value={vehicle.id}>
-                        {formatVehicleLabel(vehicle)}
+                        {formatVehicleLabel(vehicle)} - ({vehicle.type})
                       </option>
                     ))}
                   </Select>

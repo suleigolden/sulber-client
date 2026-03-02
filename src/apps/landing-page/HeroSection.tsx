@@ -7,6 +7,7 @@ import {
     Select,
     Button,
     useColorModeValue,
+    VStack,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -216,6 +217,27 @@ export const HeroSection = () => {
                                 </Text>
                             </Flex>
                         </Flex>
+                        {/* Hero Section Text */}
+                        <VStack align="start" spacing={2} mt={8}>
+                            <Text
+                                fontSize={{ base: "xl", md: "xl", lg: "2xl" }}
+                                fontWeight="bold"
+                                color={headlineDark}
+                                lineHeight="1.1"
+                            >
+                                Get your car washed or cleaned right in your driveway.
+                            </Text>
+                        <Text
+                            color={bodyColor}
+                            fontSize={{ base: "sm", md: "md" }}
+                            lineHeight="tall"
+                            mb={8}
+                            maxW="520px"
+                        >
+                            Earn money on your own schedule by offering car wash, backyard, and front yard cleaning
+                            services in your neighborhood.
+                        </Text>
+                        </VStack>
                     </Box>
 
                     {/* Right Section - Illustration */}

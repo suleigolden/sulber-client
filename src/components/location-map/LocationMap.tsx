@@ -7,6 +7,7 @@ type LocationMapProps = {
 
 export const LocationMap = ({ address }: LocationMapProps) => {
   const mapFilter = useColorModeValue("none", "invert(1) hue-rotate(180deg)");
+  console.log("address: ", address);
 
   const getMapQuery = (location: Address) => {
     console.log("location", location);

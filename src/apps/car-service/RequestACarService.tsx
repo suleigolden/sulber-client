@@ -54,9 +54,6 @@ export const RequestACarService = () => {
     const pageBg = useColorModeValue("gray.50", "#0b1437");
     const leftPanelBg = useColorModeValue("white", "#0b1437");
     const mapBorder = useColorModeValue("white", "whiteAlpha.300");
-    const loadingStateBg = useColorModeValue("gray.200", "whiteAlpha.200");
-    const loadingTextColor = useColorModeValue("gray.500", "gray.400");
-    const loadingSubtextColor = useColorModeValue("gray.400", "gray.500");
 
     if (providerResultsData) {
         return (

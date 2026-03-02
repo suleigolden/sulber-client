@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
     Text,
     VStack,
@@ -7,9 +8,7 @@ import {
     useDisclosure,
     useColorModeValue,
 } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
 import { ProviderServiceType } from "@suleigolden/sulber-api-client";
-import { useCurrentLocation } from "~/hooks/use-current-location";
 import { ConfirmServiceRequest, type ConfirmServiceRequestData } from "./ConfirmServiceRequest";
 import { ProviderResultsView } from "./ProviderResultsView";
 import { RequestServiceCard } from "./RequestServiceCard";
@@ -19,7 +18,6 @@ import heroIllustration from "~/assets/hero-illustration.png";
 type ServiceRequestType = "one-time" | "monthly";
 
 export const RequestACarService = () => {
-    const { currentLocation, isLoadingLocation, locationError } = useCurrentLocation();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [providerResultsData, setProviderResultsData] = useState<ConfirmServiceRequestData | null>(null);
     const [serviceLocation, setServiceLocation] = useState<string>("");
@@ -37,40 +35,6 @@ export const RequestACarService = () => {
     const [serviceTime, setServiceTime] = useState<string>("");
     const [serviceType, setServiceType] = useState<ProviderServiceType | "">("");
     const [serviceRequestType, setServiceRequestType] = useState<ServiceRequestType>("one-time");
-
-    // Initialize service location with current location address when available
-    useEffect(() => {
-        if (currentLocation && !serviceLocation) {
-            setServiceLocation(currentLocation.address);
-            setServiceLocationData({
-                lat: currentLocation.lat,
-                lng: currentLocation.lng,
-                address: currentLocation.address,
-                city: currentLocation.city,
-                state: currentLocation.state,
-                country: currentLocation.country,
-                postalCode: currentLocation.postalCode,
-                street: currentLocation.street,
-            });
-        }
-    }, [currentLocation, serviceLocation]);
-
-    // Convert current location to LocationMap address format
-    const mapAddress = currentLocation
-        ? {
-            street: currentLocation.street || "",
-            city: currentLocation.city || "",
-            state: currentLocation.state || "",
-            country: currentLocation.country || "",
-            postal_code: currentLocation.postalCode || "",
-        }
-        : {
-            street: "",
-            city: "",
-            state: "",
-            country: "",
-            postal_code: "",
-        };
 
     const handleSearch = () => {
         onOpen();
@@ -145,44 +109,7 @@ export const RequestACarService = () => {
                     border="2px solid"
                     borderColor={mapBorder}
                 >
-                    {isLoadingLocation ? (
-                        <Box
-                            w="full"
-                            h="full"
-                            bg={loadingStateBg}
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                        >
-                            <VStack spacing={2} px={4}>
-                                <Text color={loadingTextColor} fontSize={{ base: "md", sm: "lg" }} textAlign="center">
-                                    Getting your current location...
-                                </Text>
-                                <Text color={loadingSubtextColor} fontSize={{ base: "xs", sm: "sm" }} textAlign="center">
-                                    Please allow location access
-                                </Text>
-                            </VStack>
-                        </Box>
-                    ) : locationError ? (
-                        <Box
-                            w="full"
-                            h="full"
-                            bg={loadingStateBg}
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                        >
-                            <VStack spacing={2} px={4}>
-                                <Text color="red.500" fontSize={{ base: "md", sm: "lg" }} fontWeight="medium" textAlign="center">
-                                    {locationError}
-                                </Text>
-                                <Text color={loadingTextColor} fontSize={{ base: "xs", sm: "sm" }} textAlign="center">
-                                    You can still search for a location manually
-                                </Text>
-                            </VStack>
-                        </Box>
-                    ) : currentLocation ? (
-                        <Box w="full" h="full" position="relative">
+                    <Box w="full" h="full" position="relative">
                             <Image
                                 src={heroIllustration}
                                 alt="Exterior services at your driveway — car wash, home and yard"
@@ -220,20 +147,6 @@ export const RequestACarService = () => {
                                 </VStack>
                             </Box>
                         </Box>
-                    ) : (
-                        <Box
-                            w="full"
-                            h="full"
-                            bg={loadingStateBg}
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                        >
-                            <Text color={loadingTextColor} fontSize={{ base: "md", sm: "lg" }} textAlign="center">
-                                No location available
-                            </Text>
-                        </Box>
-                    )}
                 </Box>
             </Flex>
 

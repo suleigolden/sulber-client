@@ -19,7 +19,6 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   api,
   ProviderJobService,
@@ -213,7 +212,6 @@ type ProviderResultsViewProps = {
 
 export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) => {
   const { user } = useUser();
-  const navigate = useNavigate();
   const showToast = CustomToast();
   const [loading, setLoading] = useState(true);
   const [providers, setProviders] = useState<ProviderCardItem[]>([]);
@@ -418,7 +416,6 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
         });
         const created = await api.service("job").createMany(jobs as any);
         showToast("Success", `${created.length} requests sent to provider`, "success");
-        // navigate(`customer/${user.id}/waiting-to-connect-with-provider?jobId=${created[0].id}`);
         window.location.href = `/customer/${user.id}/waiting-to-connect-with-provider?jobId=${created[0].id}`;
       } else {
         const carType = getDerivedCarType(lines[0].vehicleId);
@@ -444,7 +441,6 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
           notes: noteParts.length > 0 ? noteParts.join(". ") : undefined,
         } as any);
         showToast("Success", "Request sent to provider", "success");
-        // navigate(`customer/${user.id}/waiting-to-connect-with-provider?jobId=${job.id}`);
         window.location.href = `/customer/${user.id}/waiting-to-connect-with-provider?jobId=${job.id}`;
       }
     } catch (err: unknown) {

@@ -418,7 +418,8 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
         });
         const created = await api.service("job").createMany(jobs as any);
         showToast("Success", `${created.length} requests sent to provider`, "success");
-        navigate(`customer/${user.id}/waiting-to-connect-with-provider?jobId=${created[0].id}`);
+        // navigate(`customer/${user.id}/waiting-to-connect-with-provider?jobId=${created[0].id}`);
+        window.location.href = `/customer/${user.id}/waiting-to-connect-with-provider?jobId=${created[0].id}`;
       } else {
         const carType = getDerivedCarType(lines[0].vehicleId);
         const { totalCents, addOnPrices } = computeTotalAndAddOns(
@@ -443,7 +444,8 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
           notes: noteParts.length > 0 ? noteParts.join(". ") : undefined,
         } as any);
         showToast("Success", "Request sent to provider", "success");
-        navigate(`/${user.id}/waiting-to-connect-with-provider?jobId=${job.id}`);
+        // navigate(`customer/${user.id}/waiting-to-connect-with-provider?jobId=${job.id}`);
+        window.location.href = `/customer/${user.id}/waiting-to-connect-with-provider?jobId=${job.id}`;
       }
     } catch (err: unknown) {
       const msg = err && typeof err === "object" && "message" in err ? String((err as { message: string }).message) : "Failed to send request";

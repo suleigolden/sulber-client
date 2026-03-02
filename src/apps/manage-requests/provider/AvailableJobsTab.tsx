@@ -3,7 +3,7 @@ import { Job, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
 import { FaMapMarkerAlt, FaCalendarAlt, FaCheck, FaStar } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { fullAddress } from "~/common/utils/address";
-import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
+import { formatNumberWithCommas, formatNumberWithCommasAndDecimals } from "~/common/utils/currency-formatter";
 import { formatDateToStringWithTime } from "~/common/utils/date-time";
 import { formatDistance } from "~/common/utils/distance";
 import { useJobDistances } from "~/hooks/use-job-distances";
@@ -34,7 +34,7 @@ export const AvailableJobsTab = ({
   const { distances, isLoading: isLoadingDistances } = useJobDistances(providerAddress, jobs);
   const cardBg = useColorModeValue("white", "gray.800");
   const selectedCardBg = useColorModeValue("brand.50", "whiteAlpha.200");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const borderColor = useColorModeValue("gray.200", "gray.800");
   const addressColor = useColorModeValue("gray.800", "gray.200");
   const titleColor = useColorModeValue("gray.900", "white");
   const scheduleColor = useColorModeValue("gray.900", "gray.400");
@@ -142,7 +142,9 @@ export const AvailableJobsTab = ({
       <Box
         w={{ base: "100%", lg: "400px" }}
         flexShrink={0}
-        bg={cardBg}
+        borderColor={borderColor}
+        borderWidth="1px"
+        borderRadius="lg"
         overflowY="auto"
         maxH={{ base: "50vh", lg: "100%" }}
       >
@@ -269,7 +271,7 @@ export const AvailableJobsTab = ({
                       fontSize="lg"
                       fontWeight="bold"
                     >
-                       ${price}
+                       ${formatNumberWithCommasAndDecimals(Number(job.total_price_cents))}
                     </Badge>
                     <Button
                       size="sm"
@@ -293,8 +295,9 @@ export const AvailableJobsTab = ({
       {/* Right Panel - Map */}
       <Box
         flex={1}
-        bg={cardBg}
         borderColor={borderColor}
+        borderWidth="1px"
+        borderRadius="lg"
         overflow="hidden"
         minH={{ base: "400px", lg: "100%" }}
       >

@@ -182,7 +182,15 @@ export const RequestACarService = () => {
                         </Box>
                     ) : currentLocation ? (
                         <Box w="full" h="full">
-                            <LocationMap address={mapAddress} />
+                            <LocationMap address={
+                                {
+                                    street: "7 Stroud Crescent",
+                                    city: "London",
+                                    state: "ON",
+                                    country: "Canada",
+                                    postal_code: "N6E 1Z5",
+                                }
+                            } />
                         </Box>
                     ) : (
                         <Box

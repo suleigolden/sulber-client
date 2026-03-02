@@ -9,6 +9,7 @@ export const LocationMap = ({ address }: LocationMapProps) => {
   const mapFilter = useColorModeValue("none", "invert(1) hue-rotate(180deg)");
 
   const getMapQuery = (location: Address) => {
+    console.log("location", location);
     const queryParts = [
       location?.street,
       location?.city,

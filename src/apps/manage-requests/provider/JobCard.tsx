@@ -23,6 +23,14 @@ import { useState, useEffect } from "react";
 import { UserProfile } from "@suleigolden/sulber-api-client";
 import { CustomerRequestInfoModal } from "./CustomerRequestInfoModal";
 
+const ADDON_LABELS: Record<string, string> = {
+  interior_deep_cleaning: "Interior deep cleaning",
+  wax_polish: "Wax polish",
+  engine_bay_cleaning: "Engine bay cleaning",
+  odor_removal: "Odor removal",
+  multiple_vehicles_discount: "Multiple vehicles discount",
+};
+
 type JobCardProps = {
   job: Job;
   showActions?: boolean;
@@ -45,6 +53,17 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
   const selectedService = job.service_type
     ? ProviderServiceTypesList.services.find((s) => s.type === job.service_type)
     : null;
+
+  const addOns =
+    Array.isArray(job.add_on_prices) && job.add_on_prices.length > 0
+      ? job.add_on_prices.flatMap((entry) =>
+          Object.entries(entry).map(([key, value]) => ({
+            id: key,
+            label: ADDON_LABELS[key] ?? key,
+            priceCents: value?.price ?? 0,
+          }))
+        )
+      : [];
 
   // Fetch customer profile information
   useEffect(() => {
@@ -182,6 +201,32 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                 </Text>
               </VStack>
             </HStack>
+
+            {/* Add-ons */}
+            {addOns.length > 0 && (
+              <HStack align="start" spacing={3}>
+                <VStack align="start" spacing={1}>
+                  <Text fontSize="xs" color={labelColor} fontWeight="medium">
+                    Add-ons
+                  </Text>
+                  <HStack spacing={2} flexWrap="wrap">
+                    {addOns.map((addon) => (
+                      <Badge
+                        key={addon.id}
+                        colorScheme="purple"
+                        variant="subtle"
+                        fontSize="xs"
+                        px={2}
+                        py={0.5}
+                        borderRadius="md"
+                      >
+                        {addon.label}
+                      </Badge>
+                    ))}
+                  </HStack>
+                </VStack>
+              </HStack>
+            )}
 
             {/* Notes */}
             {job.notes && (

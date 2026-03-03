@@ -158,6 +158,13 @@ export const AvailableJobsTab = ({
               ? formatNumberWithCommas(Number(job.total_price_cents) / 100)
               : "0";
 
+            const addOns =
+              Array.isArray(job.add_on_prices) && job.add_on_prices.length > 0
+                ? job.add_on_prices.flatMap((entry) =>
+                    Object.entries(entry).map(([key]) => key)
+                  )
+                : [];
+
             const isSelected = selectedJobId === job.id;
 
             // Determine badge label (similar to parking app)
@@ -253,6 +260,28 @@ export const AvailableJobsTab = ({
                             borderRadius="md"
                           >
                             {note}
+                          </Badge>
+                        ))}
+                      </HStack>
+                    </Box>
+                  )}
+
+                  {/* Add-ons */}
+                  {addOns.length > 0 && (
+                    <Box>
+                      <Text fontSize="sm" fontWeight="medium" color={titleColor}>Add-ons</Text>
+                      <HStack spacing={2} flexWrap="wrap">
+                        {addOns.map((addonKey) => (
+                          <Badge
+                            key={addonKey}
+                            colorScheme="purple"
+                            variant="subtle"
+                            fontSize="xs"
+                            px={2}
+                            py={0.5}
+                            borderRadius="md"
+                          >
+                            {addonKey.replace(/_/g, " ")}
                           </Badge>
                         ))}
                       </HStack>

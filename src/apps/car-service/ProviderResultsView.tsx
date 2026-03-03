@@ -840,7 +840,9 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
         borderLeftWidth={{ base: 0, md: 2 }}
         borderColor={cardBorder}
       >
-        <LocationMap address={mapAddress} />
+        {mapAddress && (
+          <LocationMap address={mapAddress} />
+        )}
       </Box>
     </Flex>
   );

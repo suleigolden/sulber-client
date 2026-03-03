@@ -357,11 +357,11 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
   };
 
   const handleSendRequest = async (
-    providerId: string,
     service: ProviderJobService,
     selection: { carType: string | null; addOns: string[] },
     requestLines?: { vehicleId: string | null }[]
   ) => {
+    const providerId = service.provider.id;
     if (!user?.id || !data.serviceLocationData) return;
     const isCarWash = isCarWashService(service.service_type ?? "");
     const lines = requestLines ?? [{ vehicleId: data.selectedVehicleId ?? null }];
@@ -703,7 +703,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                       });
                       setConfirmSendOpen(true);
                     } else {
-                      handleSendRequest(service.provider_id, service, selection);
+                      handleSendRequest(service, selection, [{ vehicleId: data.selectedVehicleId ?? null }]);
                     }
                   }}
                   isLoading={sendingId === service.provider_id}
@@ -748,7 +748,6 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                 setSelectedForDetails(null);
               } else {
                 handleSendRequest(
-                  selectedForDetails.service.provider_id,
                   selectedForDetails.service,
                   sel
                 );
@@ -794,10 +793,9 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                 onClick={() => {
                   if (pendingSend) {
                     handleSendRequest(
-                      pendingSend.providerId,
                       pendingSend.service,
                       pendingSend.selection,
-                      pendingSend.requestLines
+                      pendingSend.requestLines ?? [{ vehicleId: data.selectedVehicleId ?? null }]
                     );
                   }
                 }}

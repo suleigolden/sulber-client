@@ -44,60 +44,25 @@ export const ProviderManageRequests = () => {
   const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
 
-  // Helper function to check if job location matches provider location
-  const isJobInProviderLocation = (
-    jobAddress: Job["address"],
-    providerAddress: { country?: string | null; state?: string | null; city?: string | null; street?: string | null } | null | undefined
-  ): boolean => {
-    if (!providerAddress) return false;
 
-    // Normalize strings for comparison (case-insensitive, trim whitespace)
-    const normalize = (str: string | null | undefined): string => 
-      str?.toLowerCase().trim() || "";
-
-    const jobCountry = normalize(jobAddress.country);
-    const jobState = normalize(jobAddress.state);
-    const jobCity = normalize(jobAddress.city);
-    const jobStreet = normalize(jobAddress.street);
-
-    const providerCountry = normalize(providerAddress.country);
-    const providerState = normalize(providerAddress.state);
-    const providerCity = normalize(providerAddress.city);
-    const providerStreet = normalize(providerAddress.street);
-
-    // Match if same country AND (same state OR same city OR same street)
-    const countryMatch = jobCountry && providerCountry && jobCountry === providerCountry;
-    const locationMatch = 
-      (jobState && providerState && jobState === providerState) ||
-      (jobCity && providerCity && jobCity === providerCity) ||
-      (jobStreet && providerStreet && jobStreet === providerStreet);
-    
-    return Boolean(countryMatch && locationMatch);
-  };
-
-  // Fetch available jobs using TanStack Query
+  // Fetch available jobs (pending jobs for this provider)
   const {
     data: availableJobs = [],
     isLoading: isLoadingAvailableJobs,
     error: availableJobsError,
   } = useQuery({
-    queryKey: ["availableJobs", user?.id, userProfile?.address],
+    queryKey: ["availableJobs", user?.id],
     queryFn: async () => {
-      if (!user?.id || !userProfile?.address) {
+      if (!user?.id) {
         return [];
       }
 
-      const allPendingJobs = await api.service("job").list(undefined, undefined, "PENDING");
-      
-      // Filter jobs that:
-      // 1. Don't have a provider assigned
-      // 2. Are in the same location zone as the provider
-      return allPendingJobs.filter((job) => {
-        if (job.provider_id) return false;
-        return isJobInProviderLocation(job.address, userProfile.address);
-      });
+      // Load all jobs for this provider, then filter to pending
+      const allProviderJobs = await api.service("job").findByProviderId(user.id);
+      const pendingJobs = allProviderJobs.filter((job) => job.status === "PENDING");
+      return pendingJobs;
     },
-    enabled: Boolean(user?.id && userProfile?.address && !isLoadingUserProfile),
+    enabled: Boolean(user?.id && !isLoadingUserProfile),
     staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
@@ -256,6 +221,7 @@ export const ProviderManageRequests = () => {
       </Container>
     );
   }
+  console.log("availableJobs:: ", availableJobs);
 
   return (
     <Container maxW="1500px" px={[4, 8]} py={[0, 0]}>

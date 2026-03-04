@@ -1,7 +1,8 @@
-import { Box, VStack, Text, Icon, useColorModeValue } from "@chakra-ui/react";
+import { Box, VStack, Text, Icon } from "@chakra-ui/react";
 import { Job } from "@suleigolden/sulber-api-client";
 import { FaUser } from "react-icons/fa";
 import { JobCard } from "./JobCard";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 type ActiveJobsTabProps = {
   jobs: Job[];
@@ -9,11 +10,11 @@ type ActiveJobsTabProps = {
 };
 
 export const ActiveJobsTab = ({ jobs, onUpdateStatus }: ActiveJobsTabProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
-  const emptyIconColor = useColorModeValue("gray.400", "gray.500");
-  const emptyPrimaryTextColor = useColorModeValue("gray.600", "gray.200");
-  const emptySecondaryTextColor = useColorModeValue("gray.700", "gray.400");
+  const {
+    borderColor,
+    iconMutedColor,
+    mutedTextColor,
+  } = useSystemColor();
 
   if (jobs.length === 0) {
     return (
@@ -26,11 +27,11 @@ export const ActiveJobsTab = ({ jobs, onUpdateStatus }: ActiveJobsTabProps) => {
         textAlign="center"
       >
         <VStack spacing={4}>
-          <Icon as={FaUser} boxSize={12} color={emptyIconColor} />
-          <Text fontSize="lg" color={emptyPrimaryTextColor} fontWeight="medium">
+          <Icon as={FaUser} boxSize={12} color={iconMutedColor} />
+          <Text fontSize="lg" color={mutedTextColor} fontWeight="medium">
             No active jobs
           </Text>
-          <Text fontSize="sm" color={emptySecondaryTextColor}>
+          <Text fontSize="sm" color={mutedTextColor}>
             Jobs you've accepted will appear here.
           </Text>
         </VStack>

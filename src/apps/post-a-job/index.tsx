@@ -11,7 +11,6 @@ import {
   Heading,
   Spinner,
   Text,
-  useColorModeValue,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
@@ -24,6 +23,7 @@ import { ProviderJobServiceCard } from "./ProviderJobServiceCard";
 import { PostJobModal } from "./PostJobModal";
 import { EditProviderJobModal } from "./EditProviderJobModal";
 import { useCheckProviderVerification } from "~/hooks/use-check-provider-verification";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 export const PostAJob = () => {
   const { user } = useUser();
@@ -43,8 +43,11 @@ export const PostAJob = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [editingJob, setEditingJob] = useState<ProviderJobService | null>(null);
 
-  const headingColor = useColorModeValue("gray.800", "white");
-  const mutedColor = useColorModeValue("gray.900", "gray.400");
+  const {
+    headingColor,
+    mutedTextColor,
+    borderColor,
+  } = useSystemColor();
 
   const fetchJobs = useCallback(async () => {
     if (!user?.id || user?.role !== "provider") return;
@@ -146,7 +149,7 @@ export const PostAJob = () => {
   if (!user) {
     return (
       <Container maxW="1100px" px={{ base: 4, md: 8 }} py={8}>
-        <Text color={mutedColor}>Please sign in to view your services.</Text>
+        <Text color={mutedTextColor}>Please sign in to view your services.</Text>
       </Container>
     );
   }
@@ -154,7 +157,7 @@ export const PostAJob = () => {
   if (user.role !== "provider") {
     return (
       <Container maxW="1100px" px={{ base: 4, md: 8 }} py={8}>
-        <Text color={mutedColor}>Only providers can post and manage job services.</Text>
+        <Text color={mutedTextColor}>Only providers can post and manage job services.</Text>
       </Container>
     );
   }
@@ -177,7 +180,7 @@ export const PostAJob = () => {
             <Heading size="xl" color={headingColor} letterSpacing="tight">
               My services
             </Heading>
-            <Text color={mutedColor} mt={2}>
+            <Text color={mutedTextColor} mt={2}>
               Manage the services you offer. Add new ones so customers can find and book you.
             </Text>
           </Box>
@@ -199,7 +202,7 @@ export const PostAJob = () => {
         {isLoading ? (
           <VStack py={12}>
             <Spinner size="lg" color="brand.500" />
-            <Text color={mutedColor}>Loading your services...</Text>
+            <Text color={mutedTextColor}>Loading your services...</Text>
           </VStack>
         ) : loadError ? (
           <Box py={8}>
@@ -212,10 +215,10 @@ export const PostAJob = () => {
             borderRadius="xl"
             borderWidth="1px"
             borderStyle="dashed"
-            borderColor={useColorModeValue("gray.300", "whiteAlpha.300")}
+            borderColor={borderColor}
             textAlign="center"
           >
-            <Text color={mutedColor} mb={4}>
+            <Text color={mutedTextColor} mb={4}>
               You haven&apos;t posted any services yet.
             </Text>
             <Button

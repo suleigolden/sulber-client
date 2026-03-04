@@ -2,15 +2,15 @@ import {
   Container,
   VStack,
   Text,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { RequestACarService } from "../car-service/RequestACarService";
 import { IsProfileComplete } from "../users/customer/IsProfileComplete";
 import { useIsCustomerProfileComplete } from "~/hooks/use-is-customer-profile-complete";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 export const CustomerDashboard = () => {
   const { isProfileComplete, isLoading } = useIsCustomerProfileComplete();
-  const loadingColor = useColorModeValue("gray.600", "gray.400");
+  const { mutedTextColor: loadingColor } = useSystemColor();
 
 
   if (isLoading) {

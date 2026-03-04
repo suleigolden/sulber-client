@@ -18,7 +18,6 @@ import {
   SimpleGrid,
   Text,
   Textarea,
-  useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
@@ -43,6 +42,7 @@ import {
   type AvailabilitySlot,
   type ProviderJobServiceLocation,
 } from "./location-utils";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 type EditProviderJobModalProps = {
   job: ProviderJobService | null;
@@ -161,9 +161,11 @@ export function EditProviderJobModal({
   const rawJob: any = job ?? {};
   const showToast = CustomToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const mutedColor = useColorModeValue("gray.600", "gray.400");
-  const sectionBorder = useColorModeValue("gray.200", "whiteAlpha.300");
-  const bg = useColorModeValue("white", "#0b1437");
+  const {
+    modalBg,
+    borderColor,
+    mutedTextColor,
+  } = useSystemColor();
 
   const {
     register,
@@ -382,11 +384,11 @@ export function EditProviderJobModal({
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="2xl" scrollBehavior="inside">
       <ModalOverlay />
-      <ModalContent borderRadius="2xl" maxH="90vh" bg={bg}>
+      <ModalContent borderRadius="2xl" maxH="90vh" bg={modalBg}>
         <ModalHeader fontWeight="600" fontSize="lg">
           Edit service
           {selectedServiceConfig && (
-            <Text mt={1} fontSize="sm" color={mutedColor}>
+            <Text mt={1} fontSize="sm" color={mutedTextColor}>
               {selectedServiceConfig.title}
             </Text>
           )}
@@ -416,12 +418,12 @@ export function EditProviderJobModal({
                   p={4}
                   borderRadius="xl"
                   borderWidth="1px"
-                  borderColor={sectionBorder}
+                    borderColor={borderColor}
                 >
-                  <Text fontWeight="600" mb={1} color={mutedColor}>
+                  <Text fontWeight="600" mb={1} color={mutedTextColor}>
                     Vehicle prices (per vehicle type)
                   </Text>
-                  <Text mt={0} mb={3} color={mutedColor}>
+                  <Text mt={0} mb={3} color={mutedTextColor}>
                     Set your base price for each vehicle type in dollars.
                   </Text>
                   <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={4}>
@@ -491,12 +493,12 @@ export function EditProviderJobModal({
                   p={4}
                   borderRadius="xl"
                   borderWidth="1px"
-                  borderColor={sectionBorder}
+                  borderColor={borderColor}
                 >
-                  <Text fontWeight="600" mb={1} color={mutedColor}>
+                  <Text fontWeight="600" mb={1} color={mutedTextColor}>
                     Add-on prices (optional)
                   </Text>
-                  <Text mt={0} mb={3} color={mutedColor}>
+                  <Text mt={0} mb={3} color={mutedTextColor}>
                     Charge extra for add-ons; leave 0 if not offered.
                   </Text>
                   <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
@@ -572,7 +574,7 @@ export function EditProviderJobModal({
                     />
                   </Box>
                   {!primaryLocation?.street?.trim() && (
-                    <FormHelperText color={mutedColor}>
+                    <FormHelperText color={mutedTextColor}>
                       Search and select your main service address.
                     </FormHelperText>
                   )}
@@ -662,7 +664,7 @@ export function EditProviderJobModal({
             {serviceType && (
               <FormControl>
                 <FormLabel fontWeight="600">Availability</FormLabel>
-                <FormHelperText color={mutedColor} mb={3}>
+                <FormHelperText color={mutedTextColor} mb={3}>
                   Select days and set your available time slots for each.
                 </FormHelperText>
                 <Checkbox
@@ -694,7 +696,7 @@ export function EditProviderJobModal({
                         {slot.day}
                       </Checkbox>
                       <HStack spacing={0} flex={1} w="full" ml={{ base: 0, sm: -40 }}>
-                        <Text as="span" color={mutedColor} mr={1}>
+                        <Text as="span" color={mutedTextColor} mr={1}>
                           From:
                         </Text>
                         <Input
@@ -706,7 +708,7 @@ export function EditProviderJobModal({
                           onChange={(e) => updateSlot(index, "startTime", e.target.value)}
                           required
                         />
-                        <Text as="span" color={mutedColor} mr={1} ml={1}>
+                        <Text as="span" color={mutedTextColor} mr={1} ml={1}>
                           To:
                         </Text>
                         <Input

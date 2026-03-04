@@ -15,7 +15,6 @@ import {
     Alert,
     AlertIcon,
     AlertDescription,
-    useColorModeValue,
     Link,
 } from "@chakra-ui/react";
 import { FaCalendarAlt, FaInfoCircle } from "react-icons/fa";
@@ -23,6 +22,7 @@ import { LocationSearchInput } from "../provider-onboard/components/LocationSear
 import { ProviderServiceType, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
 import { MdLocationOn } from "react-icons/md";
 import { useCurrentLocation } from "~/hooks/use-current-location";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 type ServiceRequestType = "one-time" | "monthly";
 
@@ -69,11 +69,13 @@ export const RequestServiceCard = ({
     isSearchDisabled,
 }: RequestServiceCardProps) => {
     const { currentLocation } = useCurrentLocation();
-    const textColor = useColorModeValue("black", "white");
-    const linkColor = useColorModeValue("blue.500", "blue.300");
-    const subtextColor = useColorModeValue("gray.600", "gray.400");
-    const iconColor = useColorModeValue("gray.500", "gray.400");
-    const inputBorderColor = useColorModeValue("gray.300", "whiteAlpha.300");
+    const {
+        iconColor,
+        subtextColor,
+        linkColor,
+        inputBorderColor,
+        textColor,
+    } = useSystemColor();
     // Format location display
     const locationDisplay = currentLocation
         ? `${currentLocation.city || ""}, ${currentLocation.state || ""}, ${currentLocation.country || ""}`

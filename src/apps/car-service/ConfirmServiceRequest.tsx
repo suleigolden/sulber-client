@@ -15,7 +15,6 @@ import {
   FormControl,
   FormLabel,
   Button,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import {
   CustomerVehicle,
@@ -25,6 +24,7 @@ import {
 import { useCustomerVehicles } from "~/hooks/use-customer-vehicles";
 import { useState, useEffect } from "react";
 import { CustomToast } from "~/hooks/CustomToast";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 
 type ServiceRequestType = "one-time" | "monthly";
@@ -130,27 +130,20 @@ export const ConfirmServiceRequest = ({
   };
 
   const isFindProvidersDisabled = requiresVehicle && !selectedVehicleId;
-
-  const modalBg = useColorModeValue("white", "#0b1437");
-  const headerColor = useColorModeValue(undefined, "white");
-  const labelColor = useColorModeValue("gray.600", "gray.300");
-  const valueColor = useColorModeValue("gray.800", "white");
-  const sectionTitleColor = useColorModeValue("gray.700", "gray.200");
-  const selectBorderColor = useColorModeValue("gray.300", "whiteAlpha.300");
-  const noVehicleBg = useColorModeValue("yellow.50", "whiteAlpha.200");
-  const noVehicleBorder = useColorModeValue("yellow.200", "yellow.700");
-  const noVehicleTextColor = useColorModeValue("yellow.800", "yellow.200");
-  const selectedVehicleBg = useColorModeValue("gray.50", "whiteAlpha.200");
-  const selectedVehicleTextColor = useColorModeValue("gray.600", "gray.300");
-  const selectedVehicleNotesColor = useColorModeValue("gray.500", "gray.400");
-  const loadingTextColor = useColorModeValue("gray.500", "gray.400");
-
+  const {
+    borderColor,
+    labelColor,
+    textColor,
+    mutedTextColor,
+    headingColor,
+    dividerColor,
+  } = useSystemColor();
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
       <ModalOverlay />
-      <ModalContent bg={modalBg}>
-        <ModalHeader color={headerColor}>
-          <Heading size="md" color={headerColor}>Confirm Service Request</Heading>
+      <ModalContent bg={"transparent"}>
+        <ModalHeader color={headingColor}>
+          <Heading size="md" color={headingColor}>Confirm Service Request</Heading>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody pb={6}>
@@ -162,7 +155,7 @@ export const ConfirmServiceRequest = ({
                   <Text fontSize="sm" fontWeight="medium" color={labelColor} minW="120px">
                     Service Type:
                   </Text>
-                  <Text fontSize="sm" color={valueColor}>
+                  <Text fontSize="sm" color={textColor}>
                     {selectedService?.title || serviceType || "Not selected"}
                   </Text>
                 </HStack>
@@ -170,7 +163,7 @@ export const ConfirmServiceRequest = ({
                   <Text fontSize="sm" fontWeight="medium" color={labelColor} minW="120px">
                     Request Type:
                   </Text>
-                  <Text fontSize="sm" color={valueColor}>
+                  <Text fontSize="sm" color={textColor}>
                     {serviceRequestType === "one-time" ? "One Time Service" : "Monthly Service (4 times/month)"}
                   </Text>
                 </HStack>
@@ -178,7 +171,7 @@ export const ConfirmServiceRequest = ({
                   <Text fontSize="sm" fontWeight="medium" color={labelColor} minW="120px">
                     Location:
                   </Text>
-                  <Text fontSize="sm" color={valueColor} flex={1}>
+                  <Text fontSize="sm" color={textColor} flex={1}>
                     {serviceLocation || "Not specified"}
                   </Text>
                 </HStack>
@@ -189,22 +182,22 @@ export const ConfirmServiceRequest = ({
             {/* Vehicle Selection (only for car-related services) */}
             {requiresVehicle && (
               <FormControl isRequired>
-                <FormLabel fontSize="sm" fontWeight="bold" color={sectionTitleColor}>
+                <FormLabel fontSize="sm" fontWeight="bold" color={headingColor}>
                   Select Vehicle
                 </FormLabel>
                 {isLoadingVehicles ? (
-                  <Text fontSize="sm" color={loadingTextColor}>
+                  <Text fontSize="sm" color={mutedTextColor}>
                     Loading vehicles...
                   </Text>
                 ) : vehicles.length === 0 ? (
                   <Box
                     p={4}
-                    bg={noVehicleBg}
+                    bg={"transparent"}
                     borderRadius="md"
                     border="1px solid"
-                    borderColor={noVehicleBorder}
+                    borderColor={borderColor}
                   >
-                    <Text fontSize="sm" color={noVehicleTextColor}>
+                    <Text fontSize="sm" color={textColor}>
                       No vehicles found. Please add a vehicle to your profile first.
                     </Text>
                   </Box>
@@ -213,7 +206,7 @@ export const ConfirmServiceRequest = ({
                     placeholder="Select a vehicle"
                     value={selectedVehicleId}
                     onChange={(e) => setSelectedVehicleId(e.target.value)}
-                    borderColor={selectBorderColor}
+                    borderColor={borderColor}
                     _focus={{ borderColor: "brand.500", boxShadow: "0 0 0 1px brand.500" }}
                   >
                     {vehicles.map((vehicle) => (
@@ -224,13 +217,13 @@ export const ConfirmServiceRequest = ({
                   </Select>
                 )}
                 {selectedVehicle && (
-                  <Box mt={2} p={3} bg={selectedVehicleBg} borderRadius="md">
-                    <Text fontSize="xs" color={selectedVehicleTextColor}>
+                  <Box mt={2} p={3} bg={"transparent"} borderRadius="md">
+                    <Text fontSize="xs" color={textColor}>
                       <Text as="span" fontWeight="medium">Selected:</Text> {formatVehicleLabel(selectedVehicle)}
                       {selectedVehicle.notes && (
                         <>
                           <br />
-                          <Text as="span" fontSize="xs" color={selectedVehicleNotesColor}>
+                          <Text as="span" fontSize="xs" color={mutedTextColor}>
                             Notes: {selectedVehicle.notes}
                           </Text>
                         </>

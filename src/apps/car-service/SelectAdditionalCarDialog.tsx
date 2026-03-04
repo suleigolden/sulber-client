@@ -7,10 +7,10 @@ import {
   Button,
   Text,
   VStack,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import type { CustomerVehicle } from "@suleigolden/sulber-api-client";
 import { useRef } from "react";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 function formatVehicleLabel(vehicle: CustomerVehicle): string {
   const parts: string[] = [];
@@ -39,9 +39,11 @@ export const SelectAdditionalCarDialog = ({
   onSelect,
   isLoading = false,
 }: SelectAdditionalCarDialogProps) => {
-  const modalBg = useColorModeValue("white", "#0b1437");
-  const headerColor = useColorModeValue("gray.800", "white");
-  const labelColor = useColorModeValue("gray.600", "gray.300");
+  const {
+    modalBg,
+    headingColor,
+    labelColor,
+  } = useSystemColor();
   const cancelRef = useRef<HTMLButtonElement | null>(null);
 
   const available = vehicles.filter((v) => !excludeVehicleIds.includes(v.id));
@@ -49,7 +51,7 @@ export const SelectAdditionalCarDialog = ({
   return (
     <AlertDialog isOpen={isOpen} onClose={onClose} leastDestructiveRef={cancelRef}>
       <AlertDialogContent bg={modalBg}>
-        <AlertDialogHeader fontSize="lg" fontWeight="bold" color={headerColor}>
+        <AlertDialogHeader fontSize="lg" fontWeight="bold" color={headingColor}>
           Add another car
         </AlertDialogHeader>
         <AlertDialogBody>

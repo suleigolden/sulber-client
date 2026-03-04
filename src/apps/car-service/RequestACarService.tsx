@@ -6,13 +6,13 @@ import {
     Flex,
     Image,
     useDisclosure,
-    useColorModeValue,
 } from "@chakra-ui/react";
 import { ProviderServiceType } from "@suleigolden/sulber-api-client";
 import { ConfirmServiceRequest, type ConfirmServiceRequestData } from "./ConfirmServiceRequest";
 import { ProviderResultsView } from "./ProviderResultsView";
 import { RequestServiceCard } from "./RequestServiceCard";
 import heroIllustration from "~/assets/hero-illustration.png";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 
 type ServiceRequestType = "one-time" | "monthly";
@@ -50,21 +50,22 @@ export const RequestACarService = () => {
     };
 
     const isSearchDisabled = !serviceLocation || !serviceDate || !serviceTime || !serviceType;
-
-    const pageBg = useColorModeValue("gray.50", "#0b1437");
-    const leftPanelBg = useColorModeValue("white", "#0b1437");
-    const mapBorder = useColorModeValue("white", "whiteAlpha.300");
+    const {
+        borderColor,
+        headingColor,
+        mutedTextColor,
+    } = useSystemColor();
 
     if (providerResultsData) {
         return (
-            <Box w="full" minH="100vh" bg={pageBg}>
+            <Box w="full" minH="100vh" bg={"transparent"}>
                 <ProviderResultsView data={providerResultsData} onBack={handleBackFromProviderResults} />
             </Box>
         );
     }
 
     return (
-        <Box w="full" minH="100vh" bg={pageBg}>
+        <Box w="full" minH="100vh" bg={"transparent"}>
             <Flex
                 direction={{ base: "column", md: "row" }}
                 h={{ base: "auto", md: "100vh" }}
@@ -73,7 +74,7 @@ export const RequestACarService = () => {
                 {/* Left Panel - Reserve a Service */}
                 <Box
                     w={{ base: "100%", md: "400px", lg: "450px" }}
-                    bg={leftPanelBg}
+                    bg={"transparent"}
                     p={{ base: 4, sm: 5, md: 6 }}
                     overflowY="auto"
                     maxH={{ base: "60vh", md: "100vh" }}
@@ -101,10 +102,10 @@ export const RequestACarService = () => {
                     w={{ base: "100%", md: "auto" }}
                     h={{ base: "40vh", md: "100vh" }}
                     minH={{ base: "300px", md: "auto" }}
-                    bg={leftPanelBg}
+                    bg={"transparent"}
                     position="relative"
                     border="2px solid"
-                    borderColor={mapBorder}
+                    borderColor={borderColor}
                 >
                     <Box w="full" h="full" position="relative">
                             <Image
@@ -121,20 +122,20 @@ export const RequestACarService = () => {
                                 left={{ base: 4, md: 8 }}
                                 right={{ base: 4, md: 8 }}
                                 maxW={{ base: "100%", md: "480px" }}
-                                bg="blackAlpha.600"
+                                bg={"transparent"}
                                 borderRadius="lg"
                                 p={{ base: 4, md: 5 }}
                             >
                                 <VStack align="flex-start" spacing={2}>
                                     <Text
-                                        color="white"
+                                        color={headingColor}
                                         fontSize={{ base: "md", md: "lg", lg: "2xl" }}
                                         fontWeight="semibold"
                                     >
                                         Get your car washed or cleaned right in your driveway.
                                     </Text>
                                     <Text
-                                        color="whiteAlpha.900"
+                                        color={mutedTextColor}
                                         fontSize={{ base: "sm", md: "md", lg: "lg" }}
                                         lineHeight="tall"
                                     >

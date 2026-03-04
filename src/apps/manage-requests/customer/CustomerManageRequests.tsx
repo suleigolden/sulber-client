@@ -10,7 +10,6 @@ import {
   Badge,
   Button,
   Spinner,
-  useColorModeValue,
   Icon,
   Divider,
   useDisclosure,
@@ -32,6 +31,7 @@ import { getStatusColor } from "~/common/utils/status-color";
 import { formatDateToStringWithoutTime, formatDateToStringWithTime } from "~/common/utils/date-time";
 import { useIsCustomerProfileComplete } from "~/hooks/use-is-customer-profile-complete";
 import { IsProfileComplete } from "~/apps/users/customer/IsProfileComplete";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 export const CustomerManageRequests = () => {
   const { jobs, isLoading } = useJobs();
@@ -40,16 +40,15 @@ export const CustomerManageRequests = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
-  const [isCancelling, setIsCancelling] = useState(false);
-  const loadingColor = useColorModeValue("gray.600", "gray.300");
-  const cardBg = useColorModeValue("white", "gray.900");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
-  const headingColor = useColorModeValue("gray.900", "white");
-  const primaryTextColor = useColorModeValue("gray.800", "gray.100");
-  const secondaryTextColor = useColorModeValue("gray.600", "gray.300");
-  const mutedTextColor = useColorModeValue("gray.500", "gray.400");
-  const noteTextColor = useColorModeValue("gray.700", "gray.200");
-  const emptyIconColor = useColorModeValue("gray.400", "gray.500");
+  const [isCancelling, setIsCancelling] = useState<boolean>(false);
+  const {
+    borderColor,
+    headingColor,
+    textColor: primaryTextColor,
+    mutedTextColor,
+    iconColor,
+  } = useSystemColor();
+ 
 
   const handleCancelClick = (job: Job) => {
     setSelectedJob(job);
@@ -90,7 +89,7 @@ export const CustomerManageRequests = () => {
     return (
       <Container maxW="1500px" px={[4, 8]} py={8}>
         <VStack align="start" spacing={8} w="full" mt={10}>
-          <Text color={loadingColor}>Loading...</Text>
+          <Text color={mutedTextColor}>Loading...</Text>
         </VStack>
       </Container>
     );
@@ -107,7 +106,7 @@ export const CustomerManageRequests = () => {
         <Box display="flex" justifyContent="center" alignItems="center" minH="400px">
           <VStack spacing={4}>
             <Spinner size="xl" color="brand.500" thickness="4px" />
-            <Text color={loadingColor}>Loading your requests...</Text>
+            <Text color={mutedTextColor}>Loading your requests...</Text>
           </VStack>
         </Box>
       </Container>
@@ -124,15 +123,15 @@ export const CustomerManageRequests = () => {
           <Box
             w="full"
             p={12}
-            bg={cardBg}
+            bg={"transparent"}
             borderRadius="lg"
             borderWidth="1px"
             borderColor={borderColor}
             textAlign="center"
           >
             <VStack spacing={4}>
-              <Icon as={FaCalendarAlt} boxSize={12} color={emptyIconColor} />
-              <Text fontSize="lg" color={secondaryTextColor} fontWeight="medium">
+              <Icon as={FaCalendarAlt} boxSize={12} color={iconColor} />
+              <Text fontSize="lg" color={mutedTextColor} fontWeight="medium">
                 No service requests yet
               </Text>
               <Text fontSize="sm" color={mutedTextColor}>
@@ -287,7 +286,7 @@ export const CustomerManageRequests = () => {
                           <Text fontSize="xs" color={mutedTextColor} fontWeight="medium" mb={1}>
                             Notes
                           </Text>
-                          <Text fontSize="sm" color={noteTextColor}>
+                          <Text fontSize="sm" color={mutedTextColor}>
                             {job.notes}
                           </Text>
                         </Box>
@@ -304,7 +303,7 @@ export const CustomerManageRequests = () => {
       {/* Cancel Confirmation Dialog */}
       <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
         <AlertDialogOverlay>
-          <AlertDialogContent bg={cardBg}>
+          <AlertDialogContent bg={"transparent"}>
             <AlertDialogHeader fontSize="lg" fontWeight="bold" color={headingColor}>
               Cancel Service Request
             </AlertDialogHeader>

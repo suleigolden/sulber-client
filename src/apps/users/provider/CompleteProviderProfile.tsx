@@ -6,24 +6,22 @@ import {
   Box,
   Heading,
   Button,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { useCheckProviderVerification } from "~/hooks/use-check-provider-verification";
 import { useUser } from "~/hooks/use-user";
 import { MdVerifiedUser, MdPerson, MdInfo } from "react-icons/md";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 export const CompleteProviderProfile = () => {
   const { user } = useUser();
   const { isLoading, verificationStatus } = useCheckProviderVerification();
-  const borderColor = useColorModeValue("gray.200", "whiteAlpha.300");
-  const mutedColor = useColorModeValue("gray.600", "gray.400");
-
+  const { mutedTextColor, brandColor, borderColor } = useSystemColor();
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minH="60vh">
         <VStack spacing={4}>
-          <Spinner size="xl" color="brand.500" thickness="4px" />
-          <Text color={mutedColor}>Checking your verification status...</Text>
+          <Spinner size="xl" color={brandColor} thickness="4px" />
+          <Text color={mutedTextColor}>Checking your verification status...</Text>
         </VStack>
       </Box>
     );
@@ -37,8 +35,8 @@ export const CompleteProviderProfile = () => {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minH="60vh">
         <VStack spacing={4}>
-          <Spinner size="lg" color="brand.500" />
-          <Text color={mutedColor}>Taking you to the right place...</Text>
+          <Spinner size="lg" color={brandColor} />
+          <Text color={mutedTextColor}>Taking you to the right place...</Text>
         </VStack>
       </Box>
     );
@@ -75,7 +73,7 @@ export const CompleteProviderProfile = () => {
                 </Box>
                 <Text fontWeight="600">Profile incomplete</Text>
               </Box>
-              <Text fontSize="sm" color={mutedColor} pl={9}>
+              <Text fontSize="sm" color={mutedTextColor} pl={9}>
                 Add your name, phone, photo, date of birth, gender, and address in profile settings.
               </Text>
             </VStack>
@@ -86,7 +84,7 @@ export const CompleteProviderProfile = () => {
                 </Box>
                 <Text fontWeight="600">Identity not verified</Text>
               </Box>
-              <Text fontSize="sm" color={mutedColor} pl={9}>
+              <Text fontSize="sm" color={mutedTextColor} pl={9}>
                 Complete identity verification in our onboarding flow.
               </Text>
             </VStack>

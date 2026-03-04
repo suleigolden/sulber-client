@@ -27,7 +27,6 @@ import {
   SimpleGrid,
   Text,
   Textarea,
-  useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
 import { useCallback, useRef, useState } from "react";
@@ -50,6 +49,7 @@ import {
   type AvailabilitySlot,
   type ProviderJobServiceLocation,
 } from "./location-utils";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 const DRIVEWAY_CAR_WASH = "DRIVEWAY_CAR_WASH";
 
@@ -125,9 +125,11 @@ export function PostJobModal({
     useState(false);
   const [showRequirementsWarning, setShowRequirementsWarning] = useState(false);
   const cancelRef = useRef<HTMLButtonElement | null>(null);
-  const mutedColor = useColorModeValue("gray.600", "gray.400");
-  const sectionBorder = useColorModeValue("gray.200", "whiteAlpha.300");
-  const bg = useColorModeValue("white", "#0b1437");
+  const {
+    modalBg,
+    borderColor,
+    mutedTextColor,
+  } = useSystemColor();
 
   const usedServiceTypesSet = new Set(usedServiceTypes);
 
@@ -334,10 +336,10 @@ export function PostJobModal({
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="2xl" scrollBehavior="inside">
       <ModalOverlay />
-      <ModalContent borderRadius="2xl" maxH="90vh" bg={bg}>
+      <ModalContent borderRadius="2xl" maxH="90vh" bg={modalBg}>
         <ModalHeader fontWeight="600" fontSize="lg">
           Post a service
-          <Text mt={2} borderWidth="1px" borderColor="gray.200" borderRadius="md" p={2}>
+          <Text mt={2} borderWidth="1px" borderColor={borderColor} borderRadius="md" p={2}>
             Important: The currency type is based on your current country location.
           </Text>
         </ModalHeader>
@@ -355,7 +357,7 @@ export function PostJobModal({
                     ? `${selectedServiceConfig.title} requirements`
                     : "Service requirements"}
                 </AlertDialogHeader>
-                <AlertDialogBody bg={bg}>
+                <AlertDialogBody bg={modalBg}>
                   {selectedServiceConfig?.requirements_for_provider && (
                     <VStack align="start" spacing={2} mb={4}>
                       {selectedServiceConfig.requirements_for_provider
@@ -518,12 +520,12 @@ export function PostJobModal({
                 p={4}
                 borderRadius="xl"
                 borderWidth="1px"
-                borderColor={sectionBorder}
+                borderColor={borderColor}
               >
                 <VStack align="stretch" spacing={4}>
                   {selectedServiceConfig.included?.length > 0 && (
                     <Box>
-                      <Text fontSize="sm" fontWeight="600" color={mutedColor} mb={2}>
+                      <Text fontSize="sm" fontWeight="600" color={mutedTextColor} mb={2}>
                         What's Included. What you will be providing to the customer.
                       </Text>
                       <List spacing={1}>
@@ -538,7 +540,7 @@ export function PostJobModal({
                   )}
                   {selectedServiceConfig.requirements_for_customer?.length > 0 && (
                     <Box>
-                      <Text fontSize="sm" fontWeight="600" color={mutedColor} mb={2}>
+                      <Text fontSize="sm" fontWeight="600" color={mutedTextColor} mb={2}>
                         Customer Requirements. What the customer needs to provide to you.
                       </Text>
                       <List spacing={1}>
@@ -561,12 +563,12 @@ export function PostJobModal({
                   p={4}
                   borderRadius="xl"
                   borderWidth="1px"
-                  borderColor={sectionBorder}
+                  borderColor={borderColor}
                 >
-                  <Text fontWeight="600" mb={1} color={mutedColor}>
+                  <Text fontWeight="600" mb={1} color={mutedTextColor}>
                     Vehicle prices (per vehicle type)
                   </Text>
-                  <Text mt={0} mb={3} color={mutedColor}>
+                  <Text mt={0} mb={3} color={mutedTextColor}>
                     Set your base price for each vehicle type in dollars.
                   </Text>
                   <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={4}>
@@ -644,12 +646,12 @@ export function PostJobModal({
                   p={4}
                   borderRadius="xl"
                   borderWidth="1px"
-                  borderColor={sectionBorder}
+                  borderColor={borderColor}
                 >
-                  <Text fontWeight="600" mb={1} color={mutedColor}>
+                  <Text fontWeight="600" mb={1} color={mutedTextColor}>
                     Add-on prices (optional)
                   </Text>
-                  <Text mt={0} mb={3} color={mutedColor}>
+                  <Text mt={0} mb={3} color={mutedTextColor}>
                     Charge extra for add-ons; leave 0 if not offered.
                   </Text>
                   <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
@@ -719,7 +721,7 @@ export function PostJobModal({
                 />
               </Box>
               {!primaryLocation?.street?.trim() && (
-                <FormHelperText color={mutedColor}>
+                <FormHelperText color={mutedTextColor}>
                   Search and select your main service address.
                 </FormHelperText>
               )}
@@ -805,7 +807,7 @@ export function PostJobModal({
               <FormLabel fontWeight="600">
                 Availability
               </FormLabel>
-              <FormHelperText color={mutedColor} mb={3}>
+              <FormHelperText color={mutedTextColor} mb={3}>
                 Select days and set your available time slots for each.
               </FormHelperText>
               <Checkbox
@@ -832,7 +834,7 @@ export function PostJobModal({
                       {slot.day}
                     </Checkbox>
                     <HStack spacing={0} flex={1} w="full" ml={{base: 0, sm: -40}}>
-                    <Text as="span" color={mutedColor} mr={1}>
+                    <Text as="span" color={mutedTextColor} mr={1}>
                         From:
                       </Text>
                       <Input
@@ -844,7 +846,7 @@ export function PostJobModal({
                         onChange={(e) => updateSlot(index, "startTime", e.target.value)}
                         required
                       />
-                      <Text as="span" color={mutedColor} mr={1} ml={1}>
+                      <Text as="span" color={mutedTextColor} mr={1} ml={1}>
                         To:
                       </Text>
                       <Input

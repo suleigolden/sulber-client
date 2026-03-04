@@ -9,8 +9,8 @@ import {
   ListItem,
   Text,
   VStack,
-  useColorModeValue,
 } from "@chakra-ui/react";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 type ServiceDetailsDialogContentProps = {
   included: string[];
@@ -30,13 +30,15 @@ export const ServiceDetailsDialogContent = ({
   isSending,
   cancelRef,
   providerName,
-}: ServiceDetailsDialogContentProps) => {
-  const cardBg = useColorModeValue("white", "#0b1437");
-  const valueColor = useColorModeValue("gray.800", "white");
-  const labelColor = useColorModeValue("gray.600", "gray.300");
+  }: ServiceDetailsDialogContentProps) => {
+  const {
+    modalBg,
+    labelColor,
+    textColor: valueColor,
+  } = useSystemColor();
 
   return (
-    <AlertDialogContent bg={cardBg}>
+    <AlertDialogContent bg={modalBg}>
       <AlertDialogHeader fontSize="lg" fontWeight="bold" color={valueColor}>
         What's Included and Customer Requirements
       </AlertDialogHeader>

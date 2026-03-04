@@ -5,13 +5,13 @@ import {
   Text,
   Badge,
   Button,
-  useColorModeValue,
   Icon,
   Divider,
   VStack,
   Heading,
   Box,
   useDisclosure,
+  Spinner,
 } from "@chakra-ui/react";
 import { Job, ProviderServiceTypesList, api } from "@suleigolden/sulber-api-client";
 import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaCheck } from "react-icons/fa";
@@ -22,6 +22,7 @@ import { formatDateToStringWithoutTime, formatDateToStringWithTime } from "~/com
 import { useState, useEffect } from "react";
 import { UserProfile } from "@suleigolden/sulber-api-client";
 import { CustomerRequestInfoModal } from "./CustomerRequestInfoModal";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 const ADDON_LABELS: Record<string, string> = {
   interior_deep_cleaning: "Interior deep cleaning",
@@ -39,16 +40,17 @@ type JobCardProps = {
 };
 
 export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: JobCardProps) => {
-  const borderColor = useColorModeValue("gray.200", "gray.700");
-  const labelColor = useColorModeValue("gray.600", "gray.400");
-  const textColor = useColorModeValue("gray.800", "gray.200");
-  const mutedTextColor = useColorModeValue("gray.700", "gray.300");
-  const headingColor = useColorModeValue("gray.900", "white");
-  const dividerColor = useColorModeValue("gray.200", "gray.600");
+  const {
+    borderColor,
+    labelColor,
+    textColor,
+    mutedTextColor,
+    headingColor,
+    dividerColor,
+  } = useSystemColor();
   const [customerProfile, setCustomerProfile] = useState<UserProfile | null>(null);
-  const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
-
   const selectedService = job.service_type
     ? ProviderServiceTypesList.services.find((s) => s.type === job.service_type)
     : null;
@@ -82,6 +84,14 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
 
     fetchCustomerProfile();
   }, [job.customer_id]);
+
+  if (isLoadingCustomer) {
+    return (
+      <Box>
+        <Spinner />
+      </Box>
+    );
+  }
 
   return (
     <Card

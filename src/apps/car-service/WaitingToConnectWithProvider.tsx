@@ -20,6 +20,7 @@ import { formatNumberWithCommasAndDecimals } from "~/common/utils/currency-forma
 import { fullAddress } from "~/common/utils/address";
 import { getStatusColor } from "~/common/utils/status-color";
 import { formatDateToStringWithTime } from "~/common/utils/date-time";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 export const WaitingToConnectWithProvider = () => {
   const [searchParams] = useSearchParams();
@@ -28,18 +29,21 @@ export const WaitingToConnectWithProvider = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const cardBg = useColorModeValue("white", "#0b1437");
-  const borderColor = useColorModeValue("gray.200", "whiteAlpha.300");
-  const headingColor = useColorModeValue("gray.700", "white");
-  const subHeadingColor = useColorModeValue("gray.800", "white");
-  const bodyColor = useColorModeValue("gray.600", "gray.300");
-  const labelColor = useColorModeValue("gray.600", "gray.400");
-  const valueColor = useColorModeValue("gray.800", "white");
-  const iconMutedColor = useColorModeValue("gray.400", "gray.500");
-  const errorTextColor = useColorModeValue("gray.600", "gray.400");
-  const infoBoxBg = useColorModeValue("blue.50", "whiteAlpha.200");
-  const infoBoxBorder = useColorModeValue("blue.200", "blue.700");
-  const infoBoxTextColor = useColorModeValue("blue.800", "blue.200");
+  const {
+    modalBg,
+    borderColor,
+    headingColor,
+    subHeadingColor,
+    bodyColor,
+    labelColor,
+    valueColor,
+    iconMutedColor,
+    errorTextColor,
+    infoBoxBg,
+    infoBoxBorder,
+    infoBoxTextColor,
+  } = useSystemColor();
+
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -154,7 +158,7 @@ export const WaitingToConnectWithProvider = () => {
         </VStack>
 
         {/* Job Details Card */}
-        <Card w="full" bg={cardBg} borderWidth="1px" borderColor={borderColor} boxShadow="lg">
+        <Card w="full" bg={modalBg} borderWidth="1px" borderColor={borderColor} boxShadow="lg">
           <CardBody>
             <VStack spacing={6} align="stretch">
               {/* Service Type */}

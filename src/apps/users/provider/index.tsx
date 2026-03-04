@@ -16,7 +16,6 @@ import { useRef, useState } from "react";
 import { useUserProfile } from "~/hooks/use-user-profile";
 import { useProviderProfile } from "~/hooks/use-provider-profile";
 import { ProviderLocation } from "~/apps/provider-onboard/ProviderLocation";
-import { ProviderServices } from "~/apps/provider-onboard/ProviderServices";
 import { UserInformation } from "~/apps/provider-onboard/UserInformation";
 
 export const ProviderProfileSettings = () => {
@@ -24,9 +23,7 @@ export const ProviderProfileSettings = () => {
   const { isLoading: isLoadingProviderProfile } = useProviderProfile();
   const [tabIndex, setTabIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const locationFormRef = useRef<{ submitForm: () => Promise<void> }>(null);
-  const servicesFormRef = useRef<{ submitForm: () => Promise<void> }>(null);
   const userInfoFormRef = useRef<{ submitForm: () => Promise<void> }>(null);
 
   const handleSave = async () => {

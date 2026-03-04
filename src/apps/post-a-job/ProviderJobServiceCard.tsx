@@ -13,7 +13,6 @@ import {
   MenuList,
   Spacer,
   Text,
-  useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
 import { MdMoreVert } from "react-icons/md";
@@ -36,6 +35,7 @@ import {
   FaCalendarAlt,
 } from "react-icons/fa";
 import { formatNumberWithCommasAndDecimals } from "~/common/utils/currency-formatter";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 const DRIVEWAY_CAR_WASH = "DRIVEWAY_CAR_WASH";
 
@@ -88,24 +88,25 @@ type ProviderJobServiceCardProps = {
 };
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  const color = useColorModeValue("gray.600", "gray.400");
+    const {
+    labelColor,
+  } = useSystemColor();
   return (
-    <Text as="span" fontSize="xs" fontWeight="semibold" color={color} textTransform="uppercase" letterSpacing="wider">
+    <Text as="span" fontSize="xs" fontWeight="semibold" color={labelColor} textTransform="uppercase" letterSpacing="wider">
       {children}
     </Text>
   );
 }
 
 export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }: ProviderJobServiceCardProps) {
-  const cardBg = useColorModeValue("white", "whiteAlpha.50");
-  const borderColor = useColorModeValue("gray.200", "whiteAlpha.200");
-  const mutedColor = useColorModeValue("gray.600", "gray.400");
-  const requirementsColor = useColorModeValue("gray.700", "gray.300");
-  const menuBg = useColorModeValue("white", "gray.800");
-  const menuBorder = useColorModeValue("gray.200", "whiteAlpha.200");
-  const menuItemHover = useColorModeValue("gray.50", "whiteAlpha.100");
-  const menuButtonHover = useColorModeValue("gray.100", "whiteAlpha.200");
-  const menuButtonActive = useColorModeValue("gray.200", "whiteAlpha.300");
+const {
+  borderColor,
+  modalBg,
+  menuItemHover,
+  menuButtonHover,
+  menuButtonActive,
+  mutedTextColor,
+} = useSystemColor();
 
   // Support both camelCase (client types) and snake_case (API payload) fields
   const raw: any = job as any;
@@ -147,18 +148,17 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
   const isDrivewayCarWash = serviceType === DRIVEWAY_CAR_WASH;
   const statusColor = statusColorMap[job.status] ?? "gray";
   const IconComponent = getServiceIcon(serviceType);
-  const hoverBorderColor = useColorModeValue("gray.300", "whiteAlpha.300");
 
   return (
     <Box
-      bg={cardBg}
+      bg={modalBg}
       borderRadius={{ base: "md", md: "lg" }}
       borderWidth="1px"
       borderColor={borderColor}
       p={{ base: 3, sm: 4, md: 5 }}
       transition="all 0.2s"
       _hover={{
-        borderColor: hoverBorderColor,
+        borderColor: borderColor,
         transform: { base: "none", md: "translateY(-2px)" },
         boxShadow: { base: "sm", md: "md" },
       }}
@@ -180,8 +180,8 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
           />
           <MenuList
             minW="180px"
-            bg={menuBg}
-            borderColor={menuBorder}
+            bg={modalBg}
+            borderColor={borderColor}
             borderRadius="lg"
             py={1}
             shadow="md"
@@ -269,27 +269,27 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
           {requirements && (
             <VStack align="start" spacing={{ base: 0.5, sm: 1 }} w="full">
               {requirements.equipment && (
-                <Text fontSize={{ base: "xs", sm: "sm" }} color={requirementsColor} lineHeight="tall">
+                <Text fontSize={{ base: "xs", sm: "sm" }} color={mutedTextColor} lineHeight="tall">
                   <Text as="span" fontWeight="bold">Equipment:</Text> {requirements.equipment}
                 </Text>
               )}
               {requirements.experience && (
-                <Text fontSize={{ base: "xs", sm: "sm" }} color={requirementsColor} lineHeight="tall">
+                <Text fontSize={{ base: "xs", sm: "sm" }} color={mutedTextColor} lineHeight="tall">
                   <Text as="span" fontWeight="bold">Experience:</Text> {requirements.experience}
                 </Text>
               )}
               {requirements.license && (
-                <Text fontSize={{ base: "xs", sm: "sm" }} color={requirementsColor} lineHeight="tall">
+                <Text fontSize={{ base: "xs", sm: "sm" }} color={mutedTextColor} lineHeight="tall">
                   <Text as="span" fontWeight="bold">License:</Text> {requirements.license}
                 </Text>
               )}
               {requirements.physical && (
-                <Text fontSize={{ base: "xs", sm: "sm" }} color={requirementsColor} lineHeight="tall">
+                <Text fontSize={{ base: "xs", sm: "sm" }} color={mutedTextColor} lineHeight="tall">
                   <Text as="span" fontWeight="bold">Physical:</Text> {requirements.physical}
                 </Text>
               )}
               {requirements.availability && (
-                <Text fontSize={{ base: "xs", sm: "sm" }} color={requirementsColor} lineHeight="tall">
+                <Text fontSize={{ base: "xs", sm: "sm" }} color={mutedTextColor} lineHeight="tall">
                   <Text as="span" fontWeight="bold">Availability:</Text> {requirements.availability}
                 </Text>
               )}
@@ -316,14 +316,14 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
           <Box>
             <FieldLabel>Vehicle prices</FieldLabel>
             <VStack align="start" spacing={1} mt={1}>
-              <Text fontSize="sm" color={requirementsColor}>
+              <Text fontSize="sm" color={mutedTextColor}>
                 <Text as="span" fontWeight="bold">
                   Sedan:
                 </Text>{" "}
                 ${formatNumberWithCommasAndDecimals((sedanPriceCents ?? basePriceCents ?? priceCents))}
               </Text>
               {suvPriceCents != null && suvPriceCents > 0 && (
-                <Text fontSize="sm" color={requirementsColor}>
+                <Text fontSize="sm" color={mutedTextColor}>
                   <Text as="span" fontWeight="bold">
                     SUV:
                   </Text>{" "}
@@ -331,7 +331,7 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
                 </Text>
               )}
               {truckPriceCents != null && truckPriceCents > 0 && (
-                <Text fontSize="sm" color={requirementsColor}>
+                <Text fontSize="sm" color={mutedTextColor}>
                   <Text as="span" fontWeight="bold">
                     Truck:
                   </Text>{" "}
@@ -339,7 +339,7 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
                 </Text>
               )}
               {vanPriceCents != null && vanPriceCents > 0 && (
-                <Text fontSize="sm" color={requirementsColor}>
+                <Text fontSize="sm" color={mutedTextColor}>
                   <Text as="span" fontWeight="bold">
                     Van:
                   </Text>{" "}
@@ -354,7 +354,7 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
             <Text fontSize="lg" fontWeight="bold" color="brand.500" mt={1}>
               ${formatNumberWithCommasAndDecimals((priceCents))}
             </Text>
-            <Text fontSize="xs" color={mutedColor}>
+            <Text fontSize="xs" color={mutedTextColor}>
               Base price
             </Text>
           </Box>
@@ -370,7 +370,7 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
                 const cents = entry?.[key]?.price ?? 0;
                 if (!cents) return null;
                 return (
-                  <Text key={key} fontSize="sm" color={requirementsColor}>
+                  <Text key={key} fontSize="sm" color={mutedTextColor}>
                     <Text as="span" fontWeight="bold">
                       {ADD_ON_LABELS[key]}:
                     </Text>{" "}
@@ -386,8 +386,8 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
         <Box>
           <FieldLabel>Primary location</FieldLabel>
           <HStack align="start" spacing={2} mt={1}>
-            <Icon as={FaMapMarkerAlt} boxSize={4} color={mutedColor} mt={0.5} />
-            <Text fontSize="sm" color={requirementsColor}>
+            <Icon as={FaMapMarkerAlt} boxSize={4} color={mutedTextColor} mt={0.5} />
+              <Text fontSize="sm" color={mutedTextColor}>
               {formatLocationDisplay(primaryLocation)}
             </Text>
           </HStack>
@@ -400,8 +400,8 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
             <VStack align="stretch" spacing={1} mt={1}>
               {otherLocations.map((loc, i) => (
                 <HStack key={i} align="start" spacing={2}>
-                  <Icon as={FaMapMarkerAlt} boxSize={3} color={mutedColor} mt={1} />
-                  <Text fontSize="sm" color={requirementsColor}>
+                  <Icon as={FaMapMarkerAlt} boxSize={3} color={mutedTextColor} mt={1} />
+                  <Text fontSize="sm" color={mutedTextColor}>
                     {formatLocationDisplay(loc)}
                   </Text>
                 </HStack>
@@ -414,7 +414,7 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
         {job.description && (
           <Box>
             <FieldLabel>Description</FieldLabel>
-            <Text fontSize="sm" color={requirementsColor} mt={1} lineHeight="tall">
+            <Text fontSize="sm" color={mutedTextColor} mt={1} lineHeight="tall">
               {job.description}
             </Text>
           </Box>
@@ -425,8 +425,8 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
           <Box>
             <FieldLabel>Internal notes</FieldLabel>
             <HStack align="start" spacing={2} mt={1}>
-              <Icon as={FaStickyNote} boxSize={4} color={mutedColor} mt={0.5} />
-              <Text fontSize="sm" color={requirementsColor} fontStyle="italic">
+              <Icon as={FaStickyNote} boxSize={4} color={mutedTextColor} mt={0.5} />
+              <Text fontSize="sm" color={mutedTextColor} fontStyle="italic">
                 {job.notes}
               </Text>
             </HStack>
@@ -438,7 +438,7 @@ export function ProviderJobServiceCard({ job, onEdit, onToggleStatus, onDelete }
           <Box>
             <FieldLabel>Availability</FieldLabel>
             <HStack align="start" spacing={2} mt={1} flexWrap="wrap">
-              <Icon as={FaCalendarAlt} boxSize={4} color={mutedColor} mt={0.5} />
+              <Icon as={FaCalendarAlt} boxSize={4} color={mutedTextColor} mt={0.5} />
               <Flex wrap="wrap" gap={2}>
                 {daysOfWeekAvailable.map((slot, i) => (
                   <Badge key={i} variant="subtle" colorScheme="brand" fontSize="xs" px={2} py={1} borderRadius="md">

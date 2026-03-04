@@ -1,20 +1,21 @@
-import { Container, VStack, Box, HStack, Icon, Heading, Button, Text, useColorModeValue } from "@chakra-ui/react";
+import { Container, VStack, Box, HStack, Icon, Heading, Button, Text } from "@chakra-ui/react";
 import { FaUser, FaArrowRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useSystemColor } from "~/hooks/use-system-color";
 import { useUser } from "~/hooks/use-user";
 
 
 export const IsProfileComplete = () => {
     const { user } = useUser();
     const navigate = useNavigate();
-    const cardBg = useColorModeValue("white", "#0b1437");
-    const headingColor = useColorModeValue("gray.800", "white");
-    const bodyColor = useColorModeValue("gray.600", "gray.300");
-    const iconBoxBg = useColorModeValue("brand.50", "whiteAlpha.200");
-    const infoBoxBg = useColorModeValue("blue.50", "whiteAlpha.200");
-    const infoBoxBorder = useColorModeValue("blue.500", "blue.300");
-    const infoTitleColor = useColorModeValue("blue.900", "blue.100");
-    const infoItemColor = useColorModeValue("blue.800", "blue.200");
+    const { modalBg,
+        headingColor,
+        bodyColor,
+        brandColor,
+        infoBoxBg,
+        infoBoxBorder,
+        mutedTextColor,
+        borderColor } = useSystemColor();
 
     const handleGoToProfileSettings = () => {
         if (user?.id) {
@@ -30,7 +31,7 @@ export const IsProfileComplete = () => {
                 <Box
                     w="full"
                     maxW="720px"
-                    bg={cardBg}
+                    bg={modalBg}
                     borderRadius="2xl"
                     boxShadow="lg"
                     p={{ base: 6, sm: 8, md: 10 }}
@@ -39,13 +40,13 @@ export const IsProfileComplete = () => {
                         <HStack spacing={4}>
                             <Box
                                 p={3}
-                                bg={iconBoxBg}
+                                bg={brandColor}
                                 borderRadius="full"
                                 display="flex"
                                 alignItems="center"
                                 justifyContent="center"
                             >
-                                <Icon as={FaUser} color="brand.500" boxSize={6} />
+                                <Icon as={FaUser} color={brandColor} boxSize={6} />
                             </Box>
                             <Heading size="lg" color={headingColor}>
                                 Complete Your Profile
@@ -65,23 +66,23 @@ export const IsProfileComplete = () => {
                             w="full"
                         >
                             <VStack align="start" spacing={2} pl={2}>
-                                <Text fontSize="sm" color={infoTitleColor} fontWeight="medium">
+                                <Text fontSize="sm" color={mutedTextColor} fontWeight="medium">
                                     Required Information:
                                 </Text>
                                 <VStack align="start" spacing={1} pl={4}>
-                                    <Text fontSize="sm" color={infoItemColor}>
+                                    <Text fontSize="sm" color={mutedTextColor}>
                                         • First Name and Last Name
                                     </Text>
-                                    <Text fontSize="sm" color={infoItemColor}>
+                                    <Text fontSize="sm" color={mutedTextColor}>
                                         • Phone Number
                                     </Text>
-                                    <Text fontSize="sm" color={infoItemColor}>
+                                    <Text fontSize="sm" color={mutedTextColor}>
                                         • Date of Birth
                                     </Text>
-                                    <Text fontSize="sm" color={infoItemColor}>
+                                    <Text fontSize="sm" color={mutedTextColor}>
                                         • Gender
                                     </Text>
-                                    <Text fontSize="sm" color={infoItemColor}>
+                                    <Text fontSize="sm" color={mutedTextColor}>
                                         • Address (City, State, or Country)
                                     </Text>
                                 </VStack>

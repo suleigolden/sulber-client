@@ -1,4 +1,4 @@
-import { Box, VStack, Text, Icon, useColorModeValue, Badge, Button, Flex, HStack } from "@chakra-ui/react";
+import { Box, VStack, Text, Icon, Badge, Button, Flex, HStack } from "@chakra-ui/react";
 import { Job, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
 import { FaMapMarkerAlt, FaCalendarAlt, FaCheck, FaStar } from "react-icons/fa";
 import { useState, useEffect } from "react";
@@ -9,6 +9,7 @@ import { formatDistance } from "~/common/utils/distance";
 import { useJobDistances } from "~/hooks/use-job-distances";
 import { useUserProfile } from "~/hooks/use-user-profile";
 import { JobsMap } from "./JobsMap";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 type AvailableJobsTabProps = {
   jobs: Job[];
@@ -28,19 +29,19 @@ export const AvailableJobsTab = ({
   const { userProfile } = useUserProfile();
   const providerAddress = userProfile?.address
     ? [userProfile.address.street, userProfile.address.city, userProfile.address.state, userProfile.address.country, userProfile.address.postal_code]
-        .filter(Boolean)
-        .join(", ")
+      .filter(Boolean)
+      .join(", ")
     : null;
   const { distances, isLoading: isLoadingDistances } = useJobDistances(providerAddress, jobs);
-  const selectedCardBg = useColorModeValue("brand.50", "whiteAlpha.200");
-  const borderColor = useColorModeValue("gray.200", "gray.800");
-  const addressColor = useColorModeValue("gray.800", "gray.200");
-  const titleColor = useColorModeValue("gray.900", "white");
-  const scheduleColor = useColorModeValue("gray.900", "gray.400");
-  const loadingTextColor = useColorModeValue("gray.600", "gray.300");
-  const emptyIconColor = useColorModeValue("gray.400", "gray.500");
-  const emptyPrimaryTextColor = useColorModeValue("gray.600", "gray.200");
-  const emptySecondaryTextColor = useColorModeValue("gray.700", "gray.400");
+  const {
+    borderColor,
+    iconMutedColor,
+    mutedTextColor,
+    textColor: addressColor,
+    headingColor: titleColor,
+    dividerColor: scheduleColor,
+    selectedCardBg,
+  } = useSystemColor();
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
   // Automatically select the first job on page load
@@ -63,17 +64,17 @@ export const AvailableJobsTab = ({
       <Box
         w="full"
         p={12}
-        bg={useColorModeValue("yellow.50", "yellow.900")}
+        bg={"transparent"}
         borderRadius="lg"
         borderWidth="1px"
         textAlign="center"
       >
         <VStack spacing={4}>
-          <Icon as={FaMapMarkerAlt} boxSize={12} color={useColorModeValue("yellow.600", "yellow.300")} />
-          <Text fontSize="lg" color={useColorModeValue("yellow.800", "yellow.100")} fontWeight="medium">
+          <Icon as={FaMapMarkerAlt} boxSize={12} color={iconMutedColor} />
+          <Text fontSize="lg" color={mutedTextColor} fontWeight="medium">
             Address Required
           </Text>
-          <Text fontSize="sm" color={useColorModeValue("yellow.700", "yellow.200")}>
+          <Text fontSize="sm" color={mutedTextColor}>
             Please update your profile with your address to see available service requests in your area.
           </Text>
         </VStack>
@@ -85,14 +86,14 @@ export const AvailableJobsTab = ({
     return (
       <Box
         w="full"
-        p={12}  
+        p={12}
         borderRadius="lg"
         borderWidth="1px"
         borderColor={borderColor}
         textAlign="center"
       >
         <VStack spacing={4}>
-          <Text fontSize="sm" color={loadingTextColor}>
+          <Text fontSize="sm" color={mutedTextColor}>
             Loading available jobs...
           </Text>
         </VStack>
@@ -111,11 +112,11 @@ export const AvailableJobsTab = ({
         textAlign="center"
       >
         <VStack spacing={4}>
-          <Icon as={FaCalendarAlt} boxSize={12} color={emptyIconColor} />
-          <Text fontSize="lg" color={emptyPrimaryTextColor} fontWeight="medium">
+          <Icon as={FaCalendarAlt} boxSize={12} color={iconMutedColor} />
+          <Text fontSize="lg" color={mutedTextColor} fontWeight="medium">
             No available requests
           </Text>
-          <Text fontSize="sm" color={emptySecondaryTextColor}>
+          <Text fontSize="sm" color={mutedTextColor}>
             New service requests in your area will appear here for you to accept.
           </Text>
         </VStack>
@@ -162,8 +163,8 @@ export const AvailableJobsTab = ({
             const addOns =
               Array.isArray(job.add_on_prices) && job.add_on_prices.length > 0
                 ? job.add_on_prices.flatMap((entry) =>
-                    Object.entries(entry).map(([key]) => key)
-                  )
+                  Object.entries(entry).map(([key]) => key)
+                )
                 : [];
 
             const isSelected = selectedJobId === job.id;
@@ -218,12 +219,12 @@ export const AvailableJobsTab = ({
 
                   {/* Distance from provider (e.g. "10 km away") */}
                   {!isLoadingDistances && distances.has(job.id) && (
-                    <Badge 
-                      colorScheme="orange" 
-                      variant="outline" 
-                      width="fit-content" 
-                      px={2} 
-                      py={1} 
+                    <Badge
+                      colorScheme="orange"
+                      variant="outline"
+                      width="fit-content"
+                      px={2}
+                      py={1}
                       borderRadius="md"
                       fontSize="xs"
                       fontWeight="bold"
@@ -291,17 +292,17 @@ export const AvailableJobsTab = ({
 
                   {/* Price and Action Button */}
                   <HStack justify="space-between" align="center" pt={2}>
-                  <Badge 
-                      colorScheme="green" 
-                      variant="outline" 
-                      width="fit-content" 
-                      px={2} 
-                      py={1} 
+                    <Badge
+                      colorScheme="green"
+                      variant="outline"
+                      width="fit-content"
+                      px={2}
+                      py={1}
                       borderRadius="md"
                       fontSize="lg"
                       fontWeight="bold"
                     >
-                       ${formatNumberWithCommasAndDecimals(Number(job.total_price_cents))}
+                      ${formatNumberWithCommasAndDecimals(Number(job.total_price_cents))}
                     </Badge>
                     <Button
                       size="sm"

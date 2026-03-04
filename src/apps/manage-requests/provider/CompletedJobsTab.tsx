@@ -1,22 +1,25 @@
-import { Box, VStack, Text, Icon, useColorModeValue } from "@chakra-ui/react";
+import { Box, VStack, Text, Icon } from "@chakra-ui/react";
 import { Job } from "@suleigolden/sulber-api-client";
 import { FaCheck } from "react-icons/fa";
 import { JobCard } from "./JobCard";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 type CompletedJobsTabProps = {
   jobs: Job[];
 };
 
 export const CompletedJobsTab = ({ jobs }: CompletedJobsTabProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const {
+    borderColor,
+    modalBg,
+  } = useSystemColor();
 
   if (jobs.length === 0) {
     return (
       <Box
         w="full"
         p={12}
-        bg={cardBg}
+        bg={modalBg}
         borderRadius="lg"
         borderWidth="1px"
         borderColor={borderColor}

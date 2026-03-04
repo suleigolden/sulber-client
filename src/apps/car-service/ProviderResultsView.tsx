@@ -16,7 +16,6 @@ import {
   VStack,
   Wrap,
   WrapItem,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -32,6 +31,7 @@ import { CustomToast } from "~/hooks/CustomToast";
 import type { ConfirmServiceRequestData } from "./ConfirmServiceRequest";
 import { SelectAdditionalCarDialog } from "./SelectAdditionalCarDialog";
 import { ServiceDetailsDialogContent } from "./ServiceDetailsDialogContent";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 const RADIUS_KM = 100;
 function haversineKm(
@@ -253,17 +253,14 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
   );
   const included = serviceTypeDefinition?.included ?? [];
   const requirements = serviceTypeDefinition?.requirements_for_customer ?? [];
-
-  const cardBg = useColorModeValue("white", "#0b1437");
-  const cardBorder = useColorModeValue("gray.200", "whiteAlpha.300");
-  const labelColor = useColorModeValue("gray.600", "gray.300");
-  const valueColor = useColorModeValue("gray.800", "white");
-  const listBg = useColorModeValue("gray.50", "#0b1437");
-  const mapBg = useColorModeValue("gray.100", "gray.800");
-  const priceLabelColor = useColorModeValue("gray.500", "gray.400");
-  const priceBoxBg = useColorModeValue("brand.50", "whiteAlpha.100");
-  const priceBoxBorder = useColorModeValue("brand.200", "brand.500");
-  const priceValueColor = useColorModeValue("brand.600", "brand.300");
+  const {
+    borderColor,
+    labelColor,
+    textColor,
+    mutedTextColor,
+    headingColor,
+    dividerColor,
+  } = useSystemColor();
 
   const fetchProviders = useCallback(async () => {
     if (!data.serviceLocationData || !data.serviceType || !user?.id) return;
@@ -498,13 +495,13 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
     >
       <Box
         w={{ base: "100%", md: "400px", lg: "450px" }}
-        bg={listBg}
+        bg={"transparent"}
         overflowY="auto"
         maxH={{ base: "50vh", md: "100vh" }}
         p={4}
       >
         <HStack mb={4} justify="space-between">
-          <Heading size="md" color={valueColor}>
+          <Heading size="md" color={textColor}>
             Providers near you
           </Heading>
           <Button size="sm" variant="outline" onClick={onBack}>
@@ -524,10 +521,10 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
               <Box
                 key={service.id}
                 p={4}
-                bg={cardBg}
+                bg={"transparent"}
                 borderRadius="xl"
                 borderWidth="1px"
-                borderColor={cardBorder}
+                borderColor={borderColor}
                 shadow="sm"
               >
                 <HStack align="center" spacing={3} mb={3}>
@@ -539,10 +536,10 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                     color="brand.600"
                   />
                   <VStack align="start" spacing={0} flex={1} minW={0}>
-                    <Text fontWeight="semibold" color={valueColor} fontSize="md" noOfLines={1}>
+                    <Text fontWeight="semibold" color={textColor} fontSize="md" noOfLines={1}>
                       {providerName}
                     </Text>
-                    <Text fontSize="md" color={labelColor}>
+                    <Text fontSize="md" color={mutedTextColor}>
                       {distanceKm < 1 ? `${(distanceKm * 1000).toFixed(0)} m away` : `${distanceKm.toFixed(1)} km away`}
                       {" · "}
                       Rating: ***
@@ -568,9 +565,9 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                     <>
                       {isCarWash && data.selectedVehicleId && (
                         <Box mb={3}>
-                          <Text fontSize="sm" color={priceLabelColor} fontWeight="medium" mb={2}>
+                          <Text fontSize="sm" color={labelColor} fontWeight="medium" mb={2}>
                             Selected car:{" "}
-                            <Text as="span" color={valueColor} fontWeight="semibold">
+                            <Text as="span" color={textColor} fontWeight="semibold">
                               {getVehicleLabel(data.selectedVehicleId)}
                             </Text>
                             {derivedCarType && (
@@ -584,7 +581,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
 
                       {showAddOns && (
                         <Box mb={3}>
-                          <Text fontSize="sm" color={priceLabelColor} fontWeight="medium" mb={2}>
+                          <Text fontSize="sm" color={labelColor} fontWeight="medium" mb={2}>
                             Add-ons
                           </Text>
                           <VStack align="stretch" spacing={2}>
@@ -601,7 +598,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                                   setSelection(service.id, { addOns: next });
                                 }}
                               >
-                                <Text fontSize="sm" color={valueColor}>
+                                <Text fontSize="sm" color={textColor}>
                                   {addon.label} — ${(addon.price / 100).toFixed(2)}
                                 </Text>
                               </Checkbox>
@@ -614,15 +611,15 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                         <Box
                           p={3}
                           borderRadius="lg"
-                          bg={priceBoxBg}
+                          bg={"transparent"}
                           borderWidth="1px"
-                          borderColor={priceBoxBorder}
+                          borderColor={borderColor}
                           mb={3}
                         >
-                          <Text fontSize="sm" color={priceLabelColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" mb={1}>
+                          <Text fontSize="sm" color={labelColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" mb={1}>
                             Price
                           </Text>
-                          <Text fontSize="md" fontWeight="bold" color={priceValueColor}>
+                          <Text fontSize="md" fontWeight="bold" color={textColor}>
                             {formatPrices(service)}
                           </Text>
                         </Box>
@@ -631,15 +628,15 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                       <Box
                         p={3}
                         borderRadius="lg"
-                        bg={priceBoxBg}
+                        bg={"transparent"}
                         borderWidth="1px"
-                        borderColor={priceBoxBorder}
+                        borderColor={borderColor}
                         mb={3}
                       >
-                        <Text fontSize="sm" color={priceLabelColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" mb={1}>
+                        <Text fontSize="sm" color={labelColor} fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" mb={1}>
                           Total price
                         </Text>
-                        <Text fontSize="lg" fontWeight="bold" color={priceValueColor}>
+                        <Text fontSize="lg" fontWeight="bold" color={textColor}>
                           ${(totalCents / 100).toFixed(2)}
                         </Text>
                         {isCarWash && derivedCarType && (
@@ -796,8 +793,8 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
           setPendingSend(null);
         }}
       >
-        <AlertDialogContent bg={cardBg}>
-          <AlertDialogHeader fontSize="lg" fontWeight="bold" color={valueColor}>
+        <AlertDialogContent bg={"transparent"}>
+          <AlertDialogHeader fontSize="lg" fontWeight="bold" color={textColor}>
             Send car wash request(s)
           </AlertDialogHeader>
           <AlertDialogBody>
@@ -860,9 +857,9 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
       <Box
         flex={1}
         minH={{ base: "300px", md: "100%" }}
-        bg={mapBg}
+        bg={"transparent"}
         borderLeftWidth={{ base: 0, md: 2 }}
-        borderColor={cardBorder}
+        borderColor={borderColor}
       >
         {mapAddress && (
           <LocationMap address={mapAddress} />

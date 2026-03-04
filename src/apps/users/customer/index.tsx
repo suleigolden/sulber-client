@@ -16,7 +16,6 @@ import {
   TabPanels,
   Tab,
   TabPanel,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -32,6 +31,7 @@ import { LocationSearchInput } from "~/apps/provider-onboard/components/Location
 import { api } from "@suleigolden/sulber-api-client";
 import { CustomToast } from "~/hooks/CustomToast";
 import { Vehicles } from "~/apps/vehicles";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 type AvatarUploadSectionProps = {
   userProfile: UserProfile;
@@ -44,8 +44,7 @@ const AvatarUploadSection = ({ userProfile }: AvatarUploadSectionProps) => {
   const { uploadAvatar, isUploading } = useAvatarUpload((url) => {
     setValue("avatar_url", url);
   });
-  const labelColor = useColorModeValue(undefined, "gray.200");
-  const hintColor = useColorModeValue("gray.500", "gray.400");
+  const { labelColor, mutedTextColor } = useSystemColor();
 
   const handleFileSelect = (file: File) => {
     uploadAvatar(file);
@@ -61,7 +60,7 @@ const AvatarUploadSection = ({ userProfile }: AvatarUploadSectionProps) => {
           <Button size="sm" onClick={onOpen} isLoading={isUploading}>
             {avatarUrl ? "Change Photo" : "Upload Photo"}
           </Button>
-          <Text fontSize="xs" color={hintColor}>
+          <Text fontSize="xs" color={mutedTextColor}>
             PNG, JPG or JPEG (max. 5MB)
           </Text>
         </VStack>
@@ -126,14 +125,16 @@ export const CustomerProfileSettings = () => {
     gender &&
     (addressCity || addressState || addressCountry)
   );
-
-  const cardBg = useColorModeValue("white", "#0b1437");
-  const headingColor = useColorModeValue("gray.800", "white");
-  const bodyColor = useColorModeValue("gray.600", "gray.300");
-  const loadingColor = useColorModeValue("gray.600", "gray.400");
-  const labelColor = useColorModeValue("gray.700", "gray.200");
-  const inputBg = useColorModeValue("gray.50", "whiteAlpha.200");
-  const inputBorder = useColorModeValue("gray.200", "whiteAlpha.300");
+const {
+  modalBg,
+  headingColor,
+  bodyColor,
+  labelColor,
+  menuItemHover,
+  brandColor,
+  mutedTextColor,
+  borderColor,
+} = useSystemColor();
 
   // Initialize form with existing user profile data
   useEffect(() => {
@@ -198,7 +199,7 @@ export const CustomerProfileSettings = () => {
   if (isLoading) {
     return (
       <Container maxW="1500px" px={[4, 8]} py={8}>
-        <Text color={loadingColor}>Loading profile...</Text>
+        <Text color={mutedTextColor}>Loading profile...</Text>
       </Container>
     );
   }
@@ -228,8 +229,8 @@ export const CustomerProfileSettings = () => {
                   transform: "translateY(-2px)",
                 }}
                 _hover={{
-                  bg: useColorModeValue("gray.50", "gray.900"),
-                  color: "brand.500",
+                  bg: menuItemHover,
+                  color: brandColor,
                   borderRadius: "lg",
                   transform: "translateY(-1px)",
                 }}
@@ -237,7 +238,7 @@ export const CustomerProfileSettings = () => {
                 fontWeight="semibold"
                 w="full"
                 borderRadius="lg"
-                color={useColorModeValue("gray.600", "gray.300")}
+                color={labelColor}
               >
                 <VStack spacing={1}>
                   <Text fontSize="sm" fontWeight="inherit">
@@ -254,7 +255,7 @@ export const CustomerProfileSettings = () => {
                   transform: "translateY(-2px)",
                 }}
                 _hover={{
-                  bg: useColorModeValue("gray.50", "gray.900"),
+                  bg: menuItemHover,
                   color: "brand.500",
                   borderRadius: "lg",
                   transform: "translateY(-1px)",
@@ -263,7 +264,7 @@ export const CustomerProfileSettings = () => {
                 fontWeight="semibold"
                 w="full"
                 borderRadius="lg"
-                color={useColorModeValue("gray.600", "gray.300")}
+                color={labelColor}
               >
                 <VStack spacing={1}>
                   <Text fontSize="sm" fontWeight="inherit">
@@ -280,7 +281,7 @@ export const CustomerProfileSettings = () => {
                   <Box
                     w="full"
                     maxW="720px"
-                    bg={cardBg}
+                    bg={modalBg}
                     borderRadius="2xl"
                     boxShadow="lg"
                     p={{ base: 4, sm: 6, md: 8 }}
@@ -296,8 +297,8 @@ export const CustomerProfileSettings = () => {
                           value={user?.email || ""}
                           isDisabled={true}
                           placeholder="Email address"
-                          bg={inputBg}
-                          borderColor={inputBorder}
+                          bg={modalBg}
+                          borderColor={borderColor}
                           _disabled={{
                             opacity: 0.7,
                             cursor: "not-allowed",

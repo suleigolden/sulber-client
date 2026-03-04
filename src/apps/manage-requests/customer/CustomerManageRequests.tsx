@@ -41,9 +41,15 @@ export const CustomerManageRequests = () => {
   const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
   const [isCancelling, setIsCancelling] = useState(false);
-  const loadingColor = useColorModeValue("gray.600", "gray.400");
-  const cardBg = useColorModeValue("white", "gray.800");
+  const loadingColor = useColorModeValue("gray.600", "gray.300");
+  const cardBg = useColorModeValue("white", "gray.900");
   const borderColor = useColorModeValue("gray.200", "gray.700");
+  const headingColor = useColorModeValue("gray.900", "white");
+  const primaryTextColor = useColorModeValue("gray.800", "gray.100");
+  const secondaryTextColor = useColorModeValue("gray.600", "gray.300");
+  const mutedTextColor = useColorModeValue("gray.500", "gray.400");
+  const noteTextColor = useColorModeValue("gray.700", "gray.200");
+  const emptyIconColor = useColorModeValue("gray.400", "gray.500");
 
   const handleCancelClick = (job: Job) => {
     setSelectedJob(job);
@@ -101,7 +107,7 @@ export const CustomerManageRequests = () => {
         <Box display="flex" justifyContent="center" alignItems="center" minH="400px">
           <VStack spacing={4}>
             <Spinner size="xl" color="brand.500" thickness="4px" />
-            <Text color="gray.600">Loading your requests...</Text>
+            <Text color={loadingColor}>Loading your requests...</Text>
           </VStack>
         </Box>
       </Container>
@@ -112,7 +118,7 @@ export const CustomerManageRequests = () => {
     return (
       <Container maxW="1500px" px={[4, 8]} py={8}>
         <VStack align="start" spacing={8} w="full" mt={10}>
-          <Heading size="lg" fontWeight="bold">
+          <Heading size="lg" fontWeight="bold" color={headingColor}>
             Your Requests
           </Heading>
           <Box
@@ -125,11 +131,11 @@ export const CustomerManageRequests = () => {
             textAlign="center"
           >
             <VStack spacing={4}>
-              <Icon as={FaCalendarAlt} boxSize={12} color="gray.400" />
-              <Text fontSize="lg" color="gray.600" fontWeight="medium">
+              <Icon as={FaCalendarAlt} boxSize={12} color={emptyIconColor} />
+              <Text fontSize="lg" color={secondaryTextColor} fontWeight="medium">
                 No service requests yet
               </Text>
-              <Text fontSize="sm" color="gray.500">
+              <Text fontSize="sm" color={mutedTextColor}>
                 When you create a service request, it will appear here.
               </Text>
             </VStack>
@@ -149,7 +155,7 @@ export const CustomerManageRequests = () => {
   return (
     <Container maxW="1500px" px={[4, 8]} py={8}>
       <VStack align="start" spacing={8} w="full" mt={10}>
-        <Heading size="lg" fontWeight="bold">
+        <Heading size="lg" fontWeight="bold" color={headingColor}>
           Your Requests ({sortedJobs.length})
         </Heading>
 
@@ -164,9 +170,9 @@ export const CustomerManageRequests = () => {
             return (
               <Card
                 key={job.id}
-                bg={cardBg}
                 borderWidth="1px"
                 borderColor={borderColor}
+                bg={"transparent"}
                 boxShadow="sm"
                 _hover={{ boxShadow: "md", transform: "translateY(-2px)" }}
                 transition="all 0.2s"
@@ -177,7 +183,7 @@ export const CustomerManageRequests = () => {
                     <HStack justify="space-between" align="start">
                       <VStack align="start" spacing={1} flex={1}>
                         <HStack>
-                          <Heading size="md" fontWeight="bold">
+                          <Heading size="md" fontWeight="bold" color={headingColor}>
                             {selectedService?.title || job.service_type || "Service Request"}
                           </Heading>
                           <Badge
@@ -192,7 +198,7 @@ export const CustomerManageRequests = () => {
                             {job.status.replace("_", " ")}
                           </Badge>
                         </HStack>
-                        <Text fontSize="xs" color="gray.500">
+                        <Text fontSize="xs" color={mutedTextColor}>
                           Request ID: {job.id.slice(0, 8)}...
                         </Text>
                       </VStack>
@@ -221,10 +227,10 @@ export const CustomerManageRequests = () => {
                       <HStack align="start" spacing={3}>
                         <Icon as={FaMapMarkerAlt} color="brand.500" mt={1} />
                         <VStack align="start" spacing={0}>
-                          <Text fontSize="xs" color="gray.500" fontWeight="medium">
+                          <Text fontSize="xs" color={mutedTextColor} fontWeight="medium">
                             Location
                           </Text>
-                          <Text fontSize="sm" color="gray.800" fontWeight="medium">
+                          <Text fontSize="sm" color={primaryTextColor} fontWeight="medium">
                             {fullAddress(job.address)}
                           </Text>
                         </VStack>
@@ -234,10 +240,10 @@ export const CustomerManageRequests = () => {
                       <HStack align="start" spacing={3}>
                         <Icon as={FaCalendarAlt} color="brand.500" mt={1} />
                         <VStack align="start" spacing={0}>
-                          <Text fontSize="xs" color="gray.500" fontWeight="medium">
+                          <Text fontSize="xs" color={mutedTextColor} fontWeight="medium">
                             Schedule
                           </Text>
-                          <Text fontSize="sm" color="gray.800" fontWeight="medium">
+                          <Text fontSize="sm" color={primaryTextColor} fontWeight="medium">
                             {formatDateToStringWithTime(job?.scheduled_start as string)}
                           </Text>
                         </VStack>
@@ -248,10 +254,10 @@ export const CustomerManageRequests = () => {
                         <HStack align="start" spacing={3}>
                           <Icon as={FaDollarSign} color="brand.500" mt={1} />
                           <VStack align="start" spacing={0}>
-                            <Text fontSize="xs" color="gray.500" fontWeight="medium">
+                            <Text fontSize="xs" color={mutedTextColor} fontWeight="medium">
                               Price
                             </Text>
-                            <Text fontSize="sm" color="gray.800" fontWeight="bold">
+                            <Text fontSize="sm" color={primaryTextColor} fontWeight="bold">
                               ${formatNumberWithCommas(Number(job.total_price_cents) / 100)}{" "}
                               {job.currency || "CAD"}
                             </Text>
@@ -263,10 +269,10 @@ export const CustomerManageRequests = () => {
                       <HStack align="start" spacing={3}>
                         <Icon as={FaClock} color="brand.500" mt={1} />
                         <VStack align="start" spacing={0}>
-                          <Text fontSize="xs" color="gray.500" fontWeight="medium">
+                          <Text fontSize="xs" color={mutedTextColor} fontWeight="medium">
                             Created
                           </Text>
-                          <Text fontSize="sm" color="gray.800" fontWeight="medium">
+                          <Text fontSize="sm" color={primaryTextColor} fontWeight="medium">
                             {formatDateToStringWithoutTime(job?.created_at.toLocaleString())}
                           </Text>
                         </VStack>
@@ -278,10 +284,10 @@ export const CustomerManageRequests = () => {
                       <>
                         <Divider />
                         <Box>
-                          <Text fontSize="xs" color="gray.500" fontWeight="medium" mb={1}>
+                          <Text fontSize="xs" color={mutedTextColor} fontWeight="medium" mb={1}>
                             Notes
                           </Text>
-                          <Text fontSize="sm" color="gray.700">
+                          <Text fontSize="sm" color={noteTextColor}>
                             {job.notes}
                           </Text>
                         </Box>
@@ -298,11 +304,11 @@ export const CustomerManageRequests = () => {
       {/* Cancel Confirmation Dialog */}
       <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
         <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+          <AlertDialogContent bg={cardBg}>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold" color={headingColor}>
               Cancel Service Request
             </AlertDialogHeader>
-            <AlertDialogBody>
+            <AlertDialogBody color={primaryTextColor}>
               Are you sure you want to cancel this service request? This action cannot be undone.
             </AlertDialogBody>
             <AlertDialogFooter>

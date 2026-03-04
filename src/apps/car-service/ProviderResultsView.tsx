@@ -266,17 +266,40 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
   const priceValueColor = useColorModeValue("brand.600", "brand.300");
 
   const fetchProviders = useCallback(async () => {
-    if (!data.serviceLocationData || !data.serviceType) return;
+    if (!data.serviceLocationData || !data.serviceType || !user?.id) return;
     setLoading(true);
     try {
-      const list = (await api.service("provider-job-service").list(undefined, "active")) as ProviderJobServiceWithProvider[];
+      // Fetch existing jobs for this customer to hide providers
+      const existingJobs = await api.service("job").findByCustomerId(user.id);
+      const blockedProviderIds = new Set(
+        existingJobs
+          .filter((job) =>
+            job.provider_id &&
+            (job.status === "PENDING" ||
+              job.status === "ACCEPTED" ||
+              job.status === "IN_PROGRESS")
+          )
+          .map((job) => job.provider_id as string)
+      );
+     
+
+
+      const list = (await api.service("provider-job-service").list(
+        undefined,
+        "active"
+      )) as ProviderJobServiceWithProvider[];
       const serviceType = data.serviceType as ProviderServiceType;
       const lat = data.serviceLocationData.lat;
       const lng = data.serviceLocationData.lng;
 
-      const filtered: { service: ProviderJobServiceWithProvider; distanceKm: number }[] = [];
+      const filtered: {
+        service: ProviderJobServiceWithProvider;
+        distanceKm: number;
+      }[] = [];
       for (const s of list) {
         if (s.service_type !== serviceType) continue;
+        // Hide providers that already have an active/pending job with this customer
+        if (blockedProviderIds.has(s.provider?.id ?? "")) continue;
         const loc = s.primary_location;
         if (!loc?.latitude || !loc?.longitude) continue;
         const distanceKm = haversineKm(lat, lng, loc.latitude, loc.longitude);
@@ -286,7 +309,10 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
       }
       filtered.sort((a, b) => a.distanceKm - b.distanceKm);
 
-      const uniqueByProvider = new Map<string, { service: ProviderJobServiceWithProvider; distanceKm: number }>();
+      const uniqueByProvider = new Map<
+        string,
+        { service: ProviderJobServiceWithProvider; distanceKm: number }
+      >();
       for (const item of filtered) {
         const pid = item.service.provider_id;
         if (!uniqueByProvider.has(pid)) {
@@ -294,7 +320,9 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
         }
       }
 
-      const cards: ProviderCardItem[] = Array.from(uniqueByProvider.values()).map(({ service, distanceKm }) => {
+      const cards: ProviderCardItem[] = Array.from(
+        uniqueByProvider.values()
+      ).map(({ service, distanceKm }) => {
         const { name: providerName, avatarUrl } = fromProvider(service.provider);
         return { service, distanceKm, providerName, avatarUrl };
       });
@@ -306,7 +334,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
     } finally {
       setLoading(false);
     }
-  }, [data.serviceLocationData, data.serviceType, showToast]);
+  }, [data.serviceLocationData, data.serviceType, showToast, user?.id]);
 
   useEffect(() => {
     fetchProviders();

@@ -32,12 +32,15 @@ export const AvailableJobsTab = ({
         .join(", ")
     : null;
   const { distances, isLoading: isLoadingDistances } = useJobDistances(providerAddress, jobs);
-  const cardBg = useColorModeValue("white", "gray.800");
   const selectedCardBg = useColorModeValue("brand.50", "whiteAlpha.200");
   const borderColor = useColorModeValue("gray.200", "gray.800");
   const addressColor = useColorModeValue("gray.800", "gray.200");
   const titleColor = useColorModeValue("gray.900", "white");
   const scheduleColor = useColorModeValue("gray.900", "gray.400");
+  const loadingTextColor = useColorModeValue("gray.600", "gray.300");
+  const emptyIconColor = useColorModeValue("gray.400", "gray.500");
+  const emptyPrimaryTextColor = useColorModeValue("gray.600", "gray.200");
+  const emptySecondaryTextColor = useColorModeValue("gray.700", "gray.400");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
   // Automatically select the first job on page load
@@ -60,17 +63,17 @@ export const AvailableJobsTab = ({
       <Box
         w="full"
         p={12}
-        bg="yellow.50"
+        bg={useColorModeValue("yellow.50", "yellow.900")}
         borderRadius="lg"
         borderWidth="1px"
         textAlign="center"
       >
         <VStack spacing={4}>
-          <Icon as={FaMapMarkerAlt} boxSize={12} color="yellow.600" />
-          <Text fontSize="lg" color="yellow.800" fontWeight="medium">
+          <Icon as={FaMapMarkerAlt} boxSize={12} color={useColorModeValue("yellow.600", "yellow.300")} />
+          <Text fontSize="lg" color={useColorModeValue("yellow.800", "yellow.100")} fontWeight="medium">
             Address Required
           </Text>
-          <Text fontSize="sm" color="yellow.700">
+          <Text fontSize="sm" color={useColorModeValue("yellow.700", "yellow.200")}>
             Please update your profile with your address to see available service requests in your area.
           </Text>
         </VStack>
@@ -82,15 +85,14 @@ export const AvailableJobsTab = ({
     return (
       <Box
         w="full"
-        p={12}
-        bg={cardBg}
+        p={12}  
         borderRadius="lg"
         borderWidth="1px"
         borderColor={borderColor}
         textAlign="center"
       >
         <VStack spacing={4}>
-          <Text fontSize="sm" color="gray.600">
+          <Text fontSize="sm" color={loadingTextColor}>
             Loading available jobs...
           </Text>
         </VStack>
@@ -103,18 +105,17 @@ export const AvailableJobsTab = ({
       <Box
         w="full"
         p={12}
-        bg={cardBg}
         borderRadius="lg"
         borderWidth="1px"
         borderColor={borderColor}
         textAlign="center"
       >
         <VStack spacing={4}>
-          <Icon as={FaCalendarAlt} boxSize={12} color="gray.400" />
-          <Text fontSize="lg" color="gray.600" fontWeight="medium">
+          <Icon as={FaCalendarAlt} boxSize={12} color={emptyIconColor} />
+          <Text fontSize="lg" color={emptyPrimaryTextColor} fontWeight="medium">
             No available requests
           </Text>
-          <Text fontSize="sm" color="gray.700">
+          <Text fontSize="sm" color={emptySecondaryTextColor}>
             New service requests in your area will appear here for you to accept.
           </Text>
         </VStack>
@@ -177,7 +178,7 @@ export const AvailableJobsTab = ({
               <Box
                 key={job.id}
                 id={`job-${job.id}`}
-                bg={isSelected ? selectedCardBg : cardBg}
+                bg={isSelected ? selectedCardBg : "transparent"}
                 boxShadow="lg"
                 borderWidth="1px"
                 borderColor={isSelected ? "brand.500" : borderColor}

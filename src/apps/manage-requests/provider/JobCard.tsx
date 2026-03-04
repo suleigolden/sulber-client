@@ -39,7 +39,6 @@ type JobCardProps = {
 };
 
 export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: JobCardProps) => {
-  const cardBg = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
   const labelColor = useColorModeValue("gray.600", "gray.400");
   const textColor = useColorModeValue("gray.800", "gray.200");
@@ -86,7 +85,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
 
   return (
     <Card
-      bg={cardBg}
+      bg={"transparent"}
       borderWidth="1px"
       borderColor={borderColor}
       _hover={{ boxShadow: "md", transform: "translateY(-2px)" }}

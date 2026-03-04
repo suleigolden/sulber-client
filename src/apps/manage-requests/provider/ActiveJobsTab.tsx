@@ -11,24 +11,26 @@ type ActiveJobsTabProps = {
 export const ActiveJobsTab = ({ jobs, onUpdateStatus }: ActiveJobsTabProps) => {
   const cardBg = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
+  const emptyIconColor = useColorModeValue("gray.400", "gray.500");
+  const emptyPrimaryTextColor = useColorModeValue("gray.600", "gray.200");
+  const emptySecondaryTextColor = useColorModeValue("gray.700", "gray.400");
 
   if (jobs.length === 0) {
     return (
       <Box
         w="full"
         p={12}
-        bg={cardBg}
         borderRadius="lg"
         borderWidth="1px"
         borderColor={borderColor}
         textAlign="center"
       >
         <VStack spacing={4}>
-          <Icon as={FaUser} boxSize={12} color="gray.400" />
-          <Text fontSize="lg" color="gray.600" fontWeight="medium">
+          <Icon as={FaUser} boxSize={12} color={emptyIconColor} />
+          <Text fontSize="lg" color={emptyPrimaryTextColor} fontWeight="medium">
             No active jobs
           </Text>
-          <Text fontSize="sm" color="gray.700">
+          <Text fontSize="sm" color={emptySecondaryTextColor}>
             Jobs you've accepted will appear here.
           </Text>
         </VStack>

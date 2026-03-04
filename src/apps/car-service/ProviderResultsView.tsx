@@ -281,8 +281,6 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
           )
           .map((job) => job.provider_id as string)
       );
-     
-
 
       const list = (await api.service("provider-job-service").list(
         undefined,

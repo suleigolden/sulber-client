@@ -10,6 +10,7 @@ import { useJobDistances } from "~/hooks/use-job-distances";
 import { useUserProfile } from "~/hooks/use-user-profile";
 import { JobsMap } from "./JobsMap";
 import { useSystemColor } from "~/hooks/use-system-color";
+import { CustomerInfoCard } from "./CustomerInfoCard";
 
 type AvailableJobsTabProps = {
   jobs: Job[];
@@ -316,6 +317,9 @@ export const AvailableJobsTab = ({
                       Accept
                     </Button>
                   </HStack>
+
+                  {/* Customer information */}
+                  <CustomerInfoCard job={job} />
                 </VStack>
               </Box>
             );

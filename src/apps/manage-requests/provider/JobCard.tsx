@@ -23,6 +23,7 @@ import { useState, useEffect } from "react";
 import { UserProfile } from "@suleigolden/sulber-api-client";
 import { CustomerRequestInfoModal } from "./CustomerRequestInfoModal";
 import { useSystemColor } from "~/hooks/use-system-color";
+import { CustomerInfoCard } from "./CustomerInfoCard";
 
 const ADDON_LABELS: Record<string, string> = {
   interior_deep_cleaning: "Interior deep cleaning",
@@ -129,14 +130,14 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                   px={3}
                   py={1}
                   borderRadius="full"
-                  fontSize="xs"
+                  fontSize="sm"
                   fontWeight="bold"
                   textTransform="uppercase"
                 >
                   {job.status.replace("_", " ")}
                 </Badge>
               </HStack>
-              <Text fontSize="xs" color={mutedTextColor}>
+              <Text fontSize="sm" color={mutedTextColor}>
                 Request ID: {job.id.slice(0, 8)}...
               </Text>
             </VStack>
@@ -189,7 +190,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
             <HStack align="start" spacing={3}>
               <Icon as={FaMapMarkerAlt} color="brand.500" mt={1} />
               <VStack align="start" spacing={0}>
-                <Text fontSize="xs" color={labelColor} fontWeight="medium">
+                <Text fontSize="sm" color={labelColor} fontWeight="medium">
                   Location
                 </Text>
                 <Text fontSize="sm" color={textColor} fontWeight="medium">
@@ -202,7 +203,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
             <HStack align="start" spacing={3}>
               <Icon as={FaCalendarAlt} color="brand.500" mt={1} />
               <VStack align="start" spacing={0}>
-                <Text fontSize="xs" color={labelColor} fontWeight="medium">
+                <Text fontSize="sm" color={labelColor} fontWeight="medium">
                   Schedule
                 </Text>
                 <Text fontSize="sm" color={textColor} fontWeight="medium">
@@ -215,7 +216,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
             {addOns.length > 0 && (
               <HStack align="start" spacing={3}>
                 <VStack align="start" spacing={1}>
-                  <Text fontSize="xs" color={labelColor} fontWeight="medium">
+                  <Text fontSize="sm" color={labelColor} fontWeight="medium">
                     Add-ons
                   </Text>
                   <HStack spacing={2} flexWrap="wrap">
@@ -224,7 +225,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                         key={addon.id}
                         colorScheme="purple"
                         variant="subtle"
-                        fontSize="xs"
+                        fontSize="sm"
                         px={2}
                         py={0.5}
                         borderRadius="md"
@@ -241,7 +242,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
             {job.notes && (
               <HStack align="start" spacing={3}>
                 <VStack align="start" spacing={0}>
-                  <Text fontSize="xs" color={labelColor} fontWeight="medium">
+                  <Text fontSize="sm" color={labelColor} fontWeight="medium">
                     Note
                   </Text>
                   <Text fontSize="sm" color={textColor} fontWeight="bold">
@@ -255,7 +256,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
             <HStack align="start" spacing={3}>
               <Icon as={FaClock} color="brand.500" mt={1} />
               <VStack align="start" spacing={0}>
-                <Text fontSize="xs" color={labelColor} fontWeight="medium">
+                <Text fontSize="sm" color={labelColor} fontWeight="medium">
                   Created
                 </Text>
                 <Text fontSize="sm" color={textColor} fontWeight="medium">
@@ -269,16 +270,18 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
           {job.total_price_cents && (
             <HStack align="start" spacing={3}>
               <VStack align="start" spacing={0}>
-                <Text fontSize="xs" color={labelColor} fontWeight="medium">
-                  Price
-                </Text>
-                <Text fontSize="sm" color="brand.600" fontWeight="bold">
+                <Text fontSize="md" color={labelColor} fontWeight="medium">
+                  Price: {" "}
+                
+                <Text as="span" fontSize="sm" color="brand.600" fontWeight="bold">
                   ${formatNumberWithCommas(Number(job.total_price_cents) / 100)}
+                </Text>
                 </Text>
               </VStack>
             </HStack>
           )}
-           
+           {/* Customer Information */}
+          <CustomerInfoCard job={job} customerProfile={customerProfile} />
         </VStack>
       </CardBody>
 

@@ -136,12 +136,12 @@ export const ConfirmServiceRequest = ({
     textColor,
     mutedTextColor,
     headingColor,
-    dividerColor,
+    modalBg,
   } = useSystemColor();
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
       <ModalOverlay />
-      <ModalContent bg={"transparent"}>
+      <ModalContent bg={modalBg}>
         <ModalHeader color={headingColor}>
           <Heading size="md" color={headingColor}>Confirm Service Request</Heading>
         </ModalHeader>

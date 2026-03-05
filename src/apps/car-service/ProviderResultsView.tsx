@@ -294,7 +294,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
       for (const s of list) {
         if (s.service_type !== serviceType) continue;
         // Hide providers that already have an active/pending job with this customer
-        if (blockedProviderIds.has(s.provider?.id ?? "")) continue;
+        if (blockedProviderIds.has(s.provider?.id ?? "") && s.service_type === serviceType) continue;
         const loc = s.primary_location;
         if (!loc?.latitude || !loc?.longitude) continue;
         const distanceKm = haversineKm(lat, lng, loc.latitude, loc.longitude);

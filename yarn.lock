@@ -1281,10 +1281,10 @@
   resolved "https://registry.yarnpkg.com/@standard-schema/utils/-/utils-0.3.0.tgz#3d5e608f16c2390c10528e98e59aef6bf73cae7b"
   integrity sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==
 
-"@suleigolden/sulber-api-client@^0.29.0":
-  version "0.29.0"
-  resolved "https://npm.pkg.github.com/download/@suleigolden/sulber-api-client/0.29.0/8c78ef7718f4d96f0c14e77043ec540491b20117#8c78ef7718f4d96f0c14e77043ec540491b20117"
-  integrity sha512-ZNQzWnWs9WajXZ7n8rwrBkCg99SA0SKzmo74WkTyhYpDzYddoYkZCcY9xGKeKPR/PE6X/GuaADIRkSh8XAsNxQ==
+"@suleigolden/sulber-api-client@^0.30.0":
+  version "0.30.0"
+  resolved "https://npm.pkg.github.com/download/@suleigolden/sulber-api-client/0.30.0/e8d583ea2442f10b88a494c959e2d322142a1429#e8d583ea2442f10b88a494c959e2d322142a1429"
+  integrity sha512-YFyKTHvjD7cbKsYU4U6O272/juOcQYCJCLi7p3pzM9KttaloKhFukHUm9V5n4D15kVAATEU9DiszX+UhjZSf+Q==
   dependencies:
     axios "^0.27.2"
     bignumber.js "^9.0.2"

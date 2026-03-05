@@ -267,7 +267,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
     setLoading(true);
     try {
       // Fetch existing jobs for this customer to hide providers
-      const existingJobs = await api.service("job").findByCustomerId(user.id);
+      const existingJobs = await api.service("job").findByCustomerUserIdAndServiceType(user.id, data.serviceType as ProviderServiceType);
       const blockedProviderIds = new Set(
         existingJobs
           .filter((job) =>

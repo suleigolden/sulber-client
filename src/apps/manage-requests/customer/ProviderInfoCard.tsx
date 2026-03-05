@@ -2,6 +2,7 @@ import {
   Avatar,
   Box,
   Button,
+  Heading,
   HStack,
   Text,
   VStack,
@@ -48,7 +49,7 @@ export const ProviderInfoCard = ({ provider }: ProviderInfoCardProps) => {
     >
       <HStack align="flex-start" spacing={3}>
         <Avatar
-          size="md"
+          size="xl"
           name={fullName}
           src={profile.avatar_url ?? undefined}
         />
@@ -57,17 +58,17 @@ export const ProviderInfoCard = ({ provider }: ProviderInfoCardProps) => {
             {fullName}
           </Text>
           {email && (
-            <Text fontSize="xs" color={bodyColor}>
+            <Text fontSize="sm" color={bodyColor}>
               {email}
             </Text>
           )}
           {profile.phone_number && (
-            <Text fontSize="xs" color={bodyColor}>
+            <Text fontSize="sm" color={bodyColor}>
               {profile.phone_number}
             </Text>
           )}
           <Button
-            size="xs"
+            size="sm"
             variant="brand"
             as={email ? "a" : "button"}
             mt={2}

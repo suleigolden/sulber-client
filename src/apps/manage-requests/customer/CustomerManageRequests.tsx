@@ -6,6 +6,7 @@ import {
   Card,
   CardBody,
   HStack,
+  Stack,
   Text,
   Badge,
   Button,
@@ -123,8 +124,13 @@ export const CustomerManageRequests = () => {
 
   if (isLoading) {
     return (
-      <Container maxW="1500px" px={[4, 8]} py={8}>
-        <Box display="flex" justifyContent="center" alignItems="center" minH="400px">
+      <Container maxW="1500px" px={{ base: 4, md: 8 }} py={{ base: 4, md: 8 }}>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minH={{ base: "250px", md: "400px" }}
+        >
           <VStack spacing={4}>
             <Spinner size="xl" color="brand.500" thickness="4px" />
             <Text color={mutedTextColor}>Loading your requests...</Text>
@@ -136,14 +142,14 @@ export const CustomerManageRequests = () => {
 
   if (!jobs || jobs.length === 0) {
     return (
-      <Container maxW="1500px" px={[4, 8]} py={8}>
-        <VStack align="start" spacing={8} w="full" mt={10}>
+      <Container maxW="1500px" px={{ base: 4, md: 8 }} py={{ base: 4, md: 8 }}>
+        <VStack align="start" spacing={{ base: 6, md: 8 }} w="full" mt={{ base: 4, md: 10 }}>
           <Heading size="lg" fontWeight="bold" color={headingColor}>
             Your Requests
           </Heading>
           <Box
             w="full"
-            p={12}
+            p={{ base: 6, md: 12 }}
             bg={"transparent"}
             borderRadius="lg"
             borderWidth="1px"
@@ -173,13 +179,13 @@ export const CustomerManageRequests = () => {
   });
 
   return (
-    <Container maxW="1500px" px={[4, 8]} py={8}>
-      <VStack align="start" spacing={8} w="full" mt={10}>
+    <Container maxW="1500px" px={{ base: 4, md: 8 }} py={{ base: 4, md: 8 }}>
+      <VStack align="start" spacing={{ base: 6, md: 8 }} w="full" mt={{ base: 4, md: 10 }}>
         <Heading size="lg" fontWeight="bold" color={headingColor}>
           Your Requests ({sortedJobs.length})
         </Heading>
 
-        <VStack spacing={4} w="full" align="stretch">
+        <VStack spacing={{ base: 3, md: 4 }} w="full" align="stretch">
           {sortedJobs.map((job) => {
             const selectedService = job.service_type
               ? ProviderServiceTypesList.services.find((s) => s.type === job.service_type)
@@ -200,9 +206,19 @@ export const CustomerManageRequests = () => {
                 <CardBody>
                   <VStack align="stretch" spacing={4}>
                     {/* Header with Status */}
-                    <HStack justify="space-between" align="start">
+                    <HStack
+                      justify={{ base: "flex-start", md: "space-between" }}
+                      align={{ base: "flex-start", md: "center" }}
+                      flexDirection={{ base: "column", md: "row" }}
+                      spacing={{ base: 3, md: 4 }}
+                    >
+                      {/* Service Title and Status */}
                       <VStack align="start" spacing={1} flex={1}>
-                        <HStack>
+                        <Stack
+                          direction={{ base: "column", sm: "row" }}
+                          align={{ base: "flex-start", sm: "center" }}
+                          spacing={{ base: 1, sm: 2 }}
+                        >
                           <Heading size="md" fontWeight="bold" color={headingColor}>
                             {selectedService?.title || job.service_type || "Service Request"}
                           </Heading>
@@ -215,23 +231,26 @@ export const CustomerManageRequests = () => {
                             fontWeight="bold"
                             textTransform="uppercase"
                           >
-                            {job.status === "CANCELLED" ? "You cancelled" : job.status.replace("_", " ")} this request
+                            {job.status === "CANCELLED" ? "You cancelled" : job.status.replace("_", " ")}
                           </Badge>
-                        </HStack>
+                        </Stack>
                         <Text fontSize="xs" color={mutedTextColor}>
                           Request ID: {job.id.slice(0, 8)}...
                         </Text>
                       </VStack>
                       {canCancel && (
-                        <Button
-                          size="sm"
-                          colorScheme="red"
-                          variant="outline"
-                          leftIcon={<Icon as={FaTimes} />}
-                          onClick={() => handleCancelClick(job)}
-                        >
-                          Cancel
-                        </Button>
+                        <Box mt={{ base: 2, md: 0 }}>
+                          <Button
+                            size="sm"
+                            colorScheme="red"
+                            variant="outline"
+                            leftIcon={<Icon as={FaTimes} />}
+                            onClick={() => handleCancelClick(job)}
+                            w={{ base: "full", sm: "auto" }}
+                          >
+                            Cancel
+                          </Button>
+                        </Box>
                       )}
                     </HStack>
 
@@ -240,14 +259,14 @@ export const CustomerManageRequests = () => {
                     {/* Details Grid + Provider info */}
                     <Box
                       display="grid"
-                      gridTemplateColumns={{ base: "1fr", md: "2fr 1fr" }}
-                      gap={4}
+                      gridTemplateColumns={{ base: "1fr", lg: "2fr 1fr" }}
+                      gap={{ base: 4, md: 6 }}
                       alignItems="flex-start"
                     >
                       <Box
                         display="grid"
                         gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
-                        gap={4}
+                        gap={{ base: 3, md: 4 }}
                       >
                         {/* Location */}
                         <HStack align="start" spacing={3}>
@@ -324,6 +343,9 @@ export const CustomerManageRequests = () => {
                   {job.status === "ACCEPTED" && (
                     <Box mt={4}>
                       {/* Provider Information */}
+                      <Heading size="sm" fontWeight="semibold" color={headingColor} mb={2}>
+                        Provider Information
+                      </Heading>
                       <ProviderInfoCard provider={(job as any).provider} />
                     </Box>
                   )}

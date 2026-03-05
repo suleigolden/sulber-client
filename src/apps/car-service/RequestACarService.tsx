@@ -54,6 +54,7 @@ export const RequestACarService = () => {
         borderColor,
         headingColor,
         mutedTextColor,
+        modalBg: darkBgColor,
     } = useSystemColor();
 
     if (providerResultsData) {
@@ -122,7 +123,8 @@ export const RequestACarService = () => {
                                 left={{ base: 4, md: 8 }}
                                 right={{ base: 4, md: 8 }}
                                 maxW={{ base: "100%", md: "480px" }}
-                                bg={"transparent"}
+                                bg={darkBgColor}
+                                opacity={0.8}
                                 borderRadius="lg"
                                 p={{ base: 4, md: 5 }}
                             >

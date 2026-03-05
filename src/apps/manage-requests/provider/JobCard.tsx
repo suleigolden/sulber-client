@@ -21,6 +21,7 @@ import { fullAddress } from "~/common/utils/address";
 import { getStatusColor } from "~/common/utils/status-color";
 import { formatDateToStringWithoutTime, formatDateToStringWithTime } from "~/common/utils/date-time";
 import { useState, useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserProfile } from "@suleigolden/sulber-api-client";
 import { CustomerRequestInfoModal } from "./CustomerRequestInfoModal";
 import { useSystemColor } from "~/hooks/use-system-color";
@@ -54,6 +55,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
   const [isLoadingCustomer, setIsLoadingCustomer] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+  const queryClient = useQueryClient();
   const selectedService = job.service_type
     ? ProviderServiceTypesList.services.find((s) => s.type === job.service_type)
     : null;
@@ -88,23 +90,28 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
     fetchCustomerProfile();
   }, [job.customer_id]);
 
-  const handleComplete = async () => {
-   
-    try {
-      await api.service("job").completeJob(job.id);
+  const completeJobMutation = useMutation({
+    mutationFn: () => api.service("job").completeJob(job.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customerJobs"] });
+      queryClient.invalidateQueries({ queryKey: ["availableJobs"] });
       toast({
         title: "Job completed",
         description: "Job has been marked as completed",
         status: "success",
       });
-    } catch (error) {
-      console.error("Failed to complete job:", error);
+    },
+    onError: () => {
       toast({
         title: "Failed to complete job",
         description: "Please try again later",
         status: "error",
       });
-    }
+    },
+  });
+
+  const handleComplete = () => {
+    completeJobMutation.mutate();
   };
 
   if (isLoadingCustomer) {
@@ -190,6 +197,8 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                     colorScheme="brand"
                     leftIcon={<Icon as={FaCheck} />}
                     onClick={handleComplete}
+                    isLoading={completeJobMutation.isPending}
+                    loadingText="Completing..."
                   >
                     Mark as Complete
                   </Button>

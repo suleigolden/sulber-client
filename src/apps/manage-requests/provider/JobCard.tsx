@@ -10,10 +10,12 @@ import {
   VStack,
   Heading,
   Box,
+  Link,
   useDisclosure,
   Spinner,
   useToast,
 } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
 import { Job, ProviderServiceTypesList, api } from "@suleigolden/sulber-api-client";
 import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaCheck } from "react-icons/fa";
 import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
@@ -25,6 +27,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserProfile } from "@suleigolden/sulber-api-client";
 import { CustomerRequestInfoModal } from "./CustomerRequestInfoModal";
 import { useSystemColor } from "~/hooks/use-system-color";
+import { useUser } from "~/hooks/use-user";
 import { CustomerInfoCard } from "./CustomerInfoCard";
 
 const ADDON_LABELS: Record<string, string> = {
@@ -33,6 +36,18 @@ const ADDON_LABELS: Record<string, string> = {
   engine_bay_cleaning: "Engine bay cleaning",
   odor_removal: "Odor removal",
   multiple_vehicles_discount: "Multiple vehicles discount",
+};
+
+const PAYOUT_STATUS_COLOR: Record<string, string> = {
+  PENDING: "yellow",
+  PAID: "green",
+  FAILED: "red",
+};
+
+const PAYOUT_STATUS_LABEL: Record<string, string> = {
+  PENDING: "Payout pending",
+  PAID: "Payout paid",
+  FAILED: "Payout failed",
 };
 
 type JobCardProps = {
@@ -56,6 +71,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const queryClient = useQueryClient();
+  const { user } = useUser();
   const selectedService = job.service_type
     ? ProviderServiceTypesList.services.find((s) => s.type === job.service_type)
     : null;
@@ -164,10 +180,34 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                 >
                   {job.status.replace("_", " ")}
                 </Badge>
+                {job.status === "COMPLETED" && job.payout_status && (
+                  <Badge
+                    colorScheme={PAYOUT_STATUS_COLOR[job.payout_status] ?? "gray"}
+                    px={3}
+                    py={1}
+                    borderRadius="full"
+                    fontSize="xs"
+                    fontWeight="medium"
+                  >
+                    {PAYOUT_STATUS_LABEL[job.payout_status] ?? job.payout_status}
+                  </Badge>
+                )}
               </HStack>
               <Text fontSize="sm" color={mutedTextColor}>
                 Request ID: {job.id.slice(0, 8)}...
               </Text>
+              {job.status === "COMPLETED" && user?.id && (
+                <Link
+                  as={RouterLink}
+                  to={`/provider/${user.id}/payouts`}
+                  fontSize="sm"
+                  fontWeight="medium"
+                  color="brand.500"
+                  _hover={{ color: "brand.600", textDecoration: "underline" }}
+                >
+                  View payouts →
+                </Link>
+              )}
             </VStack>
             {showActions && (
               <VStack spacing={2}>

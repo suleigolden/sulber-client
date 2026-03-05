@@ -25,9 +25,10 @@ type CustomerLite = {
 type CustomerInfoCardProps = {
   job: Job;
   customerProfile?: UserProfile | null;
+  isSendMessageButtonVisible?: boolean;
 };
 
-export const CustomerInfoCard = ({ job, customerProfile }: CustomerInfoCardProps) => {
+export const CustomerInfoCard = ({ job, customerProfile, isSendMessageButtonVisible = true }: CustomerInfoCardProps) => {
   const { bgButton, borderColor, headingColor, bodyColor } = useSystemColor();
 
   // Prefer explicit customer relation from the job if present
@@ -83,16 +84,17 @@ export const CustomerInfoCard = ({ job, customerProfile }: CustomerInfoCardProps
               {phoneNumber}
             </Text>
           )}
-          <Button
+          {isSendMessageButtonVisible && (
+            <Button
             size="xs"
             variant="brand"
             as={email ? "a" : "button"}
-            href={email ? `mailto:${email}` : undefined}
             mt={2}
             isDisabled={!email}
           >
-            Send message
-          </Button>
+              Send message
+            </Button>
+          )}
         </VStack>
       </HStack>
     </Box>

@@ -17,7 +17,7 @@ type AvailableJobsTabProps = {
   isLoading: boolean;
   hasAddress: boolean;
   onAccept: (job: Job) => void;
-  onUpdateStatus: (job: Job, status: string) => void;
+  onCancel: (job: Job) => void;
 };
 
 export const AvailableJobsTab = ({
@@ -25,7 +25,7 @@ export const AvailableJobsTab = ({
   isLoading,
   hasAddress,
   onAccept,
-  onUpdateStatus,
+  onCancel,
 }: AvailableJobsTabProps) => {
   const { userProfile } = useUserProfile();
   const providerAddress = userProfile?.address
@@ -291,8 +291,8 @@ export const AvailableJobsTab = ({
                     </Box>
                   )}
 
-                  {/* Price and Action Button */}
-                  <HStack justify="space-between" align="center" pt={2}>
+                  {/* Price and Action Buttons */}
+                  <HStack justify="space-between" align="center" pt={2} spacing={3}>
                     <Badge
                       colorScheme="green"
                       variant="outline"
@@ -305,21 +305,34 @@ export const AvailableJobsTab = ({
                     >
                       ${formatNumberWithCommasAndDecimals(Number(job.total_price_cents))}
                     </Badge>
-                    <Button
-                      size="sm"
-                      colorScheme="brand"
-                      leftIcon={<Icon as={FaCheck} />}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onAccept(job);
-                      }}
-                    >
-                      Accept
-                    </Button>
+                    <HStack spacing={2}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        colorScheme="red"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onCancel(job);
+                        }}
+                      >
+                        Cancel request
+                      </Button>
+                      <Button
+                        size="sm"
+                        colorScheme="brand"
+                        leftIcon={<Icon as={FaCheck} />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAccept(job);
+                        }}
+                      >
+                        Accept
+                      </Button>
+                    </HStack>
                   </HStack>
 
                   {/* Customer information */}
-                  <CustomerInfoCard job={job} />
+                  <CustomerInfoCard job={job} isSendMessageButtonVisible={false} />
                 </VStack>
               </Box>
             );

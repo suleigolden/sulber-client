@@ -231,7 +231,7 @@ export const CustomerManageRequests = () => {
                             fontWeight="bold"
                             textTransform="uppercase"
                           >
-                            {job.status === "CANCELLED" ? "You cancelled" : job.status.replace("_", " ")}
+                            {job.status === "CUSTOMER_CANCELLED" ? "You cancelled this request" : job.status.replace("_", " ")}
                           </Badge>
                         </Stack>
                         <Text fontSize="xs" color={mutedTextColor}>

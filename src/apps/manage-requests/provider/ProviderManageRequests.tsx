@@ -29,6 +29,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AvailableJobsTab } from "./AvailableJobsTab";
 import { ActiveJobsTab } from "./ActiveJobsTab";
 import { CompletedJobsTab } from "./CompletedJobsTab";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 
 export const ProviderManageRequests = () => {
@@ -43,6 +44,7 @@ export const ProviderManageRequests = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
+  const { modalBg } = useSystemColor();
 
 
   // Fetch available jobs (pending jobs for this provider)
@@ -99,6 +101,13 @@ export const ProviderManageRequests = () => {
     onOpen();
   };
 
+  const handleCancelClick = (job: Job) => {
+    setSelectedJob(job);
+    setActionType("update");
+    setNewStatus("PROVIDER_CANCELLED");
+    onOpen();
+  };
+
   const handleUpdateStatusClick = (job: Job, status: string) => {
     setSelectedJob(job);
     setActionType("update");
@@ -106,9 +115,18 @@ export const ProviderManageRequests = () => {
     onOpen();
   };
 
-  // Mutation for accepting/updating jobs
+  // Mutation for accepting/updating (and rejecting) jobs
   const updateJobMutation = useMutation({
     mutationFn: async ({ jobId, updates }: { jobId: string; updates: Partial<Job> }) => {
+      // Use dedicated endpoints for accept/reject when appropriate
+      if (actionType === "accept" && user?.id) {
+        return await api.service("job").acceptJob(jobId, user.id);
+      }
+
+      if (updates.status === "PROVIDER_CANCELLED") {
+        return await api.service("job").rejectJob(jobId);
+      }
+
       return await api.service("job").update(jobId, updates);
     },
     onMutate: async ({ jobId, updates }) => {
@@ -249,7 +267,7 @@ export const ProviderManageRequests = () => {
                 isLoading={isLoadingAvailableJobs}
                 hasAddress={Boolean(userProfile?.address)}
                 onAccept={handleAcceptClick}
-                onUpdateStatus={handleUpdateStatusClick}
+                onCancel={handleCancelClick}
               />
             </TabPanel>
 
@@ -269,13 +287,15 @@ export const ProviderManageRequests = () => {
       {/* Action Confirmation Dialog */}
       <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
         <AlertDialogOverlay>
-          <AlertDialogContent>
+          <AlertDialogContent bg={modalBg}>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              {actionType === "accept" ? "Accept Service Request" : "Update Job Status"}
+              {newStatus === "ACCEPTED" ? "Accept Service Request" : newStatus === "PROVIDER_CANCELLED" ? "Cancel Service Request" : "Update Job Status"}
             </AlertDialogHeader>
             <AlertDialogBody>
               {actionType === "accept" ? (
                 "Are you sure you want to accept this service request? You'll be responsible for completing the service."
+              ) : newStatus === "PROVIDER_CANCELLED" ? (
+                "Are you sure you want to cancel this service request? This action cannot be undone."
               ) : (
                 `Are you sure you want to update this job status to ${newStatus.replace("_", " ")}?`
               )}
@@ -291,7 +311,7 @@ export const ProviderManageRequests = () => {
                 isLoading={updateJobMutation.isPending}
                 loadingText="Processing..."
               >
-                {actionType === "accept" ? "Accept" : "Update"}
+                {actionType === "accept" ? "Accept" : newStatus === "PROVIDER_CANCELLED" ? "Cancel" : "Update"}
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>

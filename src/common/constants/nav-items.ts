@@ -27,6 +27,11 @@ export const getNavItems = (user: User) => {
       type: "link",
     },
     {
+      label: "Messages",
+      href: `/provider/${user?.id}/messages`,
+      type: "link",
+    },
+    {
       label: "Log Out",
       href: "/logout",
       type: "button",
@@ -41,6 +46,11 @@ export const getNavItems = (user: User) => {
     {
       label: "Manage Requests",
       href: `/customer/${user?.id}/manage-requests`,
+      type: "link",
+    },
+    {
+      label: "Messages",
+      href: `/customer/${user?.id}/messages`,
       type: "link",
     },
     {

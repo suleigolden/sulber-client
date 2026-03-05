@@ -16,6 +16,7 @@ import { ManageRequests } from "~/apps/manage-requests";
 import { PostAJob } from "~/apps/post-a-job";
 import { CompleteProviderProfile } from "~/apps/users/provider/CompleteProviderProfile";
 import { Payouts } from "~/apps/payouts";
+import { Messages } from "~/apps/messages";
 
 // Add type definition at the top
 type RoutesType = {
@@ -139,6 +140,10 @@ export const DashboardNavBar = (props: Record<string, unknown>) => {
               <Route
                 path={`/${user.id}/payouts`}
                 element={<Payouts />}
+              />
+              <Route
+                path={`/${user.id}/messages`}
+                element={<Messages />}
               />
             </Routes>
 

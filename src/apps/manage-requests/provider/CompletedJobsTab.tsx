@@ -41,7 +41,7 @@ export const CompletedJobsTab = ({ jobs }: CompletedJobsTabProps) => {
   return (
     <VStack spacing={4} w="full" align="stretch">
       {jobs.map((job) => (
-        <JobCard key={job.id} job={job} showActions={false} />
+        <JobCard key={job.id} job={job} showActions={false} onUpdateStatus={() => {}} />
       ))}
     </VStack>
   );

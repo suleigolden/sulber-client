@@ -63,6 +63,19 @@ function formatAmount(amount: number, currency = "CAD"): string {
   }).format(Number(amount));
 }
 
+/** Normalize unknown date value to ISO string for formatDateToStringWithoutTime */
+function toDateString(value: unknown): string | null {
+  if (value == null) return null;
+  if (typeof value === "string") return value;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return value.toISOString();
+  try {
+    const d = new Date(value as string | number);
+    return Number.isNaN(d.getTime()) ? null : d.toISOString();
+  } catch {
+    return null;
+  }
+}
+
 export const Payouts = () => {
   const { user } = useUser();
   const { jobs: providerJobs = [], isLoading: isLoadingJobs } = useJobs();
@@ -283,13 +296,10 @@ export const Payouts = () => {
                             {job.id.slice(0, 8)}…
                           </Td>
                           <Td color={textColor} fontSize="sm">
-                            {jobCompletedAt
-                              ? formatDateToStringWithoutTime(
-                                  typeof jobCompletedAt === "string"
-                                    ? jobCompletedAt
-                                    : (jobCompletedAt as Date).toISOString()
-                                )
-                              : "—"}
+                            {/* {toDateString(jobCompletedAt)
+                              ? formatDateToStringWithoutTime(toDateString(jobCompletedAt)!)
+                              : "—"} */}
+                              {job.job_completed_at?.toLocaleString()}
                           </Td>
                           <Td>
                             <Badge
@@ -305,12 +315,8 @@ export const Payouts = () => {
                             {payout ? formatAmount(Number(payout.amount), payout.currency) : "—"}
                           </Td>
                           <Td color={mutedTextColor} fontSize="sm">
-                            {payout?.created_at
-                              ? formatDateToStringWithoutTime(
-                                  typeof payout.created_at === "string"
-                                    ? payout.created_at
-                                    : (payout.created_at as Date).toISOString()
-                                )
+                            {toDateString(payout?.created_at)
+                              ? formatDateToStringWithoutTime(toDateString(payout?.created_at)!)
                               : "—"}
                           </Td>
                         </Tr>

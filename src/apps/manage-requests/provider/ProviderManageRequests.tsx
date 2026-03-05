@@ -239,7 +239,6 @@ export const ProviderManageRequests = () => {
       </Container>
     );
   }
-  console.log("availableJobs:: ", availableJobs);
 
   return (
     <Container maxW="1500px" px={[4, 8]} py={[0, 0]}>

@@ -12,6 +12,7 @@ import {
   Box,
   useDisclosure,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import { Job, ProviderServiceTypesList, api } from "@suleigolden/sulber-api-client";
 import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaCheck } from "react-icons/fa";
@@ -37,7 +38,7 @@ type JobCardProps = {
   job: Job;
   showActions?: boolean;
   onAccept?: (job: Job) => void;
-  onUpdateStatus?: (job: Job, status: string) => void;
+  onUpdateStatus: (job: Job, status: string) => void;
 };
 
 export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: JobCardProps) => {
@@ -52,6 +53,7 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
   const [customerProfile, setCustomerProfile] = useState<UserProfile | null>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
   const selectedService = job.service_type
     ? ProviderServiceTypesList.services.find((s) => s.type === job.service_type)
     : null;
@@ -85,6 +87,25 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
 
     fetchCustomerProfile();
   }, [job.customer_id]);
+
+  const handleComplete = async () => {
+   
+    try {
+      await api.service("job").completeJob(job.id);
+      toast({
+        title: "Job completed",
+        description: "Job has been marked as completed",
+        status: "success",
+      });
+    } catch (error) {
+      console.error("Failed to complete job:", error);
+      toast({
+        title: "Failed to complete job",
+        description: "Please try again later",
+        status: "error",
+      });
+    }
+  };
 
   if (isLoadingCustomer) {
     return (
@@ -163,12 +184,12 @@ export const JobCard = ({ job, showActions = false, onAccept, onUpdateStatus }: 
                     Start Service
                   </Button>
                 )}
-                {job.status === "IN_PROGRESS" && onUpdateStatus && (
+                {job.status === "IN_PROGRESS" && (
                   <Button
                     size="sm"
                     colorScheme="brand"
                     leftIcon={<Icon as={FaCheck} />}
-                    onClick={() => onUpdateStatus(job, "COMPLETED")}
+                    onClick={handleComplete}
                   >
                     Mark as Complete
                   </Button>

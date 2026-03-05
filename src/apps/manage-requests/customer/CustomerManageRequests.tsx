@@ -22,7 +22,13 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useJobs } from "~/hooks/use-jobs";
-import { Job, ProviderServiceTypesList, api } from "@suleigolden/sulber-api-client";
+import {
+  Job,
+  ProviderServiceTypesList,
+  api,
+  ReasonsForCancellation,
+  ReasonForCancellation,
+} from "@suleigolden/sulber-api-client";
 import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaDollarSign, FaTimes } from "react-icons/fa";
 import { formatNumberWithCommas } from "~/common/utils/currency-formatter";
 import { fullAddress } from "~/common/utils/address";
@@ -41,12 +47,14 @@ export const CustomerManageRequests = () => {
   const cancelRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
   const [isCancelling, setIsCancelling] = useState<boolean>(false);
+  const [selectedReason, setSelectedReason] = useState<string>("");
   const {
     borderColor,
     headingColor,
     textColor: primaryTextColor,
     mutedTextColor,
     iconColor,
+    modalBg,
   } = useSystemColor();
  
 
@@ -58,9 +66,20 @@ export const CustomerManageRequests = () => {
   const handleCancelConfirm = async () => {
     if (!selectedJob) return;
 
+    if (!selectedReason) {
+      toast({
+        title: "Select a reason",
+        description: "Please choose a reason for cancelling this request.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
     setIsCancelling(true);
     try {
-      await api.service("job").update(selectedJob.id, { status: "CANCELLED" });
+      await api.service("job").cancelJob(selectedJob.id, selectedReason as ReasonForCancellation);
       toast({
         title: "Request cancelled",
         description: "Your service request has been cancelled successfully.",
@@ -69,6 +88,7 @@ export const CustomerManageRequests = () => {
         isClosable: true,
       });
       onClose();
+      setSelectedReason("");
       // Refresh the page to update the list
       window.location.reload();
     } catch (error: any) {
@@ -194,7 +214,7 @@ export const CustomerManageRequests = () => {
                             fontWeight="bold"
                             textTransform="uppercase"
                           >
-                            {job.status.replace("_", " ")}
+                            {job.status === "CANCELLED" ? "You cancelled" : job.status.replace("_", " ")} this request
                           </Badge>
                         </HStack>
                         <Text fontSize="xs" color={mutedTextColor}>
@@ -303,12 +323,31 @@ export const CustomerManageRequests = () => {
       {/* Cancel Confirmation Dialog */}
       <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
         <AlertDialogOverlay>
-          <AlertDialogContent bg={"transparent"}>
+          <AlertDialogContent bg={modalBg}>
             <AlertDialogHeader fontSize="lg" fontWeight="bold" color={headingColor}>
               Cancel Service Request
             </AlertDialogHeader>
             <AlertDialogBody color={primaryTextColor}>
-              Are you sure you want to cancel this service request? This action cannot be undone.
+              <Text mb={3}>
+                Are you sure you want to cancel this service request? This action cannot be undone.
+              </Text>
+              <Text fontSize="sm" color={mutedTextColor} mb={2}>
+                Select a reason for cancellation:
+              </Text>
+              <VStack align="stretch" spacing={2}>
+                {ReasonsForCancellation.map((reason) => (
+                  <Button
+                    key={reason}
+                    size="sm"
+                    variant={selectedReason === reason ? "solid" : "outline"}
+                    colorScheme={selectedReason === reason ? "red" : "gray"}
+                    justifyContent="flex-start"
+                    onClick={() => setSelectedReason(reason)}
+                  >
+                    {reason.replace(/_/g, " ")}
+                  </Button>
+                ))}
+              </VStack>
             </AlertDialogBody>
             <AlertDialogFooter>
               <Button ref={cancelRef} onClick={onClose}>

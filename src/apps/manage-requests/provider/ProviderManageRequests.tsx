@@ -296,6 +296,8 @@ export const ProviderManageRequests = () => {
                 "Are you sure you want to accept this service request? You'll be responsible for completing the service."
               ) : newStatus === "PROVIDER_CANCELLED" ? (
                 "Are you sure you want to cancel this service request? This action cannot be undone."
+              ) : newStatus === "IN_PROGRESS" ? (
+                "Are you ready to start this service?"
               ) : (
                 `Are you sure you want to update this job status to ${newStatus.replace("_", " ")}?`
               )}
@@ -311,7 +313,7 @@ export const ProviderManageRequests = () => {
                 isLoading={updateJobMutation.isPending}
                 loadingText="Processing..."
               >
-                {actionType === "accept" ? "Accept" : newStatus === "PROVIDER_CANCELLED" ? "Cancel" : "Update"}
+                {actionType === "accept" ? "Accept" : newStatus === "PROVIDER_CANCELLED" ? "Cancel" : newStatus === "IN_PROGRESS" ? "Start Service" : "Update"}
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>

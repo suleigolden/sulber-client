@@ -68,6 +68,20 @@ export const CustomerManageRequests = () => {
   const handleCancelConfirm = async () => {
     if (!selectedJob) return;
 
+    // Only allow cancelling when the job is still ACCEPTED.
+    // If it's already in progress, block cancellation with a message.
+    if (selectedJob.status === "IN_PROGRESS") {
+      toast({
+        title: "Cannot cancel",
+        description: "This service is already in progress and can no longer be cancelled.",
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
+      onClose();
+      return;
+    }
+
     if (!selectedReason) {
       toast({
         title: "Select a reason",
@@ -81,6 +95,17 @@ export const CustomerManageRequests = () => {
 
     setIsCancelling(true);
     try {
+      const response = await api.service("job").getJobCurrentStatus(selectedJob.id);
+      if (response === "IN_PROGRESS") {
+        toast({
+          title: "Cannot cancel",
+          description: "This service is already in progress and can no longer be cancelled. Please contact support with your request ID and reason for cancellation if you need to cancel this service.",
+          status: "info",
+          duration: 7000,
+          isClosable: true,
+        });
+        return;
+      }
       await api.service("job").cancelJob(selectedJob.id, selectedReason as ReasonForCancellation);
       toast({
         title: "Request cancelled",
@@ -340,7 +365,7 @@ export const CustomerManageRequests = () => {
                       </>
                     )}
                   </VStack>
-                  {job.status === "ACCEPTED" && (
+                  { ["IN_PROGRESS", "COMPLETED", "ACCEPTED"].includes(job.status) && (
                     <Box mt={4}>
                       {/* Provider Information */}
                       <Heading size="sm" fontWeight="semibold" color={headingColor} mb={2}>

@@ -20,7 +20,6 @@ import {
   Icon,
 } from "@chakra-ui/react";
 import { useUser } from "~/hooks/use-user";
-import { useJobs } from "~/hooks/use-jobs";
 import { useQuery } from "@tanstack/react-query";
 import { api, ProviderServiceTypesList } from "@suleigolden/sulber-api-client";
 import { useMemo } from "react";
@@ -40,6 +39,17 @@ type PayoutRow = {
   status: PayoutStatusKey;
   created_at: Date | string;
   updated_at?: Date | string;
+};
+
+/** Job with optional payout relation from findByJobPayoutsByProviderId */
+type JobWithPayout = {
+  id: string;
+  status: string;
+  service_type?: string | null;
+  job_completed_at?: string | Date | null;
+  payout_status?: PayoutStatusKey | null;
+  payout?: PayoutRow | null;
+  total_price_cents?: number | string | null;
 };
 
 const STATUS_COLOR: Record<PayoutStatusKey, string> = {
@@ -78,7 +88,6 @@ function toDateString(value: unknown): string | null {
 
 export const Payouts = () => {
   const { user } = useUser();
-  const { jobs: providerJobs = [], isLoading: isLoadingJobs } = useJobs();
   const {
     borderColor,
     headingColor,
@@ -88,23 +97,30 @@ export const Payouts = () => {
   } = useSystemColor();
 
   const {
-    data: payouts = [],
-    isLoading: isLoadingPayouts,
+    data: jobsWithPayouts = [],
+    isLoading,
   } = useQuery({
-    queryKey: ["payouts", user?.id],
-    queryFn: async (): Promise<PayoutRow[]> => {
+    queryKey: ["jobPayoutsByProvider", user?.id],
+    queryFn: async (): Promise<JobWithPayout[]> => {
       if (!user?.id) return [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (api as any).service("payout").findByProviderId(user.id);
+      return (api).service("job").findByJobPayoutsByProviderId(user.id);
     },
     enabled: Boolean(user?.id),
     staleTime: 60000,
   });
+  console.log("jobsWithPayouts:: ", jobsWithPayouts);
+
+  const payouts = useMemo(() => {
+    return (jobsWithPayouts as JobWithPayout[])
+      .map((j) => j.payout)
+      .filter((p): p is PayoutRow => p != null);
+  }, [jobsWithPayouts]);
 
   const completedJobs = useMemo(() => {
-    if (!providerJobs) return [];
-    return providerJobs.filter((job) => job.status === "COMPLETED");
-  }, [providerJobs]);
+    return (jobsWithPayouts as JobWithPayout[]).filter(
+      (job) => job.status === "COMPLETED",
+    );
+  }, [jobsWithPayouts]);
 
   const payoutByJobId = useMemo(() => {
     const map = new Map<string, PayoutRow>();
@@ -126,8 +142,6 @@ export const Payouts = () => {
     });
     return { total, pending, paid, failed };
   }, [payouts]);
-
-  const isLoading = isLoadingJobs || isLoadingPayouts;
   const isProvider = user?.role === "provider";
 
   if (!isProvider) {
@@ -273,20 +287,21 @@ export const Payouts = () => {
                     <Tr>
                       <Th color={labelColor}>Service</Th>
                       <Th color={labelColor}>Job ID</Th>
+                      <Th color={labelColor}>Price Requested</Th>
                       <Th color={labelColor}>Completed</Th>
                       <Th color={labelColor}>Payout status</Th>
-                      <Th color={labelColor}>Amount</Th>
+                      <Th color={labelColor}>Amount Paid</Th>
                       <Th color={labelColor}>Payout date</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
                     {completedJobs.map((job) => {
-                      const payout = payoutByJobId.get(job.id);
-                      const status = (payout?.status ?? (job as { payout_status?: PayoutStatusKey }).payout_status ?? "PENDING");
+                      const payout = payoutByJobId.get(job.id) ?? job.payout;
+                      const status = (payout?.status ?? job.payout_status ?? "PENDING");
                       const serviceTitle =
                         job.service_type &&
                         ProviderServiceTypesList?.services?.find((s) => s.type === job.service_type)?.title;
-                      const jobCompletedAt = (job as { job_completed_at?: string | Date | null }).job_completed_at;
+                      const jobCompletedAt = job.job_completed_at;
                       return (
                         <Tr key={job.id}>
                           <Td color={textColor} fontWeight="medium">
@@ -295,11 +310,11 @@ export const Payouts = () => {
                           <Td color={mutedTextColor} fontFamily="mono" fontSize="xs">
                             {job.id.slice(0, 8)}…
                           </Td>
+                          <Td color={textColor} fontWeight="medium">{formatAmount(Number(job.total_price_cents))}</Td>
                           <Td color={textColor} fontSize="sm">
-                            {/* {toDateString(jobCompletedAt)
+                            {toDateString(jobCompletedAt)
                               ? formatDateToStringWithoutTime(toDateString(jobCompletedAt)!)
-                              : "—"} */}
-                              {job.job_completed_at?.toLocaleString()}
+                              : "—"}
                           </Td>
                           <Td>
                             <Badge

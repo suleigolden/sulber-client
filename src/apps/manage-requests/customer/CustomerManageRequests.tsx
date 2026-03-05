@@ -38,6 +38,7 @@ import { formatDateToStringWithoutTime, formatDateToStringWithTime } from "~/com
 import { useIsCustomerProfileComplete } from "~/hooks/use-is-customer-profile-complete";
 import { IsProfileComplete } from "~/apps/users/customer/IsProfileComplete";
 import { useSystemColor } from "~/hooks/use-system-color";
+import { ProviderInfoCard } from "./ProviderInfoCard";
 
 export const CustomerManageRequests = () => {
   const { jobs, isLoading } = useJobs();
@@ -236,66 +237,73 @@ export const CustomerManageRequests = () => {
 
                     <Divider />
 
-                    {/* Details Grid */}
+                    {/* Details Grid + Provider info */}
                     <Box
                       display="grid"
-                      gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+                      gridTemplateColumns={{ base: "1fr", md: "2fr 1fr" }}
                       gap={4}
+                      alignItems="flex-start"
                     >
-                      {/* Location */}
-                      <HStack align="start" spacing={3}>
-                        <Icon as={FaMapMarkerAlt} color="brand.500" mt={1} />
-                        <VStack align="start" spacing={0}>
-                          <Text fontSize="xs" color={mutedTextColor} fontWeight="medium">
-                            Location
-                          </Text>
-                          <Text fontSize="sm" color={primaryTextColor} fontWeight="medium">
-                            {fullAddress(job.address)}
-                          </Text>
-                        </VStack>
-                      </HStack>
-
-                      {/* Schedule */}
-                      <HStack align="start" spacing={3}>
-                        <Icon as={FaCalendarAlt} color="brand.500" mt={1} />
-                        <VStack align="start" spacing={0}>
-                          <Text fontSize="xs" color={mutedTextColor} fontWeight="medium">
-                            Schedule
-                          </Text>
-                          <Text fontSize="sm" color={primaryTextColor} fontWeight="medium">
-                            {formatDateToStringWithTime(job?.scheduled_start as string)}
-                          </Text>
-                        </VStack>
-                      </HStack>
-
-                      {/* Price */}
-                      {job.total_price_cents && (
+                      <Box
+                        display="grid"
+                        gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+                        gap={4}
+                      >
+                        {/* Location */}
                         <HStack align="start" spacing={3}>
-                          <Icon as={FaDollarSign} color="brand.500" mt={1} />
+                          <Icon as={FaMapMarkerAlt} color="brand.500" mt={1} />
                           <VStack align="start" spacing={0}>
                             <Text fontSize="xs" color={mutedTextColor} fontWeight="medium">
-                              Price
+                              Location
                             </Text>
-                            <Text fontSize="sm" color={primaryTextColor} fontWeight="bold">
-                              ${formatNumberWithCommas(Number(job.total_price_cents) / 100)}{" "}
-                              {job.currency || "CAD"}
+                            <Text fontSize="sm" color={primaryTextColor} fontWeight="medium">
+                              {fullAddress(job.address)}
                             </Text>
                           </VStack>
                         </HStack>
-                      )}
 
-                      {/* Created Date */}
-                      <HStack align="start" spacing={3}>
-                        <Icon as={FaClock} color="brand.500" mt={1} />
-                        <VStack align="start" spacing={0}>
-                          <Text fontSize="xs" color={mutedTextColor} fontWeight="medium">
-                            Created
-                          </Text>
-                          <Text fontSize="sm" color={primaryTextColor} fontWeight="medium">
-                            {formatDateToStringWithoutTime(job?.created_at.toLocaleString())}
-                          </Text>
-                        </VStack>
-                      </HStack>
+                        {/* Schedule */}
+                        <HStack align="start" spacing={3}>
+                          <Icon as={FaCalendarAlt} color="brand.500" mt={1} />
+                          <VStack align="start" spacing={0}>
+                            <Text fontSize="xs" color={mutedTextColor} fontWeight="medium">
+                              Schedule
+                            </Text>
+                            <Text fontSize="sm" color={primaryTextColor} fontWeight="medium">
+                              {formatDateToStringWithTime(job?.scheduled_start as string)}
+                            </Text>
+                          </VStack>
+                        </HStack>
+
+                        {/* Price */}
+                        {job.total_price_cents && (
+                          <HStack align="start" spacing={3}>
+                            <Icon as={FaDollarSign} color="brand.500" mt={1} />
+                            <VStack align="start" spacing={0}>
+                              <Text fontSize="xs" color={mutedTextColor} fontWeight="medium">
+                                Price
+                              </Text>
+                              <Text fontSize="sm" color={primaryTextColor} fontWeight="bold">
+                                ${formatNumberWithCommas(Number(job.total_price_cents) / 100)}{" "}
+                                {job.currency || "CAD"}
+                              </Text>
+                            </VStack>
+                          </HStack>
+                        )}
+
+                        {/* Created Date */}
+                        <HStack align="start" spacing={3}>
+                          <Icon as={FaClock} color="brand.500" mt={1} />
+                          <VStack align="start" spacing={0}>
+                            <Text fontSize="xs" color={mutedTextColor} fontWeight="medium">
+                              Created
+                            </Text>
+                            <Text fontSize="sm" color={primaryTextColor} fontWeight="medium">
+                              {formatDateToStringWithoutTime(job?.created_at.toLocaleString())}
+                            </Text>
+                          </VStack>
+                        </HStack>
+                      </Box>
                     </Box>
 
                     {/* Notes */}
@@ -313,6 +321,12 @@ export const CustomerManageRequests = () => {
                       </>
                     )}
                   </VStack>
+                  {job.status === "ACCEPTED" && (
+                    <Box mt={4}>
+                      {/* Provider Information */}
+                      <ProviderInfoCard provider={(job as any).provider} />
+                    </Box>
+                  )}
                 </CardBody>
               </Card>
             );

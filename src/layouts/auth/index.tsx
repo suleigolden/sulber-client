@@ -22,7 +22,7 @@ export default function Auth() {
   };
   const getRoutes = (routes: (user: User) => RoutesType[]) => {
     // Call the routes function with undefined or get the user from context
-    const routesArray = routes(undefined);
+    const routesArray = routes({} as User);
     return routesArray.map((route: RoutesType, key: number) => {
       if (route.layout === '/auth') {
         return (

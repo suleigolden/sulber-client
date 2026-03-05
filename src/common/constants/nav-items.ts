@@ -22,8 +22,8 @@ export const getNavItems = (user: User) => {
       type: "link",
     },
     {
-      label: "Payment History",
-      href: `/provider/${user?.id}/payment-history`,
+      label: "Payouts",
+      href: `/provider/${user?.id}/payouts`,
       type: "link",
     },
     {

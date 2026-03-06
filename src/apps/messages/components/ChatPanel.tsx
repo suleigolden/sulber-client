@@ -14,11 +14,22 @@ import { FiPaperclip, FiSend, FiChevronLeft } from "react-icons/fi";
 import { MdEmojiEmotions } from "react-icons/md";
 import { HiOutlineChevronRight } from "react-icons/hi";
 import { IoGlobeOutline } from "react-icons/io5";
+import { useQuery } from "@tanstack/react-query";
 import type { Message } from "@suleigolden/sulber-api-client";
+import { api, type UserProfile } from "@suleigolden/sulber-api-client";
 import { MessageBubble } from "./MessageBubble";
 import { DateSeparator } from "./DateSeparator";
 import { formatMessageDate } from "~/common/utils/date-time";
 import { useRef, useEffect } from "react";
+
+function displayNameFromProfile(
+  profile: UserProfile | null | undefined,
+  fallbackEmail: string
+): string {
+  if (!profile) return fallbackEmail?.split("@")[0] || "User";
+  const name = [profile.first_name, profile.last_name].filter(Boolean).join(" ");
+  return name.trim() || fallbackEmail?.split("@")[0] || "User";
+}
 
 type ChatPanelProps = {
   otherUser: { id: string; email: string } | null;
@@ -64,6 +75,19 @@ export const ChatPanel = ({
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const inputBg = useColorModeValue("gray.50", "gray.700");
 
+  const { data: profile } = useQuery<UserProfile | null>({
+    queryKey: ["user-profile", otherUser?.id],
+    queryFn: async () => {
+      if (!otherUser?.id) return null;
+      try {
+        return (await api.service("user-profile").get(otherUser.id)) as UserProfile;
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!otherUser?.id,
+  });
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -85,7 +109,8 @@ export const ChatPanel = ({
     );
   }
 
-  const displayName = otherUser.email?.split("@")[0] || "User";
+  const displayName = displayNameFromProfile(profile, otherUser.email ?? "");
+  const avatarUrl = profile?.avatar_url ?? undefined;
   const groups = groupMessagesByDate(messages);
 
   return (
@@ -125,7 +150,7 @@ export const ChatPanel = ({
           <Avatar
             size="md"
             name={displayName}
-            src={undefined}
+            src={avatarUrl}
             bg="brand.400"
             color="white"
           />

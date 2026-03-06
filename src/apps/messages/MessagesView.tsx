@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Flex, useToast } from "@chakra-ui/react";
+import { Container, Flex, useToast, VStack } from "@chakra-ui/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@suleigolden/sulber-api-client";
 import { useUser } from "~/hooks/use-user";
@@ -110,41 +110,44 @@ export const MessagesView = () => {
   });
 
   return (
-    <Flex
-      height="calc(100vh - 180px)"
-      minHeight="500px"
-      maxWidth="1400px"
-      margin="0 auto"
-      bg="white"
-      borderRadius="12px"
-      boxShadow="sm"
-      overflow="hidden"
-    >
-      {showList && (
-        <Box flexShrink={0} height="100%" overflow="hidden">
-          <ConversationList
-            conversations={filteredConversations}
-            selectedUserId={selectedUserId}
-            currentUserId={user?.id ?? ""}
-            onSelect={handleSelectUser}
-            filter={filter}
-            onFilterChange={setFilter}
-          />
-        </Box>
-      )}
-      {showChat && (
-        <ChatPanel
-        otherUser={otherUser}
-        messages={messages}
-        currentUserId={user?.id ?? ""}
-        isLoading={!!selectedUserId && messagesLoading}
-        isSending={sendMutation.isPending}
-        draft={draft}
-        onDraftChange={setDraft}
-        onSend={handleSend}
-        onBack={() => setSelectedUserId(null)}
-      />
-      )}
-    </Flex>
+    <Container maxW="100%" px={[4, 8]} py={8}>
+        <Flex
+          height="calc(100vh - 180px)"
+          minHeight="500px"
+          maxWidth="1400px"
+          margin="0 auto"
+          bg="white"
+          borderRadius="12px"
+          boxShadow="sm"
+          overflow="hidden"
+        >
+          {showList && (
+            <Box flexShrink={0} height="100%" overflow="hidden">
+              <ConversationList
+                conversations={filteredConversations}
+                selectedUserId={selectedUserId}
+                currentUserId={user?.id ?? ""}
+                onSelect={handleSelectUser}
+                filter={filter}
+                onFilterChange={setFilter}
+              />
+            </Box>
+          )}
+          {showChat && (
+            <ChatPanel
+              otherUser={otherUser}
+              messages={messages}
+              currentUserId={user?.id ?? ""}
+              isLoading={!!selectedUserId && messagesLoading}
+              isSending={sendMutation.isPending}
+              draft={draft}
+              onDraftChange={setDraft}
+              onSend={handleSend}
+              onBack={() => setSelectedUserId(null)}
+            />
+          )}
+        </Flex>
+
+    </Container>
   );
 };

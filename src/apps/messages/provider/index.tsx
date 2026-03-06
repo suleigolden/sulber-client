@@ -1,7 +1,3 @@
-export const ProviderMessages = () => {
-    return (
-        <div>
-            <h1>Provider Messages</h1>
-        </div>
-    );
-};
+import { MessagesView } from "../MessagesView";
+
+export const ProviderMessages = () => <MessagesView />;

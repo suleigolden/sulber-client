@@ -21,6 +21,20 @@ export const formatDateToStringWithoutTime = (date: string) => {
   return convertToUserTimezone(date).format("MMM D, YYYY");
 };
 
+/** For message list date separators e.g. "May 16, 2025" */
+export const formatMessageDate = (date: string | Date): string => {
+  if (!date) return "";
+  const d = typeof date === "string" ? new Date(date) : date;
+  return moment(d).format("MMMM D, YYYY");
+};
+
+/** For message bubble time e.g. "6:11 p.m." */
+export const formatMessageTime = (date: string | Date): string => {
+  if (!date) return "";
+  const d = typeof date === "string" ? new Date(date) : date;
+  return moment(d).format("h:mm a");
+};
+
 export const getDaysLeft = (targetDate: string) => {
   const today = convertToUserTimezone(new Date().toISOString()).startOf("day");
   const end_date = convertToUserTimezone(targetDate).startOf("day");

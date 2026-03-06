@@ -1,7 +1,3 @@
-export const CustomerMessages = () => {
-    return (
-        <div>
-            <h1>Customer Messages</h1>
-        </div>
-    );
-};
+import { MessagesView } from "../MessagesView";
+
+export const CustomerMessages = () => <MessagesView />;

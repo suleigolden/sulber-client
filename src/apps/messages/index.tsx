@@ -1,18 +1,10 @@
-import { Box } from "@chakra-ui/react";
 import { useUser } from "~/hooks/use-user";
-import { CustomerMessages } from "./customer";
-import { ProviderMessages } from "./provider";
-
+import { MessagesView } from "./MessagesView";
 
 export const Messages = () => {
-    const {user} = useUser();
+  const { user } = useUser();
 
-    switch(user.role){
-        case "customer":
-            return <CustomerMessages />;
-        case "provider":
-            return <ProviderMessages />;
-        default:
-            return <Box>No messages found</Box>;
-    }
+  if (!user) return null;
+
+  return <MessagesView />;
 };

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Flex, useToast } from "@chakra-ui/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@suleigolden/sulber-api-client";
@@ -10,9 +11,33 @@ import { Box, useBreakpointValue } from "@chakra-ui/react";
 export const MessagesView = () => {
   const { user } = useUser();
   const toast = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const withUserId = searchParams.get("with");
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(withUserId || null);
   const [filter, setFilter] = useState<"all" | "unread">("all");
+
+  // Initialize from ?with=<otherUserId>, but never allow selecting myself
+  useEffect(() => {
+    if (!withUserId) return;
+    if (withUserId === user?.id) return;
+    if (withUserId !== selectedUserId) {
+      setSelectedUserId(withUserId);
+    }
+  }, [withUserId, user?.id, selectedUserId]);
+
+  useEffect(() => {
+    if (withUserId && selectedUserId === withUserId) {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete("with");
+          return next;
+        },
+        { replace: true }
+      );
+    }
+  }, [withUserId, selectedUserId, setSearchParams]);
   const [draft, setDraft] = useState("");
 
   const { data: conversations = [], isLoading: conversationsLoading } = useQuery({
@@ -54,7 +79,9 @@ export const MessagesView = () => {
   const selectedConversation = selectedUserId
     ? conversations.find((c) => c.otherUser.id === selectedUserId)
     : null;
-  const otherUser = selectedConversation?.otherUser ?? null;
+  const otherUser =
+    selectedConversation?.otherUser ??
+    (selectedUserId ? { id: selectedUserId, email: "" } : null);
 
   const handleSend = () => {
     const text = draft.trim();
@@ -66,6 +93,12 @@ export const MessagesView = () => {
     filter === "unread"
       ? conversations.filter(() => true)
       : conversations;
+
+  const handleSelectUser = (otherUserId: string) => {
+    // Guard: selectedUserId must always be the OTHER participant, never myself
+    if (user?.id && otherUserId === user.id) return;
+    setSelectedUserId(otherUserId);
+  };
 
   const showList = useBreakpointValue({
     base: !selectedUserId,
@@ -93,7 +126,7 @@ export const MessagesView = () => {
             conversations={filteredConversations}
             selectedUserId={selectedUserId}
             currentUserId={user?.id ?? ""}
-            onSelect={setSelectedUserId}
+            onSelect={handleSelectUser}
             filter={filter}
             onFilterChange={setFilter}
           />

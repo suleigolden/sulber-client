@@ -2,12 +2,13 @@ import {
   Avatar,
   Box,
   Button,
-  Heading,
   HStack,
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 import { useSystemColor } from "~/hooks/use-system-color";
+import { useUser } from "~/hooks/use-user";
 
 type ProviderProfileLite = {
   first_name?: string | null;
@@ -27,6 +28,8 @@ type ProviderInfoCardProps = {
 };
 
 export const ProviderInfoCard = ({ provider }: ProviderInfoCardProps) => {
+  const { user } = useUser();
+  const navigate = useNavigate();
   const { bgButton, borderColor, headingColor, bodyColor } = useSystemColor();
 
   if (!provider) return null;
@@ -70,8 +73,13 @@ export const ProviderInfoCard = ({ provider }: ProviderInfoCardProps) => {
           <Button
             size="sm"
             variant="brand"
-            as={email ? "a" : "button"}
             mt={2}
+            isDisabled={!provider.id || !user?.id}
+            onClick={() => {
+              if (provider.id && user?.id) {
+                navigate(`/customer/${user.id}/messages?with=${provider.id}`);
+              }
+            }}
           >
             Send message
           </Button>

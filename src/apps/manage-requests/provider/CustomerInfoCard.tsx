@@ -6,8 +6,10 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 import { Job, UserProfile } from "@suleigolden/sulber-api-client";
 import { useSystemColor } from "~/hooks/use-system-color";
+import { useUser } from "~/hooks/use-user";
 
 type CustomerProfileLite = {
   first_name?: string | null;
@@ -29,6 +31,8 @@ type CustomerInfoCardProps = {
 };
 
 export const CustomerInfoCard = ({ job, customerProfile, isSendMessageButtonVisible = true }: CustomerInfoCardProps) => {
+  const { user } = useUser();
+  const navigate = useNavigate();
   const { bgButton, borderColor, headingColor, bodyColor } = useSystemColor();
 
   // Prefer explicit customer relation from the job if present
@@ -86,12 +90,17 @@ export const CustomerInfoCard = ({ job, customerProfile, isSendMessageButtonVisi
           )}
           {isSendMessageButtonVisible && (
             <Button
-            size="xs"
-            variant="brand"
-            as={email ? "a" : "button"}
-            mt={2}
-            isDisabled={!email}
-          >
+              size="xs"
+              variant="brand"
+              mt={2}
+              isDisabled={!job.customer_id || !user?.id}
+              onClick={() => {
+                if (job.customer_id && user?.id) {
+                  // navigate(`/provider/${user.id}/messages?with=${job.customer_id}`);
+                  window.location.href = `/provider/${user.id}/messages?with=${job.customer_id}`;
+                }
+              }}
+            >
               Send message
             </Button>
           )}

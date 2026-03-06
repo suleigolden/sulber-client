@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Container, Flex, useToast, VStack } from "@chakra-ui/react";
+import { Container, Flex, useToast } from "@chakra-ui/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@suleigolden/sulber-api-client";
 import { useUser } from "~/hooks/use-user";
 import { ConversationList } from "./components/ConversationList";
 import { ChatPanel } from "./components/ChatPanel";
 import { Box, useBreakpointValue } from "@chakra-ui/react";
+import type { ConversationListItem } from "./types";
 
 export const MessagesView = () => {
   const { user } = useUser();
@@ -40,18 +41,49 @@ export const MessagesView = () => {
   }, [withUserId, selectedUserId, setSearchParams]);
   const [draft, setDraft] = useState("");
 
-  const { data: conversations = [], isLoading: conversationsLoading } = useQuery({
-    queryKey: ["messages", "conversations", user?.id],
-    queryFn: () => api.service("message").getConversations(),
+  const { data: rawConversations = [], isLoading: conversationsLoading } = useQuery({
+    queryKey: ["conversations", user?.id],
+    queryFn: async (): Promise<ConversationListItem[]> => {
+      try {
+        const svc = api.service("conversation" as "message") as unknown as {
+          list?: () => Promise<ConversationListItem[]>;
+        };
+        if (svc?.list) return await svc.list();
+      } catch {
+        /* fallback to messages/conversations - backend returns same shape */
+      }
+      const data = await api.service("message").getConversations();
+      return data as unknown as ConversationListItem[];
+    },
     enabled: !!user?.id,
+    refetchInterval: 5000,
   });
+
+  // Only show people I've sent or received messages from — never myself
+  const conversations = rawConversations.filter(
+    (c) => c.other_user_id !== user?.id
+  );
 
   const { data: messages = [], isLoading: messagesLoading } = useQuery({
     queryKey: ["messages", "with", selectedUserId, user?.id],
     queryFn: () =>
       api.service("message").getWithUser(selectedUserId!, { limit: 100 }),
     enabled: !!user?.id && !!selectedUserId,
+    refetchInterval: 4000,
   });
+
+  // Mark conversation as read when user opens it
+  useEffect(() => {
+    const conv = conversations.find((c) => c.other_user_id === selectedUserId);
+    if (conv?.conversation_id && conv.unread_count > 0) {
+      const svc = api.service("conversation" as "message") as { markAsRead?: (id: string) => Promise<void> };
+      svc.markAsRead?.(conv.conversation_id)
+        ?.then(() => {
+          queryClient.invalidateQueries({ queryKey: ["conversations"] });
+        })
+        .catch(() => {});
+    }
+  }, [selectedUserId, conversations, queryClient]);
 
   const sendMutation = useMutation({
     mutationFn: (content: string) =>
@@ -63,7 +95,7 @@ export const MessagesView = () => {
       queryClient.invalidateQueries({
         queryKey: ["messages", "with", selectedUserId],
       });
-      queryClient.invalidateQueries({ queryKey: ["messages", "conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
       setDraft("");
     },
     onError: (err: Error) => {
@@ -77,11 +109,14 @@ export const MessagesView = () => {
   });
 
   const selectedConversation = selectedUserId
-    ? conversations.find((c) => c.otherUser.id === selectedUserId)
+    ? conversations.find((c) => c.other_user_id === selectedUserId)
     : null;
   const otherUser =
-    selectedConversation?.otherUser ??
-    (selectedUserId ? { id: selectedUserId, email: "" } : null);
+    selectedConversation
+      ? { id: selectedConversation.other_user_id, email: "" }
+      : selectedUserId
+        ? { id: selectedUserId, email: "" }
+        : null;
 
   const handleSend = () => {
     const text = draft.trim();
@@ -91,7 +126,7 @@ export const MessagesView = () => {
 
   const filteredConversations =
     filter === "unread"
-      ? conversations.filter(() => true)
+      ? conversations.filter((c) => c.unread_count > 0)
       : conversations;
 
   const handleSelectUser = (otherUserId: string) => {

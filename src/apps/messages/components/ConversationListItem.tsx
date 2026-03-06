@@ -1,29 +1,17 @@
-import { Box, Flex, Text, Avatar, useColorModeValue } from "@chakra-ui/react";
+import { Box, Flex, Text, Avatar, Badge, useColorModeValue } from "@chakra-ui/react";
+import type { ConversationListItem as ConversationListItemType } from "../types";
 
 type ConversationListItemProps = {
-  /** Display name for the other participant (Customer or Provider from their profile) */
-  displayName: string;
-  /** Optional profile avatar URL for the other participant */
-  avatarUrl?: string | null;
-  otherUser: { id: string; email: string };
-  lastMessage: {
-    id: string;
-    content: string;
-    created_at: string;
-    sentByMe: boolean;
-  };
+  conversation: ConversationListItemType;
   isSelected: boolean;
   onSelect: () => void;
-  formatDate: (date: string) => string;
+  formatDate: (date: string | null) => string;
 };
 
 const PREVIEW_LENGTH = 50;
 
 export const ConversationListItem = ({
-  displayName,
-  avatarUrl,
-  otherUser,
-  lastMessage,
+  conversation,
   isSelected,
   onSelect,
   formatDate,
@@ -32,10 +20,11 @@ export const ConversationListItem = ({
   const hoverBg = useColorModeValue("gray.50", "gray.600");
   const nameColor = useColorModeValue("gray.800", "white");
   const previewColor = useColorModeValue("gray.600", "gray.400");
+  const lastMessage = conversation.last_message ?? "";
   const preview =
-    lastMessage.content.length > PREVIEW_LENGTH
-      ? lastMessage.content.slice(0, PREVIEW_LENGTH) + "..."
-      : lastMessage.content;
+    lastMessage.length > PREVIEW_LENGTH
+      ? lastMessage.slice(0, PREVIEW_LENGTH) + "..."
+      : lastMessage;
 
   return (
     <Box
@@ -48,14 +37,33 @@ export const ConversationListItem = ({
       transition="background 0.15s"
     >
       <Flex gap="14px" align="flex-start">
-        <Avatar
-          size="md"
-          name={displayName}
-          src={avatarUrl ?? undefined}
-          flexShrink={0}
-          bg="brand.400"
-          color="white"
-        />
+        <Box position="relative">
+          <Avatar
+            size="md"
+            name={conversation.other_user_name || "User"}
+            src={conversation.avatar_url ?? undefined}
+            flexShrink={0}
+            bg="brand.400"
+            color="white"
+          />
+          {conversation.unread_count > 0 && (
+            <Badge
+              position="absolute"
+              top="-4px"
+              right="-4px"
+              colorScheme="red"
+              borderRadius="full"
+              fontSize="10px"
+              minW="18px"
+              h="18px"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              {conversation.unread_count}
+            </Badge>
+          )}
+        </Box>
         <Box flex="1" minWidth={0}>
           <Flex justify="space-between" align="center" gap="8px" mb="2px">
             <Text
@@ -64,10 +72,10 @@ export const ConversationListItem = ({
               color={nameColor}
               noOfLines={1}
             >
-              {displayName}
+              {conversation.other_user_name?.trim() || "User"}
             </Text>
             <Text fontSize="13px" color={previewColor} flexShrink={0}>
-              {formatDate(lastMessage.created_at)}
+              {formatDate(conversation.last_message_time)}
             </Text>
           </Flex>
           <Text

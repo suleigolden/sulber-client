@@ -14,10 +14,11 @@ import { Link as RouterLink } from "react-router-dom";
 import { CloseIcon, HamburgerIcon } from "@chakra-ui/icons";
 import { Logo } from "~/components/icons/Logo";
 import { AdminNavbarLinks } from "./AdminNavbarLinks";
+import { NavLinkWithBadge } from "./NavLinkWithBadge";
 import { FC } from "react";
 import { useUser } from "~/hooks/use-user";
 import { homePageLink } from "~/common/utils/home-page-link";
-import { getNavItems } from "~/common/constants/nav-items";
+import { getNavItems, type NavItem } from "~/common/constants/nav-items";
 
 // Add this style object at the top of the file
 const mobileNavStyles = {
@@ -93,16 +94,28 @@ export const AdminNavbar: FC<AdminNavbarProps> = ({
             {getNavItems(user).map((navItem) => (
               <Box key={navItem.label}>
                 {navItem.type === "link" ? (
-                  <Link
-                    as={RouterLink}
-                    to={navItem.type === "link" ? `${navItem.href}` : "#"}
-                    fontWeight="medium"
-                    color={linkColor}
-                    _hover={{ color: "brand.500" }}
-                    cursor="pointer"
-                  >
-                    {navItem.label}
-                  </Link>
+                  navItem.showUnreadBadge ? (
+                    <NavLinkWithBadge
+                      navItem={navItem}
+                      linkProps={{
+                        fontWeight: "medium",
+                        color: linkColor,
+                        _hover: { color: "brand.500" },
+                        cursor: "pointer",
+                      }}
+                    />
+                  ) : (
+                    <Link
+                      as={RouterLink}
+                      to={navItem.type === "link" ? `${navItem.href}` : "#"}
+                      fontWeight="medium"
+                      color={linkColor}
+                      _hover={{ color: "brand.500" }}
+                      cursor="pointer"
+                    >
+                      {navItem.label}
+                    </Link>
+                  )
                 ) : (
                   <AdminNavbarLinks
                     onOpen={onOpen}
@@ -163,13 +176,20 @@ export const AdminNavbar: FC<AdminNavbarProps> = ({
                 {getNavItems(user).map((navItem) => (
                   <Box key={navItem.label}>
                     {navItem.type === "link" ? (
-                      <Link
-                        as={RouterLink}
-                        to={navItem.type === "link" ? `${navItem.href}` : "#"}
-                        {...mobileNavStyles.link}
-                      >
-                        {navItem.label}
-                      </Link>
+                      navItem.showUnreadBadge ? (
+                        <NavLinkWithBadge
+                          navItem={navItem}
+                          linkProps={mobileNavStyles.link}
+                        />
+                      ) : (
+                        <Link
+                          as={RouterLink}
+                          to={navItem.type === "link" ? `${navItem.href}` : "#"}
+                          {...mobileNavStyles.link}
+                        >
+                          {navItem.label}
+                        </Link>
+                      )
                     ) : (
                       <AdminNavbarLinks
                         onOpen={onOpen}

@@ -12,24 +12,11 @@ import {
 } from "@chakra-ui/react";
 import { FiSearch, FiSettings } from "react-icons/fi";
 import moment from "moment-timezone";
-import { useQueries } from "@tanstack/react-query";
-import type { ConversationItem } from "@suleigolden/sulber-api-client";
-import { api, type UserProfile } from "@suleigolden/sulber-api-client";
-import { ConversationListItem } from "./ConversationListItem";
-
-function getDisplayNameFromProfile(
-  profile: UserProfile | null | undefined,
-  fallbackEmail: string
-): string {
-  if (!profile) {
-    return fallbackEmail?.split("@")[0] || "User";
-  }
-  const name = [profile.first_name, profile.last_name].filter(Boolean).join(" ");
-  return name.trim() || fallbackEmail?.split("@")[0] || "User";
-}
+import type { ConversationListItem } from "../types";
+import { ConversationListItem as ConversationListItemComponent } from "./ConversationListItem";
 
 type ConversationListProps = {
-  conversations: ConversationItem[];
+  conversations: ConversationListItem[];
   selectedUserId: string | null;
   currentUserId: string;
   onSelect: (userId: string) => void;
@@ -40,28 +27,10 @@ type ConversationListProps = {
 export const ConversationList = ({
   conversations,
   selectedUserId,
-  currentUserId,
   onSelect,
   filter,
   onFilterChange,
 }: ConversationListProps) => {
-  const profileQueries = useQueries({
-    queries: conversations.map((c) => ({
-      queryKey: ["user-profile", c.otherUser.id],
-      queryFn: () =>
-        api.service("user-profile").get(c.otherUser.id) as Promise<UserProfile>,
-      enabled: !!c.otherUser.id,
-    })),
-  });
-
-  const profileByUserId = new Map<string, UserProfile | null>();
-  conversations.forEach((c, i) => {
-    const result = profileQueries[i]?.data;
-    if (c.otherUser.id) {
-      profileByUserId.set(c.otherUser.id, result ?? null);
-    }
-  });
-
   const bg = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
   const headerBorder = useColorModeValue("gray.200", "gray.600");
@@ -148,25 +117,15 @@ export const ConversationList = ({
             </Text>
           </Box>
         ) : (
-          conversations.map((conv) => {
-            const profile = profileByUserId.get(conv.otherUser.id) ?? null;
-            const displayName = getDisplayNameFromProfile(
-              profile,
-              conv.otherUser.email ?? ""
-            );
-            return (
-              <ConversationListItem
-                key={conv.otherUser.id}
-                displayName={displayName}
-                avatarUrl={profile?.avatar_url}
-                otherUser={conv.otherUser}
-                lastMessage={conv.lastMessage}
-                isSelected={selectedUserId === conv.otherUser.id}
-                onSelect={() => onSelect(conv.otherUser.id)}
-                formatDate={(d) => moment(d).format("DD-MM-YY")}
-              />
-            );
-          })
+          conversations.map((conv) => (
+            <ConversationListItemComponent
+              key={conv.conversation_id}
+              conversation={conv}
+              isSelected={selectedUserId === conv.other_user_id}
+              onSelect={() => onSelect(conv.other_user_id)}
+              formatDate={(d) => (d ? moment(d).format("DD-MM-YY") : "—")}
+            />
+          ))
         )}
       </VStack>
     </Box>

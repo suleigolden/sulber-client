@@ -22,6 +22,7 @@ import { homePageLink } from "~/common/utils/home-page-link";
 import { useUser } from "~/hooks/use-user";
 import { getNavItems } from "~/common/constants/nav-items";
 import { AdminNavbarLinks } from "~/components/navbar/AdminNavbarLinks";
+import { NavLinkWithBadge } from "~/components/navbar/NavLinkWithBadge";
 
 // Add this style object at the top of the file
 const mobileNavStyles = {

@@ -49,7 +49,8 @@ function groupMessagesByDate(messages: Message[]): Array<{ date: string; message
   const groups: Array<{ date: string; messages: Message[] }> = [];
   let currentDate = "";
   for (const msg of chronological) {
-    const dateStr = formatMessageDate(msg.created_at);
+    const m = msg as { sent_at?: string; created_at?: string };
+    const dateStr = formatMessageDate(m.sent_at ?? m.created_at ?? "");
     if (dateStr !== currentDate) {
       currentDate = dateStr;
       groups.push({ date: dateStr, messages: [] });
@@ -111,6 +112,7 @@ export const ChatPanel = ({
 
   const displayName = displayNameFromProfile(profile, otherUser.email ?? "");
   const avatarUrl = profile?.avatar_url ?? undefined;
+  // Show both sent and received messages (no filtering — backend returns full thread)
   const groups = groupMessagesByDate(messages);
 
   return (

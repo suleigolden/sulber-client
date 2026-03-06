@@ -1,13 +1,15 @@
 import { User } from "@suleigolden/sulber-api-client";
 
 
-type NavItem = {
-    label: string;
-    children?: Array<NavItem>;
-    href?: string;
-    type: 'button' | 'link';
-    isHandleNavigationLink?: string;
-  };
+export type NavItem = {
+  label: string;
+  children?: Array<NavItem>;
+  href?: string;
+  type: "button" | "link";
+  isHandleNavigationLink?: string;
+  /** When true, fetches and displays total unread count (e.g. for Messages) */
+  showUnreadBadge?: boolean;
+};
 
 export const getNavItems = (user: User) => {
   const PROVIDER_NAV_ITEMS: Array<NavItem> = [
@@ -30,6 +32,7 @@ export const getNavItems = (user: User) => {
       label: "Messages",
       href: `/provider/${user?.id}/messages`,
       type: "link",
+      showUnreadBadge: true,
     },
     {
       label: "Log Out",
@@ -52,6 +55,7 @@ export const getNavItems = (user: User) => {
       label: "Messages",
       href: `/customer/${user?.id}/messages`,
       type: "link",
+      showUnreadBadge: true,
     },
     {
       label: "Log Out",

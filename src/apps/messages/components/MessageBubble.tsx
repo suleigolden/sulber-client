@@ -20,7 +20,11 @@ export const MessageBubble = ({
 
   const displayName =
     message.sender?.email?.split("@")[0] || "User";
-  const time = formatMessageTime(message.created_at);
+  const time = formatMessageTime(
+    (message as { sent_at?: string; created_at?: string }).sent_at ??
+      (message as { sent_at?: string; created_at?: string }).created_at ??
+      ""
+  );
 
   return (
     <Flex
@@ -60,7 +64,9 @@ export const MessageBubble = ({
         color={isMine ? "white" : undefined}
       >
         <Text fontSize="15px" lineHeight="1.5" whiteSpace="pre-wrap" wordBreak="break-word">
-          {message.content}
+          {(message as { message_text?: string; content?: string }).message_text ??
+            (message as { message_text?: string; content?: string }).content ??
+            ""}
         </Text>
       </Box>
     </Flex>

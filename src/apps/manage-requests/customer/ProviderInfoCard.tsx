@@ -77,7 +77,7 @@ export const ProviderInfoCard = ({ provider }: ProviderInfoCardProps) => {
             isDisabled={!provider.id || !user?.id}
             onClick={() => {
               if (provider.id && user?.id) {
-                navigate(`/customer/${user.id}/messages?with=${provider.id}`);
+                navigate(`/customer/${user.id}/send-message?with=${provider.id}`);
               }
             }}
           >

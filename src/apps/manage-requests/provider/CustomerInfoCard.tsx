@@ -96,8 +96,15 @@ export const CustomerInfoCard = ({ job, customerProfile, isSendMessageButtonVisi
               isDisabled={!job.customer_id || !user?.id}
               onClick={() => {
                 if (job.customer_id && user?.id) {
-                  // navigate(`/provider/${user.id}/messages?with=${job.customer_id}`);
-                  window.location.href = `/provider/${user.id}/messages?with=${job.customer_id}`;
+                  const params = new URLSearchParams({
+                    with: job.customer_id,
+                  });
+                  if (job.service_type) {
+                    params.set("service", String(job.service_type));
+                  }
+                  navigate(
+                    `/provider/${user.id}/send-message?${params.toString()}`
+                  );
                 }
               }}
             >

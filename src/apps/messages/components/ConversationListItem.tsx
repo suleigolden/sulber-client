@@ -1,6 +1,10 @@
 import { Box, Flex, Text, Avatar, useColorModeValue } from "@chakra-ui/react";
 
 type ConversationListItemProps = {
+  /** Display name for the other participant (Customer or Provider from their profile) */
+  displayName: string;
+  /** Optional profile avatar URL for the other participant */
+  avatarUrl?: string | null;
   otherUser: { id: string; email: string };
   lastMessage: {
     id: string;
@@ -16,6 +20,8 @@ type ConversationListItemProps = {
 const PREVIEW_LENGTH = 50;
 
 export const ConversationListItem = ({
+  displayName,
+  avatarUrl,
   otherUser,
   lastMessage,
   isSelected,
@@ -26,8 +32,6 @@ export const ConversationListItem = ({
   const hoverBg = useColorModeValue("gray.50", "gray.600");
   const nameColor = useColorModeValue("gray.800", "white");
   const previewColor = useColorModeValue("gray.600", "gray.400");
-
-  const displayName = otherUser.email?.split("@")[0] || "User";
   const preview =
     lastMessage.content.length > PREVIEW_LENGTH
       ? lastMessage.content.slice(0, PREVIEW_LENGTH) + "..."
@@ -47,7 +51,7 @@ export const ConversationListItem = ({
         <Avatar
           size="md"
           name={displayName}
-          src={undefined}
+          src={avatarUrl ?? undefined}
           flexShrink={0}
           bg="brand.400"
           color="white"

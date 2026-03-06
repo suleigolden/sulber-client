@@ -28,6 +28,18 @@ export const formatMessageDate = (date: string | Date): string => {
   return moment(d).format("MMMM D, YYYY");
 };
 
+/** For message list date separators: "Today", "Yesterday", or "March 4, 2026" */
+export const formatMessageDateRelative = (date: string | Date): string => {
+  if (!date) return "";
+  const d = typeof date === "string" ? new Date(date) : date;
+  const m = moment(d);
+  const today = moment().startOf("day");
+  const yesterday = moment().subtract(1, "day").startOf("day");
+  if (m.isSame(today, "day")) return "Today";
+  if (m.isSame(yesterday, "day")) return "Yesterday";
+  return m.format("MMMM D, YYYY");
+};
+
 /** For message bubble time e.g. "6:11 p.m." */
 export const formatMessageTime = (date: string | Date): string => {
   if (!date) return "";

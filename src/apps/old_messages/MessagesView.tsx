@@ -7,8 +7,13 @@ import { useUser } from "~/hooks/use-user";
 import { ConversationList } from "./components/ConversationList";
 import { ChatPanel } from "./components/ChatPanel";
 import { Box, useBreakpointValue } from "@chakra-ui/react";
-import type { ConversationListItem } from "./types";
+import type { ConversationListItem } from "../messages/types";
 
+/**
+ * Messages view: Customer sees conversations with providers; Provider sees conversations with customers.
+ * - Customer: provider names on left, messages with provider on click
+ * - Provider: customer names on left, messages with customer on click
+ */
 export const MessagesView = () => {
   const { user } = useUser();
   const toast = useToast();
@@ -42,27 +47,26 @@ export const MessagesView = () => {
   const [draft, setDraft] = useState("");
 
   const { data: rawConversations = [], isLoading: conversationsLoading } = useQuery({
-    queryKey: ["conversations", user?.id],
+    queryKey: ["messages", "conversations", user?.id],
     queryFn: async (): Promise<ConversationListItem[]> => {
-      try {
-        const svc = api.service("conversation" as "message") as unknown as {
-          list?: () => Promise<ConversationListItem[]>;
-        };
-        if (svc?.list) return await svc.list();
-      } catch {
-        /* fallback to messages/conversations - backend returns same shape */
-      }
       const data = await api.service("message").getConversations();
-      return data as unknown as ConversationListItem[];
+      const list = Array.isArray(data) ? data : (data as { data?: unknown[] })?.data ?? [];
+      return (list as ConversationListItem[]).map((c) => ({
+        conversation_id: c.conversation_id,
+        other_user_id: c.other_user_id,
+        other_user_name: c.other_user_name ?? "",
+        avatar_url: c.avatar_url ?? null,
+        unread_count: Number(c.unread_count ?? 0),
+        last_message: c.last_message ?? null,
+        last_message_time: c.last_message_time ?? null,
+      }));
     },
     enabled: !!user?.id,
     refetchInterval: 5000,
   });
 
-  // Only show people I've sent or received messages from — never myself
-  const conversations = rawConversations.filter(
-    (c) => c.other_user_id !== user?.id
-  );
+  // Use conversations as-is; backend returns correct other_user_id (the other participant)
+  const conversations = rawConversations;
 
   const { data: messages = [], isLoading: messagesLoading } = useQuery({
     queryKey: ["messages", "with", selectedUserId, user?.id],
@@ -79,7 +83,7 @@ export const MessagesView = () => {
       const svc = api.service("conversation" as "message") as { markAsRead?: (id: string) => Promise<void> };
       svc.markAsRead?.(conv.conversation_id)
         ?.then(() => {
-          queryClient.invalidateQueries({ queryKey: ["conversations"] });
+          queryClient.invalidateQueries({ queryKey: ["messages", "conversations"] });
         })
         .catch(() => {});
     }
@@ -95,7 +99,7 @@ export const MessagesView = () => {
       queryClient.invalidateQueries({
         queryKey: ["messages", "with", selectedUserId],
       });
-      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["messages", "conversations"] });
       setDraft("");
     },
     onError: (err: Error) => {
@@ -143,7 +147,7 @@ export const MessagesView = () => {
     base: !!selectedUserId,
     md: true,
   });
-
+console.log('filteredConversations:::', filteredConversations);
   return (
     <Container maxW="100%" px={[4, 8]} py={8}>
         <Flex
@@ -162,6 +166,7 @@ export const MessagesView = () => {
                 conversations={filteredConversations}
                 selectedUserId={selectedUserId}
                 currentUserId={user?.id ?? ""}
+                currentUserRole={user?.role}
                 onSelect={handleSelectUser}
                 filter={filter}
                 onFilterChange={setFilter}

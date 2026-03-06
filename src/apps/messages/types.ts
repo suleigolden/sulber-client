@@ -1,6 +1,6 @@
 /**
  * Local types for the new messages/conversations API.
- * Use these until @suleigolden/sulber-api-client is updated with the new types.
+ * Aligned with backend and @suleigolden/sulber-api-client.
  */
 
 export type ConversationListItem = {
@@ -11,4 +11,6 @@ export type ConversationListItem = {
   unread_count: number;
   last_message: string | null;
   last_message_time: string | null;
+  /** Id of the user who sent the last message (for Sent/Received filters). */
+  last_message_sender_id?: string | null;
 };

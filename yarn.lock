@@ -1293,10 +1293,10 @@
   resolved "https://registry.yarnpkg.com/@stripe/stripe-js/-/stripe-js-8.9.0.tgz#44e441c7f19555fdf627675a8190ab8024d2890e"
   integrity sha512-OJkXvUI5GAc56QdiSRimQDvWYEqn475J+oj8RzRtFTCPtkJNO2TWW619oDY+nn1ExR+2tCVTQuRQBbR4dRugww==
 
-"@suleigolden/sulber-api-client@^0.46.0":
-  version "0.46.0"
-  resolved "https://npm.pkg.github.com/download/@suleigolden/sulber-api-client/0.46.0/33ef23dd31b49b64a100ddaa6de886a77ac989d1#33ef23dd31b49b64a100ddaa6de886a77ac989d1"
-  integrity sha512-gPNcUO+cbTCBiUZBP2bPRevXL4Ijkaq1eCH+ek8jMFMLbPwVz8Nn4z+eOUx2Jz3oAScU4eU4oVg+9KQcewOW4g==
+"@suleigolden/sulber-api-client@^0.47.0":
+  version "0.47.0"
+  resolved "https://npm.pkg.github.com/download/@suleigolden/sulber-api-client/0.47.0/334ac600db5539c619678ae7eaf17b8b91f1fb18#334ac600db5539c619678ae7eaf17b8b91f1fb18"
+  integrity sha512-9rSUzroE9Jjg1vdnmbxhG3X3U8cZ+cLTgtWZP+OKKJctGfQJglWdEaUTR9B57ovQJcSPo38blSgmNkcTAPr4BA==
   dependencies:
     axios "^0.27.2"
     bignumber.js "^9.0.2"

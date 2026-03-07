@@ -113,7 +113,7 @@ export const DashboardNavBar = (props: Record<string, unknown>) => {
               />
               <Route path={`/${user.id}/dashboard`} element={<Dashboard />} />
               <Route
-                path={`/${user.id}/profile-settings`}
+                path={`/${user.id}/account-settings`}
                 element={<UserProfileSettings />}
               />
               <Route

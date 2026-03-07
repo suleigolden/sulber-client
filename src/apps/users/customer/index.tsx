@@ -7,6 +7,7 @@ import {
   Button,
   Avatar,
   Flex,
+  Icon,
   useDisclosure,
   FormControl,
   FormLabel,
@@ -16,7 +17,10 @@ import {
   TabPanels,
   Tab,
   TabPanel,
+  useBreakpointValue,
 } from "@chakra-ui/react";
+import { FiUser } from "react-icons/fi";
+import { FaCar } from "react-icons/fa";
 import { useEffect } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -136,6 +140,10 @@ const {
   borderColor,
 } = useSystemColor();
 
+  const tabOrientation = useBreakpointValue<
+    "horizontal" | "vertical"
+  >({ base: "horizontal", md: "vertical" });
+
   // Initialize form with existing user profile data
   useEffect(() => {
     if (userProfile) {
@@ -198,95 +206,134 @@ const {
 
   if (isLoading) {
     return (
-      <Container maxW="1500px" px={[4, 8]} py={8}>
-        <Text color={mutedTextColor}>Loading profile...</Text>
+      <Container maxW="1500px" px={{ base: 4, sm: 6, md: 8 }} py={{ base: 6, md: 8 }}>
+        <Box display="flex" justifyContent="center" alignItems="center" minH={{ base: "300px", md: "400px" }}>
+          <Text color={mutedTextColor} fontSize={{ base: "sm", md: "md" }}>
+            Loading profile...
+          </Text>
+        </Box>
       </Container>
     );
   }
 
   return (
-    <Container maxW="1500px" px={[4, 8]} py={8}>
-      <VStack align="start" spacing={8} w="full" mt={10}>
+    <Container maxW="1500px" px={{ base: 4, sm: 6, md: 8 }} py={{ base: 4, sm: 5, md: 8 }}>
+      <VStack
+        align="start"
+        spacing={{ base: 4, sm: 6, md: 8 }}
+        w="full"
+        mt={{ base: 4, sm: 6, md: 10 }}
+      >
         <Box w="full">
-          <Heading size="lg" mb={2} color={headingColor}>
-            Customer Profile Settings
+          <Heading size={{ base: "sm", sm: "md", md: "lg" }} mb={{ base: 1, md: 2 }} color={headingColor}>
+            Account Settings
           </Heading>
-          <Text color={bodyColor} mb={6}>
+          <Text color={bodyColor} mb={{ base: 4, md: 6 }} fontSize={{ base: "sm", md: "md" }}>
             Manage your profile information and vehicles.
           </Text>
 
-          <Tabs colorScheme="brand" variant="enclosed" w="full">
+          <Tabs
+            colorScheme="brand"
+            variant="enclosed"
+            w="full"
+            orientation={tabOrientation}
+            display={{ base: "block", md: "flex" }}
+            flexDirection={{ base: "column", md: "row" }}
+            gap={{ base: 0, md: 6 }}
+            alignItems={{ md: "stretch" }}
+          >
             <TabList
-              mb={6}
+              flexDirection={{ base: "row", md: "column" }}
+              flexShrink={0}
+              w={{ base: "full", md: "200px" }}
+              mb={{ base: 4, md: 0 }}
+              gap={{ base: 2, md: 0 }}
               overflowX={{ base: "auto", md: "visible" }}
+              overflowY="hidden"
+              borderRightWidth={{ base: 0, md: "1px" }}
+              borderColor={{ md: borderColor }}
+              pr={{ md: 4 }}
+              pb={{ base: 1, md: 0 }}
+              sx={{ WebkitOverflowScrolling: "touch" }}
             >
               <Tab
                 _selected={{
                   bg: "brand.500",
                   color: "white",
                   borderRadius: "lg",
-                  boxShadow: "0 4px 12px rgba(242, 107, 58, 0.3)",
-                  transform: "translateY(-2px)",
+                  transform: { base: "translateY(-2px)", md: "translateX(4px)" },
                 }}
                 _hover={{
                   bg: menuItemHover,
                   color: brandColor,
                   borderRadius: "lg",
-                  transform: "translateY(-1px)",
+                  transform: { base: "translateY(-1px)", md: "translateX(2px)" },
                 }}
                 transition="all 0.3s ease"
                 fontWeight="semibold"
-                w="full"
+                w={{ base: "auto", minW: "fit-content", md: "full" }}
+                flexShrink={0}
+                justifyContent={{ base: "center", md: "flex-start" }}
                 borderRadius="lg"
                 color={labelColor}
+                py={{ base: 3, md: 2 }}
+                px={{ base: 4, md: 3 }}
+                mt={{ base: 0, md: 5 }}
               >
-                <VStack spacing={1}>
-                  <Text fontSize="sm" fontWeight="inherit">
+                <Flex align="center" gap={2}>
+                  <Icon as={FiUser} boxSize={4} />
+                  <Text fontSize="sm" fontWeight="inherit" whiteSpace="nowrap">
                     Profile
                   </Text>
-                </VStack>
+                </Flex>
               </Tab>
               <Tab
                 _selected={{
                   bg: "brand.500",
                   color: "white",
                   borderRadius: "lg",
-                  boxShadow: "0 4px 12px rgba(242, 107, 58, 0.3)",
-                  transform: "translateY(-2px)",
+                  transform: { base: "translateY(-2px)", md: "translateX(4px)" },
                 }}
                 _hover={{
                   bg: menuItemHover,
-                  color: "brand.500",
+                  color: brandColor,
                   borderRadius: "lg",
-                  transform: "translateY(-1px)",
+                  transform: { base: "translateY(-1px)", md: "translateX(2px)" },
                 }}
                 transition="all 0.3s ease"
                 fontWeight="semibold"
-                w="full"
+                w={{ base: "auto", minW: "fit-content", md: "full" }}
+                flexShrink={0}
+                justifyContent={{ base: "center", md: "flex-start" }}
                 borderRadius="lg"
                 color={labelColor}
+                py={{ base: 3, md: 2 }}
+                px={{ base: 4, md: 3 }}
+                mt={{ base: 0, md: 5 }}
               >
-                <VStack spacing={1}>
-                  <Text fontSize="sm" fontWeight="inherit">
+                <Flex align="center" gap={2}>
+                  <Icon as={FaCar} boxSize={4} />
+                  <Text fontSize="sm" fontWeight="inherit" whiteSpace="nowrap">
                     Vehicles
                   </Text>
-                </VStack>
+                </Flex>
               </Tab>
             </TabList>
 
-            <TabPanels>
+            <TabPanels flex={1} minW={0} overflow="hidden">
               {/* Profile Tab */}
-              <TabPanel px={0}>
+              <TabPanel px={0} py={{ base: 4, sm: 5, md: 0 }}>
                 <FormProvider {...methods}>
                   <Box
                     w="full"
                     maxW="720px"
                     bg={modalBg}
-                    borderRadius="2xl"
-                    boxShadow="lg"
+                    borderRadius={{ base: "xl", md: "2xl" }}
+                    boxShadow={{ base: "md", md: "lg" }}
                     p={{ base: 4, sm: 6, md: 8 }}
+                    overflow="hidden"
                   >
-                    <VStack spacing={6} align="stretch">
+                    <VStack spacing={{ base: 4, sm: 5, md: 6 }} align="stretch">
                       {/* Email (Read-only) */}
                       <Box>
                         <Text fontSize="sm" fontWeight="medium" mb={2} color={labelColor}>
@@ -405,12 +452,13 @@ const {
                       {/* Submit Button */}
                       <Button
                         colorScheme="brand"
-                        size="lg"
+                        size={{ base: "md", md: "lg" }}
                         w="full"
+                        minH={{ base: "44px", md: "40px" }}
                         onClick={handleSubmit(onSubmit)}
                         isLoading={isSubmitting}
                         isDisabled={!isFormValid}
-                        mt={4}
+                        mt={{ base: 2, md: 4 }}
                       >
                         Save Changes
                       </Button>
@@ -420,7 +468,7 @@ const {
               </TabPanel>
 
               {/* Vehicles Tab */}
-              <TabPanel px={0}>
+              <TabPanel px={0} py={{ base: 4, sm: 5, md: 0 }}>
                 <Vehicles />
               </TabPanel>
             </TabPanels>

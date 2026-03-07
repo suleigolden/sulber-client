@@ -149,7 +149,7 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
           <Avatar
             _hover={{ cursor: 'pointer' }}
             color="white"
-            name={`${userProfile?.firstName} ${userProfile?.lastName}`}
+            name={`${userProfile?.first_name} ${userProfile?.last_name}`}
             bg="#11047A"
             size="sm"
             w="40px"
@@ -176,15 +176,16 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
               fontWeight="700"
               color={textColor}
             >
-              👋&nbsp; {` ${userProfile?.firstName}`}
+              👋&nbsp; {` ${userProfile?.first_name}`}
             </Text>
           </Flex>
           <Flex flexDirection="column" p="10px">
             {user?.role !== "provider" && (
             <MenuItem
-              _hover={{ bg: 'none' }}
-              _focus={{ bg: 'none' }}
+              _hover={{ bg: 'gray.100', color: 'gray.900' }}
+              _focus={{ bg: 'gray.100', color: 'gray.900' }}
               borderRadius="8px"
+              bg="transparent"
               px="14px"
               as={"a"}
               href={`/${user?.role}/${user?.id}/my-vehicles`}
@@ -193,29 +194,22 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
             </MenuItem>
             )}
             <MenuItem
-              _hover={{ bg: 'none' }}
-              _focus={{ bg: 'none' }}
+              _hover={{ bg: 'gray.100', color: 'gray.900' }}
+              _focus={{ bg: 'gray.100', color: 'gray.900' }}
               borderRadius="8px"
+              bg="transparent"
               px="14px"
               as={"a"}
-              href={`/${user?.role}/${user?.id}/profile-settings`}
+              href={`/${user?.role}/${user?.id}/account-settings`}
             >
-              <Text fontSize="sm">Profile Settings</Text>
+              <Text fontSize="sm">Account Settings</Text>
             </MenuItem>
-            {/* <MenuItem
-              _hover={{ bg: 'none' }}
-              _focus={{ bg: 'none' }}
-              borderRadius="8px"
-              px="14px"
-            >
-              <Text fontSize="sm">Newsletter Settings</Text>
-            </MenuItem> */}
             <MenuItem
-              _hover={{ bg: 'none' }}
-              _focus={{ bg: 'none' }}
-              color="red.400"
+              _hover={{ bg: 'gray.100', color: 'gray.900' }}
+              _focus={{ bg: 'gray.100', color: 'gray.900' }}
               borderRadius="8px"
               px="14px"
+              bg="transparent"
               onClick={signOut}
             >
               <Text fontSize="sm">Log out</Text>

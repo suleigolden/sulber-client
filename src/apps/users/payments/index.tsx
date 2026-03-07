@@ -28,16 +28,16 @@ import {
   Radio,
   RadioGroup,
   Stack,
+  Spinner,
   useBreakpointValue,
   useColorModeValue,
 } from "@chakra-ui/react";
+import { Elements } from "@stripe/react-stripe-js";
 import { FiBell, FiMoreVertical } from "react-icons/fi";
 import { useSystemColor } from "~/hooks/use-system-color";
-
-const PAYMENT_METHODS_PLACEHOLDER = [
-  { id: "1", brand: "Visa", last4: "6064", exp: "07/2028" },
-  { id: "2", brand: "Visa", last4: "5407", exp: "05/2026" },
-];
+import { usePaymentMethods, cardBrandLabel } from "~/hooks/usePaymentMethods";
+import { AddPaymentMethodForm } from "./AddPaymentMethodForm";
+import { stripePromise } from "./stripe";
 
 const PAYOUT_OPTIONS = [
   { value: "bank_cad", label: "Bank account in CAD", details: ["3-5 business days", "No fees"], icon: "bank" },
@@ -49,15 +49,18 @@ const PAYOUT_OPTIONS = [
 function PaymentMethodRow({
   brand,
   last4,
-  exp,
+  expMonth,
+  expYear,
   onMenuClick,
 }: {
   brand: string;
   last4: string;
-  exp: string;
+  expMonth: number;
+  expYear: number;
   onMenuClick?: () => void;
 }) {
   const { headingColor, mutedTextColor, borderColor } = useSystemColor();
+  const exp = `${String(expMonth).padStart(2, "0")}/${expYear}`;
   return (
     <Flex
       align="center"
@@ -83,7 +86,7 @@ function PaymentMethodRow({
         </Flex>
         <Box>
           <Text fontWeight="600" color={headingColor} fontSize="md">
-            {brand} {last4}
+            {cardBrandLabel(brand)} •••• {last4}
           </Text>
           <Text fontSize="sm" color={mutedTextColor}>
             Expiration: {exp}
@@ -208,6 +211,15 @@ export const PaymentsSettings = () => {
     modalBg,
   } = useSystemColor();
   const { isOpen: isPayoutModalOpen, onOpen: onPayoutModalOpen, onClose: onPayoutModalClose } = useDisclosure();
+  const { isOpen: isAddPaymentOpen, onOpen: onAddPaymentOpen, onClose: onAddPaymentClose } = useDisclosure();
+
+  const {
+    user,
+    paymentMethods,
+    isLoadingPaymentMethods,
+    error: paymentMethodsError,
+    handleAddSuccess,
+  } = usePaymentMethods(true);
 
   const tabSize = useBreakpointValue({ base: "sm", md: "md" });
   const activeTabBorderColor = useColorModeValue("gray.900", "white");
@@ -287,32 +299,56 @@ export const PaymentsSettings = () => {
                   <Text color={bodyColor} fontSize="sm" mb={4}>
                     Add and manage your payment methods using our secure payment system.
                   </Text>
+                  {paymentMethodsError && (
+                    <Text color="red.500" fontSize="sm" mb={3}>
+                      {paymentMethodsError}
+                    </Text>
+                  )}
                   <Box
                     borderWidth="1px"
                     borderColor={borderColor}
                     borderRadius="lg"
                     overflow="hidden"
                     bg={modalBg}
+                    p={4}
                   >
-                    {PAYMENT_METHODS_PLACEHOLDER.map((pm) => (
-                      <PaymentMethodRow
-                        key={pm.id}
-                        brand={pm.brand}
-                        last4={pm.last4}
-                        exp={pm.exp}
-                      />
-                    ))}
+                    {isLoadingPaymentMethods ? (
+                      <Flex py={8} justify="center">
+                        <Spinner />
+                      </Flex>
+                    ) : paymentMethods.length === 0 ? (
+                      <Text py={6} px={4} color={mutedTextColor} fontSize="sm">
+                        No payment methods yet. Add one below.
+                      </Text>
+                    ) : (
+                      paymentMethods.map((pm) => (
+                        <PaymentMethodRow
+                          key={pm.id}
+                          brand={pm.brand}
+                          last4={pm.last4}
+                          expMonth={pm.exp_month}
+                          expYear={pm.exp_year}
+                        />
+                      ))
+                    )}
                   </Box>
-                  <Button
-                    bg={primaryButtonBg}
-                    color={primaryButtonColor}
-                    _hover={{ bg: primaryButtonHover }}
-                    size="md"
-                    borderRadius="md"
-                    mt={4}
-                  >
-                    Add payment method
-                  </Button>
+                  {stripePromise && user ? (
+                    <Button
+                      bg={primaryButtonBg}
+                      color={primaryButtonColor}
+                      _hover={{ bg: primaryButtonHover }}
+                      size="md"
+                      borderRadius="md"
+                      mt={4}
+                      onClick={onAddPaymentOpen}
+                    >
+                      Add payment method
+                    </Button>
+                  ) : (
+                    <Text fontSize="xs" color={mutedTextColor} mt={2}>
+                      Add payment method is not configured. Please contact support.
+                    </Text>
+                  )}
                 </Box>
               </VStack>
             </TabPanel>
@@ -389,6 +425,30 @@ export const PaymentsSettings = () => {
       </VStack>
 
       <AddPayoutMethodModal isOpen={isPayoutModalOpen} onClose={onPayoutModalClose} />
+
+      <Modal isOpen={isAddPaymentOpen} onClose={onAddPaymentClose} size="md" isCentered>
+        <ModalOverlay />
+        <ModalContent bg={modalBg}>
+          <ModalHeader color={headingColor}>Add payment method</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            {user && stripePromise && (
+              <Elements stripe={stripePromise}>
+                <AddPaymentMethodForm
+                  user={{ id: user.id, email: user.email }}
+                  onSuccess={() => {
+                    handleAddSuccess();
+                    onAddPaymentClose();
+                  }}
+                  onCancel={onAddPaymentClose}
+                  labelColor={labelColor}
+                  textColor={bodyColor}
+                />
+              </Elements>
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Container>
   );
 };

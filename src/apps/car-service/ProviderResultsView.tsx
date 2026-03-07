@@ -29,6 +29,7 @@ import { useCustomerVehicles } from "~/hooks/use-customer-vehicles";
 import { useUser } from "~/hooks/use-user";
 import { CustomToast } from "~/hooks/CustomToast";
 import type { ConfirmServiceRequestData } from "./ConfirmServiceRequest";
+import { PaymentMethodSelectDialog } from "./PaymentMethodSelectDialog";
 import { SelectAdditionalCarDialog } from "./SelectAdditionalCarDialog";
 import { ServiceDetailsDialogContent } from "./ServiceDetailsDialogContent";
 import { useSystemColor } from "~/hooks/use-system-color";
@@ -226,6 +227,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
     Record<string, { carType: string | null; addOns: string[] }>
   >({});
   const [confirmSendOpen, setConfirmSendOpen] = useState(false);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [addCarDialogOpen, setAddCarDialogOpen] = useState(false);
   const [pendingSend, setPendingSend] = useState<{
     providerId: string;
@@ -382,10 +384,15 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
   const handleSendRequest = async (
     service: ProviderJobService,
     selection: { carType: string | null; addOns: string[] },
-    requestLines?: { vehicleId: string | null }[]
+    requestLines?: { vehicleId: string | null }[],
+    paymentMethodId?: string
   ) => {
     const providerId = service.provider.id;
     if (!user?.id || !data.serviceLocationData) return;
+    if (!paymentMethodId) {
+      showToast("Error", "Please select a payment method", "error");
+      return;
+    }
     const isCarWash = isCarWashService(service.service_type ?? "");
     const lines = requestLines ?? [{ vehicleId: data.selectedVehicleId ?? null }];
     if (isCarWash && lines.length > 0 && !lines[0].vehicleId) {
@@ -435,6 +442,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
             addOnPrices: addOnPrices.length > 0 ? addOnPrices : undefined,
             currency: "CAD",
             notes: noteParts.length > 0 ? noteParts.join(". ") : undefined,
+            paymentMethodId: paymentMethodId ?? undefined,
           };
         });
         const created = await api.service("job").createMany(jobs as any);
@@ -462,6 +470,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
           addOnPrices: addOnPrices.length > 0 ? addOnPrices : undefined,
           currency: "CAD",
           notes: noteParts.length > 0 ? noteParts.join(". ") : undefined,
+          paymentMethodId: paymentMethodId ?? undefined,
         } as any);
         showToast("Success", "Request sent to provider", "success");
         window.location.href = `/customer/${user.id}/waiting-to-connect-with-provider?jobId=${job.id}`;
@@ -473,6 +482,7 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
       setSendingId(null);
       setPendingSend(null);
       setConfirmSendOpen(false);
+      setPaymentDialogOpen(false);
     }
   };
 
@@ -717,16 +727,16 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                   onClick={() => {
                     const selection = getSelection(service.id);
                     const isCarWash = isCarWashService(service.service_type ?? "");
+                    setPendingSend({
+                      providerId: service.provider_id,
+                      service,
+                      selection,
+                      requestLines: isCarWash ? [{ vehicleId: data.selectedVehicleId ?? null }] : [{ vehicleId: data.selectedVehicleId ?? null }],
+                    });
                     if (isCarWash) {
-                      setPendingSend({
-                        providerId: service.provider_id,
-                        service,
-                        selection,
-                        requestLines: [{ vehicleId: data.selectedVehicleId ?? null }],
-                      });
                       setConfirmSendOpen(true);
                     } else {
-                      handleSendRequest(service, selection, [{ vehicleId: data.selectedVehicleId ?? null }]);
+                      setPaymentDialogOpen(true);
                     }
                   }}
                   isLoading={sendingId === service.provider_id}
@@ -759,23 +769,18 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
             if (selectedForDetails) {
               const sel = getSelection(selectedForDetails.service.id);
               const isCarWash = isCarWashService(selectedForDetails.service.service_type ?? "");
+              setPendingSend({
+                providerId: selectedForDetails.service.provider_id,
+                service: selectedForDetails.service,
+                selection: sel,
+                requestLines: [{ vehicleId: data.selectedVehicleId ?? null }],
+              });
+              setDetailsDialogOpen(false);
+              setSelectedForDetails(null);
               if (isCarWash) {
-                setPendingSend({
-                  providerId: selectedForDetails.service.provider_id,
-                  service: selectedForDetails.service,
-                  selection: sel,
-                  requestLines: [{ vehicleId: data.selectedVehicleId ?? null }],
-                });
                 setConfirmSendOpen(true);
-                setDetailsDialogOpen(false);
-                setSelectedForDetails(null);
               } else {
-                handleSendRequest(
-                  selectedForDetails.service,
-                  sel
-                );
-                setDetailsDialogOpen(false);
-                setSelectedForDetails(null);
+                setPaymentDialogOpen(true);
               }
             }
           }}
@@ -815,11 +820,8 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
                 colorScheme="brand"
                 onClick={() => {
                   if (pendingSend) {
-                    handleSendRequest(
-                      pendingSend.service,
-                      pendingSend.selection,
-                      pendingSend.requestLines ?? [{ vehicleId: data.selectedVehicleId ?? null }]
-                    );
+                    setConfirmSendOpen(false);
+                    setPaymentDialogOpen(true);
                   }
                 }}
                 isLoading={pendingSend ? sendingId === pendingSend.providerId : false}
@@ -834,6 +836,25 @@ export const ProviderResultsView = ({ data, onBack }: ProviderResultsViewProps) 
           </AlertDialogBody>
         </AlertDialogContent>
       </AlertDialog>
+
+      <PaymentMethodSelectDialog
+        isOpen={paymentDialogOpen}
+        onClose={() => {
+          setPaymentDialogOpen(false);
+          setPendingSend(null);
+        }}
+        onContinue={(paymentMethodId) => {
+          if (pendingSend) {
+            handleSendRequest(
+              pendingSend.service,
+              pendingSend.selection,
+              pendingSend.requestLines ?? [{ vehicleId: data.selectedVehicleId ?? null }],
+              paymentMethodId
+            );
+          }
+        }}
+        isSubmitting={!!sendingId}
+      />
 
       <SelectAdditionalCarDialog
         isOpen={addCarDialogOpen}

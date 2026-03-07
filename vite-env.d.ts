@@ -11,6 +11,7 @@ interface ImportMetaEnv extends Envs {
   readonly VITE_THE_LAST_SPELLING_BEE_RE_CAPTCHA_KEY: string;
   readonly VITE_API_BASE_URL: string;
   readonly VITE_GOOGLE_MAPS_API_KEY: string;
+  readonly VITE_STRIPE_PUBLISHABLE_KEY?: string;
 }
 
  

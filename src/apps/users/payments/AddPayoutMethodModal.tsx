@@ -17,44 +17,109 @@ import {
     VStack,
     Radio,
     Button,
-    Link
+    Link,
+    Alert,
+    AlertDescription,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSystemColor } from "~/hooks/use-system-color";
+import { payoutAccountService } from "./payout-api";
+import type { ProviderPayoutAccount } from "@suleigolden/sulber-api-client";
+import type { PayoutMethodType } from "@suleigolden/sulber-api-client";
 
 const PAYOUT_OPTIONS = [
-    { value: "bank_cad", label: "Bank account in CAD", details: ["3-5 business days", "No fees"], icon: "bank" },
-    { value: "paypal_cad", label: "PayPal in CAD", details: ["1 business day", "PayPal fees may apply"], icon: "paypal" },
-    { value: "paypal_usd", label: "PayPal in USD", details: ["1 business day", "PayPal fees may apply"], icon: "paypal" },
-    { value: "payoneer_usd", label: "Payoneer in USD", details: ["Prepaid debit Mastercard", "24 hours or less", "Payoneer fees may apply"], icon: "payoneer" },
+    { value: "bank_cad", label: "Bank account in CAD", details: ["3-5 business days", "No fees"], payoutMethod: "bank_account" as PayoutMethodType, currency: "cad" },
+    { value: "paypal_cad", label: "PayPal in CAD", details: ["1 business day", "PayPal fees may apply"], payoutMethod: "paypal" as PayoutMethodType, currency: "cad" },
+    { value: "paypal_usd", label: "PayPal in USD", details: ["1 business day", "PayPal fees may apply"], payoutMethod: "paypal" as PayoutMethodType, currency: "usd" },
+    { value: "payoneer_usd", label: "Payoneer in USD", details: ["Prepaid debit Mastercard", "24 hours or less", "Payoneer fees may apply"], payoutMethod: "payoneer" as PayoutMethodType, currency: "usd" },
 ];
 
-
+function optionValueFromAccount(account: ProviderPayoutAccount): string {
+    const currency = (account.default_currency || "cad").toLowerCase();
+    const method = account.payout_method || "bank_account";
+    const found = PAYOUT_OPTIONS.find((o) => o.payoutMethod === method && o.currency === currency);
+    return found ? found.value : "";
+}
 
 export function AddPayoutMethodModal({
     isOpen,
     onClose,
+    account,
+    onSuccess,
 }: {
     isOpen: boolean;
     onClose: () => void;
+    account?: ProviderPayoutAccount | null;
+    onSuccess?: () => void;
 }) {
     const { headingColor, bodyColor, labelColor, borderColor, linkColor } = useSystemColor();
     const [country, setCountry] = useState("CA");
     const [method, setMethod] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
     const primaryButtonBg = useColorModeValue("gray.800", "whiteAlpha.200");
     const primaryButtonColor = useColorModeValue("white", "white");
     const primaryButtonHover = useColorModeValue("gray.700", "whiteAlpha.300");
+
+    useEffect(() => {
+        if (!isOpen) return;
+        setError(null);
+        if (account) {
+            setCountry(account.country_code || "CA");
+            setMethod(optionValueFromAccount(account));
+        } else {
+            setCountry("CA");
+            setMethod("");
+        }
+    }, [isOpen, account]);
+
+    const handleContinue = async () => {
+        if (!method) return;
+        setError(null);
+        const option = PAYOUT_OPTIONS.find((o) => o.value === method);
+        if (!option) return;
+
+        const countryCode = country === "US" ? "US" : "CA";
+        const defaultCurrency = option.currency;
+
+        if (account) {
+            setIsSubmitting(true);
+            try {
+                await payoutAccountService.update(account.id, {
+                    country_code: countryCode,
+                    default_currency: defaultCurrency,
+                    payout_method: option.payoutMethod,
+                    payout_schedule: "biweekly",
+                });
+                onSuccess?.();
+                onClose();
+            } catch (e) {
+                const msg = e && typeof e === "object" && "message" in e ? String((e as { message: string }).message) : "Failed to update payout account";
+                setError(msg);
+            } finally {
+                setIsSubmitting(false);
+            }
+        } else {
+            setError("To receive payouts, you need to connect your Stripe account first. This step is coming soon.");
+        }
+    };
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader color={headingColor}>Let's add a payout method</ModalHeader>
+                <ModalHeader color={headingColor}>{account ? "Update payout method" : "Let's add a payout method"}</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody pb={6}>
                     <Text color={bodyColor} mb={6} fontSize="sm">
-                        To start, let us know where you'd like us to send your money.
+                        {account ? "Update where you'd like to receive your money." : "To start, let us know where you'd like us to send your money."}
                     </Text>
+
+                    {error && (
+                        <Alert status="error" mb={4} borderRadius="md">
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                    )}
 
                     <FormControl mb={6}>
                         <FormLabel color={labelColor}>Billing country/region</FormLabel>
@@ -116,10 +181,12 @@ export function AddPayoutMethodModal({
                         size="lg"
                         w="full"
                         mt={6}
-                        isDisabled={!method}
-                        onClick={onClose}
+                        isDisabled={!method || isSubmitting}
+                        isLoading={isSubmitting}
+                        loadingText="Saving…"
+                        onClick={handleContinue}
                     >
-                        Continue
+                        {account ? "Save changes" : "Continue"}
                     </Button>
                 </ModalBody>
             </ModalContent>

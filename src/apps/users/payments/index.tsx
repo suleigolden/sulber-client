@@ -36,6 +36,7 @@ import { FiBell } from "react-icons/fi";
 import { useSystemColor } from "~/hooks/use-system-color";
 import { CustomToast } from "~/hooks/CustomToast";
 import { usePaymentMethods } from "~/hooks/usePaymentMethods";
+import { useProviderPayoutAccount } from "~/hooks/useProviderPayoutAccount";
 import { AddPaymentMethodForm } from "./AddPaymentMethodForm";
 import { paymentService } from "./payment-api";
 import { stripePromise } from "./stripe";
@@ -65,6 +66,13 @@ export const PaymentsSettings = () => {
     handleAddSuccess,
     fetchPaymentMethods,
   } = usePaymentMethods(true);
+
+  const isProvider = user?.role === "provider";
+  const {
+    account: payoutAccount,
+    isLoading: isLoadingPayoutAccount,
+    refetch: refetchPayoutAccount,
+  } = useProviderPayoutAccount(isProvider ? user?.id : undefined);
 
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [settingDefaultId, setSettingDefaultId] = useState<string | null>(null);
@@ -260,56 +268,97 @@ export const PaymentsSettings = () => {
             {/* Payouts tab */}
             <TabPanel px={0}>
               <VStack align="stretch" spacing={8}>
-                <Box
-                  borderWidth="1px"
-                  borderColor={borderColor}
-                  borderRadius="lg"
-                  p={5}
-                  bg={modalBg}
-                >
-                  <Flex gap={4} align="flex-start">
-                    <Flex
-                      flexShrink={0}
-                      w="48px"
-                      h="48px"
-                      bg="blue.500"
-                      color="white"
-                      borderRadius="full"
-                      align="center"
-                      justify="center"
-                    >
-                      <FiBell size={24} />
-                    </Flex>
-                    <Box>
-                      <Text fontWeight="bold" color={headingColor} fontSize="md" mb={1}>
-                        Add payout and account info
-                      </Text>
-                      <Text color={bodyColor} fontSize="sm" mb={3}>
-                        In order to get paid, you'll need to provide a few more details.
-                      </Text>
-                      <Link
-                        href="#"
-                        color={linkColor}
-                        textDecoration="underline"
-                        fontWeight="600"
-                        fontSize="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          onPayoutModalOpen();
-                        }}
-                      >
-                        Get started
-                      </Link>
-                    </Box>
+                {isLoadingPayoutAccount ? (
+                  <Flex py={8} justify="center">
+                    <Spinner />
                   </Flex>
-                </Box>
+                ) : payoutAccount ? (
+                  <Box
+                    borderWidth="1px"
+                    borderColor={borderColor}
+                    borderRadius="lg"
+                    p={5}
+                    bg={modalBg}
+                  >
+                    <Heading size="sm" fontWeight="bold" color={headingColor} mb={3}>
+                      Payout account
+                    </Heading>
+                    <Flex align="center" justify="space-between" flexWrap="wrap" gap={4}>
+                      <Box>
+                        <Text color={bodyColor} fontSize="sm">
+                          Method: {payoutAccount.payout_method.replace("_", " ")} · {payoutAccount.default_currency.toUpperCase()}
+                        </Text>
+                        <Text color={mutedTextColor} fontSize="xs" mt={1}>
+                          Country: {payoutAccount.country_code} · Schedule: {payoutAccount.payout_schedule}
+                          {payoutAccount.status !== "pending" && ` · Status: ${payoutAccount.status}`}
+                        </Text>
+                      </Box>
+                      <Button
+                        bg={primaryButtonBg}
+                        color={primaryButtonColor}
+                        _hover={{ bg: primaryButtonHover }}
+                        size="sm"
+                        borderRadius="md"
+                        onClick={onPayoutModalOpen}
+                      >
+                        Manage
+                      </Button>
+                    </Flex>
+                  </Box>
+                ) : (
+                  <Box
+                    borderWidth="1px"
+                    borderColor={borderColor}
+                    borderRadius="lg"
+                    p={5}
+                    bg={modalBg}
+                  >
+                    <Flex gap={4} align="flex-start">
+                      <Flex
+                        flexShrink={0}
+                        w="48px"
+                        h="48px"
+                        bg="blue.500"
+                        color="white"
+                        borderRadius="full"
+                        align="center"
+                        justify="center"
+                      >
+                        <FiBell size={24} />
+                      </Flex>
+                      <Box>
+                        <Text fontWeight="bold" color={headingColor} fontSize="md" mb={1}>
+                          Add payout and account info
+                        </Text>
+                        <Text color={bodyColor} fontSize="sm" mb={3}>
+                          In order to get paid, you'll need to provide a few more details.
+                        </Text>
+                        <Link
+                          href="#"
+                          color={linkColor}
+                          textDecoration="underline"
+                          fontWeight="600"
+                          fontSize="sm"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onPayoutModalOpen();
+                          }}
+                        >
+                          Get started
+                        </Link>
+                      </Box>
+                    </Flex>
+                  </Box>
+                )}
 
                 <Box>
                   <Heading size="sm" fontWeight="bold" color={headingColor} mb={1}>
                     How you'll get paid
                   </Heading>
                   <Text color={bodyColor} fontSize="sm" mb={4}>
-                    Add at least one payout method so we know where to send your money.
+                    {payoutAccount
+                      ? "Update your payout method or schedule below."
+                      : "Add at least one payout method so we know where to send your money."}
                   </Text>
                   <Button
                     bg={primaryButtonBg}
@@ -319,7 +368,7 @@ export const PaymentsSettings = () => {
                     borderRadius="md"
                     onClick={onPayoutModalOpen}
                   >
-                    Set up payouts
+                    {payoutAccount ? "Manage payouts" : "Set up payouts"}
                   </Button>
                 </Box>
               </VStack>
@@ -328,7 +377,15 @@ export const PaymentsSettings = () => {
         </Tabs>
       </VStack>
 
-      <AddPayoutMethodModal isOpen={isPayoutModalOpen} onClose={onPayoutModalClose} />
+      <AddPayoutMethodModal
+        isOpen={isPayoutModalOpen}
+        onClose={onPayoutModalClose}
+        account={payoutAccount ?? undefined}
+        onSuccess={() => {
+          refetchPayoutAccount();
+          showToast("Success", "Payout preferences updated", "success");
+        }}
+      />
 
       <Modal isOpen={isAddPaymentOpen} onClose={onAddPaymentClose} size="md" isCentered>
         <ModalOverlay />

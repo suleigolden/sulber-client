@@ -15,13 +15,14 @@ import {
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
-import { FiMapPin, FiUser } from "react-icons/fi";
+import { FiCreditCard, FiMapPin, FiUser } from "react-icons/fi";
 import { useRef, useState } from "react";
 import { useUserProfile } from "~/hooks/use-user-profile";
 import { useProviderProfile } from "~/hooks/use-provider-profile";
 import { ProviderLocation } from "~/apps/provider-onboard/ProviderLocation";
 import { UserInformation } from "~/apps/provider-onboard/UserInformation";
 import { useSystemColor } from "~/hooks/use-system-color";
+import { PaymentsSettings } from "../payments";
 
 export const ProviderProfileSettings = () => {
   const { isLoading: isLoadingUserProfile } = useUserProfile();
@@ -185,6 +186,37 @@ export const ProviderProfileSettings = () => {
                   </Text>
                 </Flex>
               </Tab>
+              <Tab
+                _selected={{
+                  bg: "brand.500",
+                  color: "white",
+                  borderRadius: "lg",
+                  transform: { base: "translateY(-2px)", md: "translateX(4px)" },
+                }}
+                _hover={{
+                  bg: menuItemHover,
+                  color: brandColor,
+                  borderRadius: "lg",
+                  transform: { base: "translateY(-1px)", md: "translateX(2px)" },
+                }}
+                transition="all 0.3s ease"
+                fontWeight="semibold"
+                w={{ base: "auto", minW: "fit-content", md: "full" }}
+                flexShrink={0}
+                justifyContent={{ base: "center", md: "flex-start" }}
+                borderRadius="lg"
+                color={labelColor}
+                py={{ base: 3, md: 2 }}
+                px={{ base: 4, md: 3 }}
+                mt={{ base: 0, md: 5 }}
+              >
+                <Flex align="center" gap={2}>
+                  <Icon as={FiCreditCard} boxSize={{ base: 4, md: 4 }} />
+                  <Text fontSize={{ base: "sm", md: "sm" }} fontWeight="inherit" whiteSpace="nowrap">
+                    Payments
+                  </Text>
+                </Flex>
+              </Tab>
             </TabList>
 
             <TabPanels flex={1} minW={0} overflow="hidden">
@@ -216,6 +248,9 @@ export const ProviderProfileSettings = () => {
                   steps={[{ title: "User", Component: UserInformation }]}
                   shouldDisplayStepper={false}
                 />
+              </TabPanel>
+              <TabPanel px={0} py={{ base: 4, sm: 5, md: 6 }}>
+                <PaymentsSettings />
               </TabPanel>
             </TabPanels>
           </Tabs>

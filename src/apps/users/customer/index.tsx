@@ -19,7 +19,7 @@ import {
   TabPanel,
   useBreakpointValue,
 } from "@chakra-ui/react";
-import { FiUser } from "react-icons/fi";
+import { FiCreditCard, FiUser } from "react-icons/fi";
 import { FaCar } from "react-icons/fa";
 import { useEffect } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -36,6 +36,7 @@ import { api } from "@suleigolden/sulber-api-client";
 import { CustomToast } from "~/hooks/CustomToast";
 import { Vehicles } from "~/apps/vehicles";
 import { useSystemColor } from "~/hooks/use-system-color";
+import { PaymentsSettings } from "../payments";
 
 type AvatarUploadSectionProps = {
   userProfile: UserProfile;
@@ -318,6 +319,37 @@ const {
                   </Text>
                 </Flex>
               </Tab>
+              <Tab
+                _selected={{
+                  bg: "brand.500",
+                  color: "white",
+                  borderRadius: "lg",
+                  transform: { base: "translateY(-2px)", md: "translateX(4px)" },
+                }}
+                _hover={{
+                  bg: menuItemHover,
+                  color: brandColor,
+                  borderRadius: "lg",
+                  transform: { base: "translateY(-1px)", md: "translateX(2px)" },
+                }}
+                transition="all 0.3s ease"
+                fontWeight="semibold"
+                w={{ base: "auto", minW: "fit-content", md: "full" }}
+                flexShrink={0}
+                justifyContent={{ base: "center", md: "flex-start" }}
+                borderRadius="lg"
+                color={labelColor}
+                py={{ base: 3, md: 2 }}
+                px={{ base: 4, md: 3 }}
+                mt={{ base: 0, md: 5 }}
+              >
+                <Flex align="center" gap={2}>
+                  <Icon as={FiCreditCard} boxSize={{ base: 4, md: 4 }} />
+                  <Text fontSize={{ base: "sm", md: "sm" }} fontWeight="inherit" whiteSpace="nowrap">
+                    Payments
+                  </Text>
+                </Flex>
+              </Tab>
             </TabList>
 
             <TabPanels flex={1} minW={0} overflow="hidden">
@@ -470,6 +502,9 @@ const {
               {/* Vehicles Tab */}
               <TabPanel px={0} py={{ base: 4, sm: 5, md: 0 }}>
                 <Vehicles />
+              </TabPanel>
+              <TabPanel px={0} py={{ base: 4, sm: 5, md: 0 }}>
+                <PaymentsSettings />
               </TabPanel>
             </TabPanels>
           </Tabs>

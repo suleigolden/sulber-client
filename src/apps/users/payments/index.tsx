@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Container,
   Heading,
@@ -35,6 +35,12 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
 } from "@chakra-ui/react";
 import { Elements } from "@stripe/react-stripe-js";
 import { FiBell, FiMoreVertical } from "react-icons/fi";
@@ -42,6 +48,7 @@ import { useSystemColor } from "~/hooks/use-system-color";
 import { CustomToast } from "~/hooks/CustomToast";
 import { usePaymentMethods, cardBrandLabel } from "~/hooks/usePaymentMethods";
 import { AddPaymentMethodForm } from "./AddPaymentMethodForm";
+import { paymentService } from "./payment-api";
 import { stripePromise } from "./stripe";
 
 const PAYOUT_OPTIONS = [
@@ -58,6 +65,8 @@ function PaymentMethodRow({
   expYear,
   onSetDefault,
   onRemove,
+  isRemoving,
+  isSettingDefault,
 }: {
   brand: string;
   last4: string;
@@ -65,6 +74,8 @@ function PaymentMethodRow({
   expYear: number;
   onSetDefault?: () => void;
   onRemove?: () => void;
+  isRemoving?: boolean;
+  isSettingDefault?: boolean;
 }) {
   const { headingColor, mutedTextColor, borderColor, linkColor } = useSystemColor();
   const exp = `${String(expMonth).padStart(2, "0")}/${expYear}`;
@@ -109,6 +120,7 @@ function PaymentMethodRow({
           icon={<FiMoreVertical />}
           borderColor="blue.500"
           borderRadius="md"
+          isDisabled={isRemoving || isSettingDefault}
         />
         <MenuList minW="140px" py={1}>
           <MenuItem
@@ -116,16 +128,20 @@ function PaymentMethodRow({
             textDecoration="underline"
             color={linkColor}
             fontSize="sm"
+            isDisabled={isSettingDefault}
+            closeOnSelect
           >
-            Set as default
+            {isSettingDefault ? "Setting default…" : "Set as default"}
           </MenuItem>
           <MenuItem
             onClick={onRemove}
             textDecoration="underline"
             color={linkColor}
             fontSize="sm"
+            isDisabled={isRemoving}
+            closeOnSelect
           >
-            Remove
+            {isRemoving ? "Removing…" : "Remove"}
           </MenuItem>
         </MenuList>
       </Menu>
@@ -249,14 +265,62 @@ export const PaymentsSettings = () => {
     isLoadingPaymentMethods,
     error: paymentMethodsError,
     handleAddSuccess,
+    fetchPaymentMethods,
   } = usePaymentMethods(true);
 
-  const handleSetDefault = (paymentMethodId: string) => {
-    showToast("Info", "Set as default is not yet implemented", "info");
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [settingDefaultId, setSettingDefaultId] = useState<string | null>(null);
+  const [paymentMethodToRemove, setPaymentMethodToRemove] = useState<string | null>(null);
+  const { isOpen: isRemoveConfirmOpen, onOpen: onRemoveConfirmOpen, onClose: onRemoveConfirmClose } = useDisclosure();
+  const removeConfirmCancelRef = useRef<HTMLButtonElement>(null);
+
+  const handleSetDefault = async (paymentMethodId: string) => {
+    if (!user?.id || !user?.email) return;
+    setSettingDefaultId(paymentMethodId);
+    try {
+      await paymentService.setDefaultPaymentMethod({
+        user: { id: user.id, email: user.email },
+        paymentMethodId,
+      });
+      showToast("Success", "Default payment method updated", "success");
+      fetchPaymentMethods();
+    } catch (e) {
+      const msg =
+        e && typeof e === "object" && "message" in e
+          ? String((e as { message: string }).message)
+          : "Failed to set default payment method";
+      showToast("Error", msg, "error");
+    } finally {
+      setSettingDefaultId(null);
+    }
   };
 
-  const handleRemoveCard = (paymentMethodId: string) => {
-    showToast("Info", "Remove card is not yet implemented", "info");
+  const handleRemoveClick = (paymentMethodId: string) => {
+    setPaymentMethodToRemove(paymentMethodId);
+    onRemoveConfirmOpen();
+  };
+
+  const handleRemoveCard = async () => {
+    if (!paymentMethodToRemove || !user?.id || !user?.email) return;
+    setRemovingId(paymentMethodToRemove);
+    onRemoveConfirmClose();
+    try {
+      await paymentService.removePaymentMethod({
+        user: { id: user.id, email: user.email },
+        paymentMethodId: paymentMethodToRemove,
+      });
+      showToast("Success", "Payment method removed", "success");
+      fetchPaymentMethods();
+    } catch (e) {
+      const msg =
+        e && typeof e === "object" && "message" in e
+          ? String((e as { message: string }).message)
+          : "Failed to remove payment method";
+      showToast("Error", msg, "error");
+    } finally {
+      setRemovingId(null);
+      setPaymentMethodToRemove(null);
+    }
   };
 
   const tabSize = useBreakpointValue({ base: "sm", md: "md" });
@@ -367,7 +431,9 @@ export const PaymentsSettings = () => {
                           expMonth={pm.exp_month}
                           expYear={pm.exp_year}
                           onSetDefault={() => handleSetDefault(pm.id)}
-                          onRemove={() => handleRemoveCard(pm.id)}
+                          onRemove={() => handleRemoveClick(pm.id)}
+                          isRemoving={removingId === pm.id}
+                          isSettingDefault={settingDefaultId === pm.id}
                         />
                       ))
                     )}
@@ -489,6 +555,31 @@ export const PaymentsSettings = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
+
+      <AlertDialog
+        isOpen={isRemoveConfirmOpen}
+        leastDestructiveRef={removeConfirmCancelRef}
+        onClose={() => {
+          onRemoveConfirmClose();
+          setPaymentMethodToRemove(null);
+        }}
+      >
+        <AlertDialogOverlay />
+        <AlertDialogContent>
+          <AlertDialogHeader color={headingColor}>Remove payment method</AlertDialogHeader>
+          <AlertDialogBody color={bodyColor}>
+            Are you sure you want to remove this card? You can add it again later.
+          </AlertDialogBody>
+          <AlertDialogFooter>
+            <Button ref={removeConfirmCancelRef} onClick={onRemoveConfirmClose}>
+              Cancel
+            </Button>
+            <Button colorScheme="red" onClick={handleRemoveCard} ml={3} isLoading={!!removingId}>
+              Remove
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Container>
   );
 };

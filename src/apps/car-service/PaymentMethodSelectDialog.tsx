@@ -20,6 +20,15 @@ import { CardElement, Elements, useElements, useStripe } from "@stripe/react-str
 import { api } from "@suleigolden/sulber-api-client";
 import type { SavedPaymentMethod } from "@suleigolden/sulber-api-client";
 import { useSystemColor } from "~/hooks/use-system-color";
+import { useUser } from "~/hooks/use-user";
+
+/** Payment API with user passed in payloads (matches backend DTOs). */
+type PaymentServiceWithUser = {
+  listPaymentMethods: (data: { user: { id: string; email: string } }) => Promise<SavedPaymentMethod[]>;
+  createSetupIntent: (data: { user: { id: string; email: string } }) => Promise<{ clientSecret: string }>;
+  setStripeCustomerId: (data: { user: { id: string; email: string }; stripeCustomerId: string }) => Promise<{ ok: boolean }>;
+};
+const paymentService = api.service("payment") as unknown as PaymentServiceWithUser;
 
 const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "";
 const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
@@ -46,6 +55,7 @@ export function PaymentMethodSelectDialog({
   onContinue,
   isSubmitting = false,
 }: PaymentMethodSelectDialogProps) {
+  const { user } = useUser();
   const [paymentMethods, setPaymentMethods] = useState<SavedPaymentMethod[]>([]);
   const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState<string | null>(null);
   const [isLoadingPaymentMethods, setIsLoadingPaymentMethods] = useState(false);
@@ -54,10 +64,13 @@ export function PaymentMethodSelectDialog({
   const { textColor, labelColor, modalBg, borderColor } = useSystemColor();
 
   const fetchPaymentMethods = useCallback(async () => {
+    if (!user?.id || !user?.email) return;
     setIsLoadingPaymentMethods(true);
     setError(null);
     try {
-      const list = await api.service("payment").listPaymentMethods();
+      const list = await paymentService.listPaymentMethods({
+        user: { id: user.id, email: user.email },
+      });
       setPaymentMethods(list);
       setSelectedPaymentMethodId(null);
     } catch (e) {
@@ -67,14 +80,14 @@ export function PaymentMethodSelectDialog({
     } finally {
       setIsLoadingPaymentMethods(false);
     }
-  }, []);
+  }, [user?.id, user?.email]);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && user?.id && user?.email) {
       setIsAddMode(false);
       fetchPaymentMethods();
     }
-  }, [isOpen, fetchPaymentMethods]);
+  }, [isOpen, user?.id, user?.email, fetchPaymentMethods]);
 
   const handleContinue = () => {
     if (selectedPaymentMethodId && !isSubmitting) {
@@ -90,16 +103,7 @@ export function PaymentMethodSelectDialog({
   const canContinue = !!selectedPaymentMethodId && !isSubmitting;
   const hasMethods = paymentMethods.length > 0;
   const showAddForm = stripePromise && isAddMode;
-  console.log("stripePromise", stripePromise);
-console.log("paymentMethods", paymentMethods);
-console.log("selectedPaymentMethodId", selectedPaymentMethodId);
-console.log("isAddMode", isAddMode);
-console.log("showAddForm", showAddForm);
-console.log("isLoadingPaymentMethods", isLoadingPaymentMethods);
-console.log("error", error);
-console.log("isSubmitting", isSubmitting);
-console.log("canContinue", canContinue);
-console.log("hasMethods", hasMethods);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="md" isCentered>
       <ModalOverlay />
@@ -115,10 +119,11 @@ console.log("hasMethods", hasMethods);
             <Text color="red.500" fontSize="sm">
               {error}
             </Text>
-          ) : showAddForm ? (
+          ) : showAddForm && user ? (
             stripePromise && (
               <Elements stripe={stripePromise}>
                 <AddPaymentMethodForm
+                  user={{ id: user.id, email: user.email }}
                   onSuccess={handleAddSuccess}
                   onCancel={() => setIsAddMode(false)}
                   labelColor={labelColor}
@@ -175,9 +180,10 @@ console.log("hasMethods", hasMethods);
               <Text fontSize="sm" color={labelColor}>
                 No payment method found. Please add a payment method first.
               </Text>
-              {stripePromise ? (
+              {stripePromise && user ? (
                 <Elements stripe={stripePromise}>
                   <AddPaymentMethodForm
+                    user={{ id: user.id, email: user.email }}
                     onSuccess={handleAddSuccess}
                     onCancel={onClose}
                     labelColor={labelColor}
@@ -220,13 +226,17 @@ console.log("hasMethods", hasMethods);
   );
 }
 
+type PaymentUser = { id: string; email: string };
+
 /** Add card form; must be rendered inside <Elements stripe={stripePromise}>. */
 function AddPaymentMethodForm({
+  user,
   onSuccess,
   onCancel,
   labelColor,
   textColor,
 }: {
+  user: PaymentUser;
   onSuccess: () => void;
   onCancel: () => void;
   labelColor: string;
@@ -242,7 +252,9 @@ function AddPaymentMethodForm({
     let cancelled = false;
     (async () => {
       try {
-        const { clientSecret: secret } = await api.service("payment").createSetupIntent();
+        const { clientSecret: secret } = await paymentService.createSetupIntent({
+          user: { id: user.id, email: user.email },
+        });
         if (!cancelled) setClientSecret(secret);
       } catch (e) {
         if (!cancelled) {
@@ -251,7 +263,7 @@ function AddPaymentMethodForm({
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [user.id, user.email]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -261,12 +273,20 @@ function AddPaymentMethodForm({
     setIsAdding(true);
     setAddError(null);
     try {
-      const { error } = await stripe.confirmCardSetup(clientSecret, {
+      const result = await stripe.confirmCardSetup(clientSecret, {
         payment_method: { card: cardEl },
       });
-      if (error) {
-        setAddError(error.message ?? "Card setup failed");
+      if (result.error) {
+        setAddError(result.error.message ?? "Card setup failed");
         return;
+      }
+      const si = result.setupIntent as { customer?: string | { id?: string } } | null | undefined;
+      const customerId = typeof si?.customer === "string" ? si.customer : si?.customer?.id;
+      if (customerId) {
+        await paymentService.setStripeCustomerId({
+          user: { id: user.id, email: user.email },
+          stripeCustomerId: customerId,
+        });
       }
       onSuccess();
     } catch (err) {

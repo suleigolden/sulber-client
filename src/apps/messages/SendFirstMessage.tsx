@@ -15,7 +15,7 @@ import {
 import { FiChevronLeft } from "react-icons/fi";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useUser } from "~/hooks/use-user";
-import { api, type UserProfile } from "@suleigolden/sulber-api-client";
+import { api, type UserProfile, type User } from "@suleigolden/sulber-api-client";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
 export const SendFirstMessage = () => {
@@ -34,6 +34,73 @@ export const SendFirstMessage = () => {
   const sectionHeadingColor = useColorModeValue("gray.800", "gray.100");
   const bulletColor = useColorModeValue("gray.700", "gray.200");
   const borderColor = useColorModeValue("gray.200", "gray.700");
+
+  const { data: profile } = useQuery<UserProfile | null>({
+    queryKey: ["send-first-message-profile", otherUserId],
+    enabled: !!otherUserId,
+    queryFn: async () => {
+      const svc = api.service("user-profile" as never) as {
+        findByUserId: (id: string) => Promise<UserProfile>;
+      };
+      try {
+        return await svc.findByUserId(otherUserId!);
+      } catch {
+        return null;
+      }
+    },
+  });
+
+  const firstName = profile?.first_name ?? "";
+  const lastName = profile?.last_name ?? "";
+  const displayName =
+    [firstName, lastName].filter(Boolean).join(" ") || "your host";
+
+  const serviceDisplayName = rawService
+    ? rawService
+        .split(/[_\s]+/)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(" ")
+    : "Sulber service";
+  const serviceLowerPhrase = rawService
+    ? serviceDisplayName.toLowerCase()
+    : "service";
+
+  const sendMutation = useMutation({
+    mutationFn: async () => {
+      if (!otherUserId) {
+        throw new Error("Missing recipient");
+      }
+      const content = message.trim();
+      if (!content) {
+        throw new Error("Message cannot be empty");
+      }
+      await api.service("message").createMessage({
+        recipientId: otherUserId,
+        content,
+        sender: user as User,
+      });
+    },
+    onSuccess: () => {
+      if (user && otherUserId) {
+        const roleSegment = user.role === "provider" ? "provider" : "customer";
+        navigate(`/${roleSegment}/${user.id}/messages?with=${otherUserId}`);
+      }
+    },
+    onError: (err: unknown) => {
+      const desc =
+        err instanceof Error ? err.message : "Could not send message";
+      toast({
+        title: "Failed to send message",
+        description: desc,
+        status: "error",
+        isClosable: true,
+      });
+    },
+  });
+
+  if (!user || !otherUserId) {
+    return null;
+  }
 
   return (
     <Box

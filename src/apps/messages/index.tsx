@@ -8,7 +8,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Box, Flex, useBreakpointValue } from "@chakra-ui/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@chakra-ui/react";
-import { api } from "@suleigolden/sulber-api-client";
+import { api, type User } from "@suleigolden/sulber-api-client";
 import { useUser } from "~/hooks/use-user";
 import type { ConversationListItem } from "./types";
 import { ConversationList } from "./components/ConversationList";
@@ -18,7 +18,7 @@ import { MessageInput } from "./components/MessageInput";
 import { EmptyState } from "./components/EmptyState";
 import type { ConversationFilter } from "./components/ConversationFilters";
 import { useQuery as useProfileQuery } from "@tanstack/react-query";
-import type { UserProfile } from "@suleigolden/sulber-api-client";
+import type { Message, UserProfile } from "@suleigolden/sulber-api-client";
 
 /** Normalize conversation list from API (snake_case and numbers). */
 function normalizeConversations(
@@ -52,10 +52,12 @@ export const MessagesUIView = () => {
   const { data: rawConversations = [], isLoading: conversationsLoading } = useQuery({
     queryKey: ["messages", "conversations", user?.id],
     queryFn: async () => {
-      const data = await api.service("message").getConversations();
+      if (!user?.id || !user?.role) return [];
+      const messageService = api.service("message") as { getConversations: (data: { user: { id: string; role: string } }) => Promise<unknown> };
+      const data = await messageService.getConversations({ user: { id: user.id, role: user.role } });
       return normalizeConversations(data);
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && !!user?.role,
     refetchInterval: 8000,
   });
 
@@ -108,15 +110,19 @@ export const MessagesUIView = () => {
     }
   }, [conversations.length, selectedUserId]);
 
-  // Messages for selected conversation
+  // Messages for selected conversation (frontend sends current user and other userId)
   const { data: messages = [], isLoading: messagesLoading } = useQuery({
     queryKey: ["messages", "with", selectedUserId, user?.id],
     queryFn: () =>
-      api.service("message").getWithUser(selectedUserId!, { limit: 100 }),
-    enabled: !!user?.id && !!selectedUserId,
+      (api.service("message") as unknown as {
+        getWithUser: (data: { user: { id: string; role: string }; userId: string }, opts?: { limit?: number }) => Promise<unknown[]>;
+      }).getWithUser(
+        { user: { id: user!.id, role: user!.role }, userId: selectedUserId! },
+        { limit: 100 }
+      ),
+    enabled: !!user?.id && !!user?.role && !!selectedUserId,
     refetchInterval: 5000,
   });
-
   // Mark conversation as read when user opens it
   const selectedConv = selectedUserId
     ? conversations.find((c) => c.other_user_id === selectedUserId)
@@ -136,17 +142,16 @@ export const MessagesUIView = () => {
     }
   }, [selectedConv?.conversation_id, selectedConv?.unread_count, queryClient]);
 
-  // Send message
+  // Send message: pass current user as sender (API client sends it in the request body).
   const sendMutation = useMutation({
     mutationFn: (content: string) =>
       api.service("message").createMessage({
         recipientId: selectedUserId!,
         content,
+        sender: user as User,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["messages", "with", selectedUserId],
-      });
+      queryClient.invalidateQueries({ queryKey: ["messages"] });
       queryClient.invalidateQueries({ queryKey: ["messages", "conversations"] });
       queryClient.invalidateQueries({ queryKey: ["conversations", "total-unread"] });
       setDraft("");
@@ -164,12 +169,14 @@ export const MessagesUIView = () => {
 
   const handleSend = () => {
     const text = draft.trim();
-    if (!text || !selectedUserId || sendMutation.isPending) return;
+    if (!text || !selectedUserId || sendMutation.isPending || selectedUserId === user?.id) return;
+    console.log('selectedUserId:::', selectedUserId);
+    console.log('user:::', user.id);
     sendMutation.mutate(text);
   };
 
   const handleSelectUser = (userId: string) => {
-    if (user?.id && userId === user.id) return;
+    if (!userId || userId === user?.id) return;
     setSelectedUserId(userId);
   };
 
@@ -325,7 +332,7 @@ function ChatPanel({
         onBack={onBack}
       />
       <MessageList
-        messages={messages as import("@suleigolden/sulber-api-client").Message[]}
+        messages={messages as Message[]}
         currentUserId={currentUserId}
         otherUserDisplayName={displayName}
         isLoading={messagesLoading}

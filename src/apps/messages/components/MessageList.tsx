@@ -66,7 +66,7 @@ export function MessageList({
   }
 
   const groups = groupMessagesByDate(messages);
-
+ 
   return (
     <Box
       flex={1}

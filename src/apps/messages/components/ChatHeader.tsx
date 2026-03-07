@@ -1,13 +1,6 @@
-import {
-  Box,
-  Flex,
-  Text,
-  Avatar,
-  Button,
-  Icon,
-  useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, Flex, Text, Avatar, Button, Icon } from "@chakra-ui/react";
 import { FiChevronLeft } from "react-icons/fi";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 type ChatHeaderProps = {
   /** Other participant's display name */
@@ -30,8 +23,7 @@ export function ChatHeader({
   roleLabel,
   onBack,
 }: ChatHeaderProps) {
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const subColor = useColorModeValue("gray.500", "gray.400");
+  const { borderColor, subtextColor, headingColor } = useSystemColor();
 
   return (
     <Flex
@@ -64,21 +56,21 @@ export function ChatHeader({
         color="white"
       />
       <Box flex={1} minW={0}>
-        <Text fontWeight="600" fontSize="md" noOfLines={1}>
+        <Text fontWeight="600" fontSize="md" noOfLines={1} color={headingColor}>
           {displayName}
         </Text>
         <Flex align="center" gap={2} mt={0.5}>
-          <Text fontSize="xs" color={subColor}>
+          <Text fontSize="xs" color={subtextColor}>
             {roleLabel}
           </Text>
           <Box
             w="6px"
             h="6px"
             borderRadius="full"
-            bg={subColor}
+            bg={subtextColor}
             title="Status"
           />
-          <Text fontSize="xs" color={subColor}>
+          <Text fontSize="xs" color={subtextColor}>
             Offline
           </Text>
         </Flex>

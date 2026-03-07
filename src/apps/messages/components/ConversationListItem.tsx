@@ -1,13 +1,8 @@
-import {
-  Box,
-  Flex,
-  Text,
-  Avatar,
-  useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, Flex, Text, Avatar } from "@chakra-ui/react";
 import type { ConversationListItem as ConversationListItemType } from "../types";
 import { UnreadBadge } from "./UnreadBadge";
 import moment from "moment";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 const PREVIEW_LENGTH = 48;
 
@@ -28,10 +23,7 @@ export function ConversationListItem({
   isSelected,
   onSelect,
 }: ConversationListItemProps) {
-  const selectedBg = useColorModeValue("gray.100", "gray.700");
-  const hoverBg = useColorModeValue("gray.50", "gray.600");
-  const nameColor = useColorModeValue("gray.800", "white");
-  const previewColor = useColorModeValue("gray.600", "gray.400");
+  const { selectedCardBg, menuItemHover, headingColor, mutedTextColor, borderColor } = useSystemColor();
 
   const lastMessage = conversation.last_message ?? "";
   const preview =
@@ -48,12 +40,12 @@ export function ConversationListItem({
       px={4}
       py={3}
       cursor="pointer"
-      bg={isSelected ? selectedBg : "transparent"}
-      _hover={{ bg: isSelected ? selectedBg : hoverBg }}
+      bg={isSelected ? selectedCardBg : "transparent"}
+      _hover={{ bg: isSelected ? selectedCardBg : menuItemHover }}
       onClick={onSelect}
       transition="background 0.15s"
       borderBottomWidth="1px"
-      borderColor={useColorModeValue("gray.100", "gray.700")}
+      borderColor={borderColor}
     >
       <Flex gap={3} align="flex-start">
         <Box position="relative" flexShrink={0}>
@@ -74,7 +66,7 @@ export function ConversationListItem({
               <Text
                 fontWeight="600"
                 fontSize="15px"
-                color={nameColor}
+                color={headingColor}
                 noOfLines={1}
               >
                 {conversation.other_user_name?.trim() || "User"}
@@ -82,7 +74,7 @@ export function ConversationListItem({
               {roleLabel && (
                 <Text
                   fontSize="10px"
-                  color={previewColor}
+                  color={mutedTextColor}
                   flexShrink={0}
                   textTransform="uppercase"
                   letterSpacing="0.5px"
@@ -92,13 +84,13 @@ export function ConversationListItem({
                 </Text>
               )}
             </Flex>
-            <Text fontSize="xs" color={previewColor} flexShrink={0}>
+            <Text fontSize="xs" color={mutedTextColor} flexShrink={0}>
               {timeLabel}
             </Text>
           </Flex>
           <Text
             fontSize="sm"
-            color={previewColor}
+            color={mutedTextColor}
             noOfLines={2}
             lineHeight="1.4"
           >

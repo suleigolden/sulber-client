@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import { Box, Flex, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, Flex, Text } from "@chakra-ui/react";
 import type { Message } from "@suleigolden/sulber-api-client";
 import { MessageBubble } from "./MessageBubble";
 import { formatMessageDateRelative } from "~/common/utils/date-time";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 type MessageListProps = {
   messages: Message[];
@@ -46,8 +47,7 @@ export function MessageList({
   isLoading = false,
   messagesEndRef,
 }: MessageListProps) {
-  const lineColor = useColorModeValue("gray.300", "gray.500");
-  const textColor = useColorModeValue("gray.600", "gray.400");
+  const { dividerColor, mutedTextColor } = useSystemColor();
 
   useEffect(() => {
     if (messagesEndRef?.current) {
@@ -58,7 +58,7 @@ export function MessageList({
   if (isLoading) {
     return (
       <Flex flex={1} align="center" justify="center" p={8}>
-        <Text color="gray.500" fontSize="sm">
+        <Text color={mutedTextColor} fontSize="sm">
           Loading messages...
         </Text>
       </Flex>
@@ -78,7 +78,7 @@ export function MessageList({
     >
       {groups.length === 0 ? (
         <Flex flex={1} align="center" justify="center">
-          <Text color="gray.500" fontSize="sm">
+          <Text color={mutedTextColor} fontSize="sm">
             No messages yet. Say hello!
           </Text>
         </Flex>
@@ -86,11 +86,11 @@ export function MessageList({
         groups.map((group) => (
           <Box key={group.dateLabel}>
             <Flex align="center" gap={4} my={4} w="100%">
-              <Box flex={1} h="1px" bg={lineColor} />
-              <Text fontSize="xs" color={textColor} fontWeight="500">
+              <Box flex={1} h="1px" bg={dividerColor} />
+              <Text fontSize="xs" color={mutedTextColor} fontWeight="500">
                 {group.dateLabel}
               </Text>
-              <Box flex={1} h="1px" bg={lineColor} />
+              <Box flex={1} h="1px" bg={dividerColor} />
             </Flex>
             {group.messages.map((msg, idx) => {
               const isMine = msg.sender_id === currentUserId;

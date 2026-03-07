@@ -1,4 +1,5 @@
-import { Button, ButtonGroup, Flex, useColorModeValue } from "@chakra-ui/react";
+import { Button, ButtonGroup, Flex } from "@chakra-ui/react";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 export type ConversationFilter = "all" | "unread" | "sent" | "received";
 
@@ -22,10 +23,7 @@ export function ConversationFilters({
   filter,
   onFilterChange,
 }: ConversationFiltersProps) {
-  const activeBg = useColorModeValue("gray.800", "white");
-  const activeColor = useColorModeValue("white", "gray.800");
-  const inactiveBg = useColorModeValue("gray.100", "gray.700");
-  const inactiveColor = useColorModeValue("gray.700", "gray.200");
+  const { bgButton, textColor } = useSystemColor();
 
   return (
     <Flex gap={2} flexWrap="wrap">
@@ -34,8 +32,8 @@ export function ConversationFilters({
           <Button
             key={key}
             borderRadius="lg"
-            bg={filter === key ? activeBg : inactiveBg}
-            color={filter === key ? activeColor : inactiveColor}
+            bg={filter === key ? "brand.500" : bgButton}
+            color={filter === key ? "white" : textColor}
             fontWeight="500"
             onClick={() => onFilterChange(key)}
             _hover={{ opacity: 0.9 }}

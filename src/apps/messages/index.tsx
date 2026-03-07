@@ -10,6 +10,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@chakra-ui/react";
 import { api, type User } from "@suleigolden/sulber-api-client";
 import { useUser } from "~/hooks/use-user";
+import { useSystemColor } from "~/hooks/use-system-color";
 import type { ConversationListItem } from "./types";
 import { ConversationList } from "./components/ConversationList";
 import { ChatHeader } from "./components/ChatHeader";
@@ -39,6 +40,7 @@ function normalizeConversations(
 
 export const MessagesUIView = () => {
   const { user } = useUser();
+  const { modalBg, borderColor } = useSystemColor();
   const toast = useToast();
   const queryClient = useQueryClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -170,8 +172,6 @@ export const MessagesUIView = () => {
   const handleSend = () => {
     const text = draft.trim();
     if (!text || !selectedUserId || sendMutation.isPending || selectedUserId === user?.id) return;
-    console.log('selectedUserId:::', selectedUserId);
-    console.log('user:::', user.id);
     sendMutation.mutate(text);
   };
 
@@ -208,10 +208,12 @@ export const MessagesUIView = () => {
     >
       <Flex
         h="100%"
-        bg="white"
+        bg={modalBg}
         borderRadius={{ md: "xl" }}
         boxShadow={{ md: "sm" }}
         overflow="hidden"
+        borderWidth={{ md: "1px" }}
+        borderColor={borderColor}
       >
         {showList && (
           <Box flexShrink={0} h="100%" overflow="hidden">
@@ -298,6 +300,8 @@ function ChatPanel({
     : selectedConv?.other_user_name ?? "User";
   const avatarUrl = profile?.avatar_url ?? selectedConv?.avatar_url ?? null;
 
+  const { modalBg, borderColor } = useSystemColor();
+
   if (!selectedUserId) {
     return (
       <Box
@@ -305,7 +309,7 @@ function ChatPanel({
         display="flex"
         alignItems="center"
         justifyContent="center"
-        bg="gray.50"
+        bg={modalBg}
       >
         <EmptyState
           title="Select a conversation"
@@ -321,9 +325,9 @@ function ChatPanel({
       display="flex"
       flexDirection="column"
       minW={0}
-      bg="gray.50"
+      bg={modalBg}
       borderLeftWidth={{ base: 0, md: "1px" }}
-      borderColor="gray.200"
+      borderColor={borderColor}
     >
       <ChatHeader
         displayName={displayName}

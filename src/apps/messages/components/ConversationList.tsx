@@ -1,18 +1,11 @@
-import {
-  Box,
-  Flex,
-  Text,
-  VStack,
-  Skeleton,
-  SkeletonCircle,
-  useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, Flex, Text, VStack, Skeleton, SkeletonCircle } from "@chakra-ui/react";
 import type { ConversationListItem as ConversationListItemType } from "../types";
 import { ConversationSearch } from "./ConversationSearch";
 import { ConversationFilters } from "./ConversationFilters";
 import type { ConversationFilter } from "./ConversationFilters";
 import { ConversationListItem } from "./ConversationListItem";
 import { EmptyState } from "./EmptyState";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 type ConversationListProps = {
   conversations: ConversationListItemType[];
@@ -50,9 +43,7 @@ export function ConversationList({
       : currentUserRole === "provider"
         ? "Customer"
         : null;
-  const bg = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const headerBorder = useColorModeValue("gray.200", "gray.600");
+  const { bgList, borderColor, headingColor } = useSystemColor();
 
   return (
     <Box
@@ -60,7 +51,7 @@ export function ConversationList({
       minW={{ md: "320px" }}
       h="100%"
       flexShrink={0}
-      bg={bg}
+      bg={bgList}
       borderRightWidth="1px"
       borderColor={borderColor}
       display="flex"
@@ -73,10 +64,10 @@ export function ConversationList({
         pt={5}
         pb={4}
         borderBottomWidth="1px"
-        borderColor={headerBorder}
+        borderColor={borderColor}
       >
         <Flex align="center" justify="space-between" mb={4}>
-          <Text fontSize="xl" fontWeight="700" letterSpacing="-0.02em">
+          <Text fontSize="xl" fontWeight="700" letterSpacing="-0.02em" color={headingColor}>
             Messages
           </Text>
           {totalUnread > 0 && (

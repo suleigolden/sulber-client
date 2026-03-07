@@ -3,6 +3,7 @@ import { formatMessageTime } from "~/common/utils/date-time";
 import type { Message } from "@suleigolden/sulber-api-client";
 import { FiCheck, FiCheckCircle } from "react-icons/fi";
 import { Icon } from "@chakra-ui/react";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 type MessageBubbleProps = {
   message: Message;
@@ -21,9 +22,7 @@ export function MessageBubble({
   senderDisplayName = "User",
 }: MessageBubbleProps) {
   const mineBg = useColorModeValue("brand.500", "brand.600");
-  const theirsBg = useColorModeValue("gray.100", "gray.700");
-  const timeColor = useColorModeValue("gray.500", "gray.400");
-  const nameColor = useColorModeValue("gray.700", "gray.300");
+  const { bgList, subtextColor, textColor } = useSystemColor();
 
   const text =
     (message as { message_text?: string }).message_text ??
@@ -44,7 +43,7 @@ export function MessageBubble({
       mt={showAvatarAndName ? 4 : 2}
     >
       {!isMine && showAvatarAndName && (
-        <Text fontSize="xs" fontWeight="500" color={nameColor} mb={1}>
+        <Text fontSize="xs" fontWeight="500" color={textColor} mb={1}>
           {senderDisplayName}
         </Text>
       )}
@@ -54,8 +53,8 @@ export function MessageBubble({
         borderRadius="2xl"
         borderTopRightRadius={isMine ? "6px" : "2xl"}
         borderTopLeftRadius={isMine ? "2xl" : "6px"}
-        bg={isMine ? mineBg : theirsBg}
-        color={isMine ? "white" : undefined}
+        bg={isMine ? mineBg : bgList}
+        color={isMine ? "white" : textColor}
         boxShadow="sm"
       >
         <Text
@@ -73,14 +72,14 @@ export function MessageBubble({
         mt={1}
         justifyContent={isMine ? "flex-end" : "flex-start"}
       >
-        <Text fontSize="xs" color={timeColor}>
+        <Text fontSize="xs" color={subtextColor}>
           {formatMessageTime(sentAt)}
         </Text>
         {isMine && (
           <Icon
             as={isRead ? FiCheckCircle : FiCheck}
             boxSize={3.5}
-            color={timeColor}
+            color={subtextColor}
             ml={0.5}
             title={isRead ? "Read" : "Sent"}
           />

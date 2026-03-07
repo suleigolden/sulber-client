@@ -1,12 +1,6 @@
-import {
-  Box,
-  Textarea,
-  Button,
-  Icon,
-  Flex,
-  useColorModeValue,
-} from "@chakra-ui/react";
-import { FiSend, FiPaperclip } from "react-icons/fi";
+import { Box, Textarea, Button, Icon, Flex } from "@chakra-ui/react";
+import { FiSend } from "react-icons/fi";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 type MessageInputProps = {
   value: string;
@@ -27,8 +21,7 @@ export function MessageInput({
   isSending = false,
   placeholder = "Write a message...",
 }: MessageInputProps) {
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const inputBg = useColorModeValue("gray.50", "gray.700");
+  const { borderColor, bgButton } = useSystemColor();
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -39,50 +32,43 @@ export function MessageInput({
 
   return (
     <Box
-      px={{ base: 4, md: 6 }}
-      py={4}
-      borderTopWidth="1px"
+      // px={{ base: 4, md: 6 }}
+      // py={4}
+      borderTopWidth="2px"
       borderColor={borderColor}
       flexShrink={0}
       bg="inherit"
     >
-      <Flex gap={2} align="flex-end">
+      <Flex gap={2} align="flex-end"  bg={bgButton}>
         <Textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          minH="44px"
+          minH="74px"
           maxH="120px"
           resize="none"
-          bg={inputBg}
+          bg={'transparent'}
           border="none"
-          borderRadius="xl"
           _focus={{ boxShadow: "none" }}
-          fontSize="sm"
+          fontSize="md"
           pr="12"
         />
-        <Flex align="center" gap={1} flexShrink={0}>
+        <Flex align="center" gap={3} flexShrink={0} border="1px solid #24a89d">
           <Button
-            variant="ghost"
-            size="sm"
-            p={2}
-            aria-label="Attach"
-            flexShrink={0}
-          >
-            <Icon as={FiPaperclip} boxSize={5} />
-          </Button>
-          <Button
-            size="sm"
+            size="xl"
             colorScheme="brand"
             borderRadius="full"
+            mr={2}
+            mt={-10}
             p={2.5}
             aria-label="Send"
             onClick={onSend}
             isLoading={isSending}
             isDisabled={!value.trim()}
+            bg="red.500"
           >
-            <Icon as={FiSend} boxSize={5} />
+            <Icon as={FiSend} boxSize={7} />
           </Button>
         </Flex>
       </Flex>

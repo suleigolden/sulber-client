@@ -1,11 +1,7 @@
-import {
-  Input,
-  InputGroup,
-  InputLeftElement,
-  useColorModeValue,
-} from "@chakra-ui/react";
+import { Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
 import { FiSearch } from "react-icons/fi";
 import { Icon } from "@chakra-ui/react";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 type ConversationSearchProps = {
   value: string;
@@ -21,13 +17,11 @@ export function ConversationSearch({
   onChange,
   placeholder = "Search conversations",
 }: ConversationSearchProps) {
-  const bg = useColorModeValue("gray.50", "gray.700");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const _placeholder = useColorModeValue("gray.500", "gray.400");
+  const { bgButton, borderColor, subtextColor } = useSystemColor();
 
   return (
-    <InputGroup size="sm" bg={bg} borderRadius="lg" borderWidth="1px" borderColor={borderColor}>
-      <InputLeftElement pointerEvents="none" color={_placeholder}>
+    <InputGroup size="sm" bg={bgButton} borderRadius="lg" borderWidth="1px" borderColor={borderColor}>
+      <InputLeftElement pointerEvents="none" color={subtextColor}>
         <Icon as={FiSearch} boxSize="16px" />
       </InputLeftElement>
       <Input

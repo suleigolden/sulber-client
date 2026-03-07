@@ -1,6 +1,7 @@
-import { Box, Text, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Box, Text, VStack } from "@chakra-ui/react";
 import { FiMessageCircle } from "react-icons/fi";
 import { Icon } from "@chakra-ui/react";
+import { useSystemColor } from "~/hooks/use-system-color";
 
 type EmptyStateProps = {
   /** Main message (e.g. "No conversations yet") */
@@ -19,9 +20,7 @@ export function EmptyState({
   description,
   icon,
 }: EmptyStateProps) {
-  const iconColor = useColorModeValue("gray.400", "gray.500");
-  const titleColor = useColorModeValue("gray.700", "gray.300");
-  const descColor = useColorModeValue("gray.500", "gray.400");
+  const { iconMutedColor, headingColor, bodyColor } = useSystemColor();
 
   return (
     <VStack
@@ -33,14 +32,14 @@ export function EmptyState({
       spacing={4}
       textAlign="center"
     >
-      <Box color={iconColor}>
+      <Box color={iconMutedColor}>
         {icon ?? <Icon as={FiMessageCircle} boxSize="48px" />}
       </Box>
-      <Text fontSize="lg" fontWeight="600" color={titleColor}>
+      <Text fontSize="lg" fontWeight="600" color={headingColor}>
         {title}
       </Text>
       {description && (
-        <Text fontSize="sm" color={descColor} maxW="280px">
+        <Text fontSize="sm" color={bodyColor} maxW="280px">
           {description}
         </Text>
       )}

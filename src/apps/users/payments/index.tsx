@@ -31,10 +31,15 @@ import {
   Spinner,
   useBreakpointValue,
   useColorModeValue,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from "@chakra-ui/react";
 import { Elements } from "@stripe/react-stripe-js";
 import { FiBell, FiMoreVertical } from "react-icons/fi";
 import { useSystemColor } from "~/hooks/use-system-color";
+import { CustomToast } from "~/hooks/CustomToast";
 import { usePaymentMethods, cardBrandLabel } from "~/hooks/usePaymentMethods";
 import { AddPaymentMethodForm } from "./AddPaymentMethodForm";
 import { stripePromise } from "./stripe";
@@ -51,15 +56,17 @@ function PaymentMethodRow({
   last4,
   expMonth,
   expYear,
-  onMenuClick,
+  onSetDefault,
+  onRemove,
 }: {
   brand: string;
   last4: string;
   expMonth: number;
   expYear: number;
-  onMenuClick?: () => void;
+  onSetDefault?: () => void;
+  onRemove?: () => void;
 }) {
-  const { headingColor, mutedTextColor, borderColor } = useSystemColor();
+  const { headingColor, mutedTextColor, borderColor, linkColor } = useSystemColor();
   const exp = `${String(expMonth).padStart(2, "0")}/${expYear}`;
   return (
     <Flex
@@ -93,13 +100,35 @@ function PaymentMethodRow({
           </Text>
         </Box>
       </Flex>
-      <IconButton
-        aria-label="Options"
-        variant="ghost"
-        size="sm"
-        icon={<FiMoreVertical />}
-        onClick={onMenuClick}
-      />
+      <Menu placement="bottom-end">
+        <MenuButton
+          as={IconButton}
+          aria-label="Options"
+          variant="outline"
+          size="sm"
+          icon={<FiMoreVertical />}
+          borderColor="blue.500"
+          borderRadius="md"
+        />
+        <MenuList minW="140px" py={1}>
+          <MenuItem
+            onClick={onSetDefault}
+            textDecoration="underline"
+            color={linkColor}
+            fontSize="sm"
+          >
+            Set as default
+          </MenuItem>
+          <MenuItem
+            onClick={onRemove}
+            textDecoration="underline"
+            color={linkColor}
+            fontSize="sm"
+          >
+            Remove
+          </MenuItem>
+        </MenuList>
+      </Menu>
     </Flex>
   );
 }
@@ -213,6 +242,7 @@ export const PaymentsSettings = () => {
   const { isOpen: isPayoutModalOpen, onOpen: onPayoutModalOpen, onClose: onPayoutModalClose } = useDisclosure();
   const { isOpen: isAddPaymentOpen, onOpen: onAddPaymentOpen, onClose: onAddPaymentClose } = useDisclosure();
 
+  const showToast = CustomToast();
   const {
     user,
     paymentMethods,
@@ -220,6 +250,14 @@ export const PaymentsSettings = () => {
     error: paymentMethodsError,
     handleAddSuccess,
   } = usePaymentMethods(true);
+
+  const handleSetDefault = (paymentMethodId: string) => {
+    showToast("Info", "Set as default is not yet implemented", "info");
+  };
+
+  const handleRemoveCard = (paymentMethodId: string) => {
+    showToast("Info", "Remove card is not yet implemented", "info");
+  };
 
   const tabSize = useBreakpointValue({ base: "sm", md: "md" });
   const activeTabBorderColor = useColorModeValue("gray.900", "white");
@@ -328,6 +366,8 @@ export const PaymentsSettings = () => {
                           last4={pm.last4}
                           expMonth={pm.exp_month}
                           expYear={pm.exp_year}
+                          onSetDefault={() => handleSetDefault(pm.id)}
+                          onRemove={() => handleRemoveCard(pm.id)}
                         />
                       ))
                     )}

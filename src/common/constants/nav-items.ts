@@ -111,13 +111,13 @@ export const getNavItems = (user: User) => {
       type: "link",
     },
     {
-      label: "Manage Payouts",
-      href: `/system-admin/${user?.id}/manage-payouts`,
+      label: "Manage Providers",
+      href: `/system-admin/${user?.id}/manage-providers`,
       type: "link",
     },
     {
-      label: "Manage Providers",
-      href: `/system-admin/${user?.id}/manage-providers`,
+      label: "Manage Payouts",
+      href: `/system-admin/${user?.id}/manage-payouts`,
       type: "link",
     },
     {

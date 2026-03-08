@@ -29,7 +29,7 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
 }) => {
   const { secondary } = props;
   const { userProfile } = useUserProfile();
-  const {user} = useUser();
+  const { user } = useUser();
   const signOut = useSignOut();
   const { colorMode, toggleColorMode } = useColorMode();
   const isLightMode = colorMode === 'light';
@@ -51,7 +51,7 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
       flexWrap={secondary ? { base: 'wrap', md: 'nowrap' } : 'unset'}
       p="10px"
       borderRadius="30px"
-      // boxShadow={shadow}
+    // boxShadow={shadow}
     >
       {/* <Tooltip label="Account Credits" placement="bottom">
         <HStack
@@ -176,34 +176,50 @@ export const AdminNavbarLinks: FC<AdminNavbarLinksProps> = (props: {
               fontWeight="700"
               color={textColor}
             >
-              👋&nbsp; {` ${userProfile?.first_name}`}
+              👋&nbsp; {` ${user?.role === "system-admin" ? "System Admin" : userProfile?.first_name}`}
             </Text>
           </Flex>
           <Flex flexDirection="column" p="10px">
-            {user?.role !== "provider" && (
-            <MenuItem
-              _hover={{ bg: 'gray.100', color: 'gray.900' }}
-              _focus={{ bg: 'gray.100', color: 'gray.900' }}
-              borderRadius="8px"
-              bg="transparent"
-              px="14px"
-              as={"a"}
-              href={`/${user?.role}/${user?.id}/my-vehicles`}
-            >
-              <Text fontSize="sm">My Vehicles</Text>
-            </MenuItem>
+            {user?.role === "customer" && (
+              <MenuItem
+                _hover={{ bg: 'gray.100', color: 'gray.900' }}
+                _focus={{ bg: 'gray.100', color: 'gray.900' }}
+                borderRadius="8px"
+                bg="transparent"
+                px="14px"
+                as={"a"}
+                href={`/${user?.role}/${user?.id}/my-vehicles`}
+              >
+                <Text fontSize="sm">My Vehicles</Text>
+              </MenuItem>
             )}
-            <MenuItem
-              _hover={{ bg: 'gray.100', color: 'gray.900' }}
-              _focus={{ bg: 'gray.100', color: 'gray.900' }}
-              borderRadius="8px"
-              bg="transparent"
-              px="14px"
-              as={"a"}
-              href={`/${user?.role}/${user?.id}/account-settings`}
-            >
-              <Text fontSize="sm">Account Settings</Text>
-            </MenuItem>
+            {user?.role === "provider" && (
+              <MenuItem
+                _hover={{ bg: 'gray.100', color: 'gray.900' }}
+                _focus={{ bg: 'gray.100', color: 'gray.900' }}
+                borderRadius="8px"
+                bg="transparent"
+                px="14px"
+                as={"a"}
+                href={`/${user?.role}/${user?.id}/post-a-job`}
+              >
+                <Text fontSize="sm">Post a Job</Text>
+              </MenuItem>
+            )}
+            {user?.role !== "system-admin" && (
+              <MenuItem
+                _hover={{ bg: 'gray.100', color: 'gray.900' }}
+                _focus={{ bg: 'gray.100', color: 'gray.900' }}
+                borderRadius="8px"
+                bg="transparent"
+                px="14px"
+                as={"a"}
+                href={`/${user?.role}/${user?.id}/account-settings`}
+              >
+                <Text fontSize="sm">Account Settings</Text>
+              </MenuItem>
+            )}
+
             <MenuItem
               _hover={{ bg: 'gray.100', color: 'gray.900' }}
               _focus={{ bg: 'gray.100', color: 'gray.900' }}

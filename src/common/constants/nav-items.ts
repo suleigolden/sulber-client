@@ -120,6 +120,11 @@ export const getNavItems = (user: User) => {
       href: `/system-admin/${user?.id}/manage-providers`,
       type: "link",
     },
+    {
+      label: "Log Out",
+      href: "/logout",
+      type: "button",
+    },
   ];
 
   return user?.role === "provider"

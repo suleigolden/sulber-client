@@ -380,10 +380,10 @@ export const PaymentsSettings = () => {
       <AddPayoutMethodModal
         isOpen={isPayoutModalOpen}
         onClose={onPayoutModalClose}
-        account={payoutAccount ?? undefined}
+        providerId={isProvider ? user?.id : undefined}
         onSuccess={() => {
           refetchPayoutAccount();
-          showToast("Success", "Payout preferences updated", "success");
+          showToast("Success", "Payout account added", "success");
         }}
       />
 

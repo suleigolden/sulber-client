@@ -1,195 +1,273 @@
 import {
-    useColorModeValue,
-    Text,
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalCloseButton,
-    ModalBody,
-    FormControl,
-    FormLabel,
-    Select,
-    RadioGroup,
-    Stack,
-    Box,
-    Flex,
-    VStack,
-    Radio,
-    Button,
-    Link,
-    Alert,
-    AlertDescription,
+  useColorModeValue,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  Stack,
+  Radio,
+  Button,
+  Alert,
+  AlertDescription,
+  Box,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import { useSystemColor } from "~/hooks/use-system-color";
+import { CustomInputField } from "~/components/fields/CustomInputField";
 import { payoutAccountService } from "./payout-api";
-import type { ProviderPayoutAccount } from "@suleigolden/sulber-api-client";
-import type { PayoutMethodType } from "@suleigolden/sulber-api-client";
+import type { CreateProviderPayoutAccountRequest } from "@suleigolden/sulber-api-client";
 
-const PAYOUT_OPTIONS = [
-    { value: "bank_cad", label: "Bank account in CAD", details: ["3-5 business days", "No fees"], payoutMethod: "bank_account" as PayoutMethodType, currency: "cad" },
-    { value: "paypal_cad", label: "PayPal in CAD", details: ["1 business day", "PayPal fees may apply"], payoutMethod: "paypal" as PayoutMethodType, currency: "cad" },
-    { value: "paypal_usd", label: "PayPal in USD", details: ["1 business day", "PayPal fees may apply"], payoutMethod: "paypal" as PayoutMethodType, currency: "usd" },
-    { value: "payoneer_usd", label: "Payoneer in USD", details: ["Prepaid debit Mastercard", "24 hours or less", "Payoneer fees may apply"], payoutMethod: "payoneer" as PayoutMethodType, currency: "usd" },
+const COUNTRY_OPTIONS = [
+  { label: "Canada", value: "CA" },
+  { label: "USA", value: "US" },
 ];
 
-function optionValueFromAccount(account: ProviderPayoutAccount): string {
-    const currency = (account.default_currency || "cad").toLowerCase();
-    const method = account.payout_method || "bank_account";
-    const found = PAYOUT_OPTIONS.find((o) => o.payoutMethod === method && o.currency === currency);
-    return found ? found.value : "";
-}
+type BankAccountType = "chequing" | "savings";
+
+type BankAccountFormValues = {
+  country: string;
+  institutionNumber: string;
+  transitNumber: string;
+  accountNumber: string;
+  confirmAccountNumber: string;
+};
 
 export function AddPayoutMethodModal({
-    isOpen,
-    onClose,
-    account,
-    onSuccess,
+  isOpen,
+  onClose,
+  providerId,
+  onSuccess,
 }: {
-    isOpen: boolean;
-    onClose: () => void;
-    account?: ProviderPayoutAccount | null;
-    onSuccess?: () => void;
+  isOpen: boolean;
+  onClose: () => void;
+  providerId: string | undefined;
+  onSuccess?: () => void;
 }) {
-    const { headingColor, bodyColor, labelColor, borderColor, linkColor } = useSystemColor();
-    const [country, setCountry] = useState("CA");
-    const [method, setMethod] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
-    const primaryButtonBg = useColorModeValue("gray.800", "whiteAlpha.200");
-    const primaryButtonColor = useColorModeValue("white", "white");
-    const primaryButtonHover = useColorModeValue("gray.700", "whiteAlpha.300");
+  const { headingColor, labelColor } = useSystemColor();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [accountType, setAccountType] = useState<BankAccountType | "">("");
 
-    useEffect(() => {
-        if (!isOpen) return;
-        setError(null);
-        if (account) {
-            setCountry(account.country_code || "CA");
-            setMethod(optionValueFromAccount(account));
-        } else {
-            setCountry("CA");
-            setMethod("");
-        }
-    }, [isOpen, account]);
+  const methods = useForm<BankAccountFormValues>({
+    defaultValues: {
+      country: "CA",
+      institutionNumber: "",
+      transitNumber: "",
+      accountNumber: "",
+      confirmAccountNumber: "",
+    },
+    mode: "onTouched",
+  });
 
-    const handleContinue = async () => {
-        if (!method) return;
-        setError(null);
-        const option = PAYOUT_OPTIONS.find((o) => o.value === method);
-        if (!option) return;
+  const {
+    handleSubmit,
+    reset,
+    watch,
+    setError,
+    clearErrors,
+    formState: { errors },
+  } = methods;
 
-        const countryCode = country === "US" ? "US" : "CA";
-        const defaultCurrency = option.currency;
+  const country = watch("country");
+  const institutionNumber = watch("institutionNumber");
+  const transitNumber = watch("transitNumber");
+  const accountNumber = watch("accountNumber");
+  const confirmAccountNumber = watch("confirmAccountNumber");
 
-        if (account) {
-            setIsSubmitting(true);
-            try {
-                await payoutAccountService.update(account.id, {
-                    country_code: countryCode,
-                    default_currency: defaultCurrency,
-                    payout_method: option.payoutMethod,
-                    payout_schedule: "biweekly",
-                });
-                onSuccess?.();
-                onClose();
-            } catch (e) {
-                const msg = e && typeof e === "object" && "message" in e ? String((e as { message: string }).message) : "Failed to update payout account";
-                setError(msg);
-            } finally {
-                setIsSubmitting(false);
-            }
-        } else {
-            setError("To receive payouts, you need to connect your Stripe account first. This step is coming soon.");
-        }
-    };
+  const primaryButtonBg = useColorModeValue("gray.800", "whiteAlpha.200");
+  const primaryButtonColor = useColorModeValue("white", "white");
+  const primaryButtonHover = useColorModeValue("gray.700", "whiteAlpha.300");
 
-    return (
-        <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader color={headingColor}>{account ? "Update payout method" : "Let's add a payout method"}</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody pb={6}>
-                    <Text color={bodyColor} mb={6} fontSize="sm">
-                        {account ? "Update where you'd like to receive your money." : "To start, let us know where you'd like us to send your money."}
-                    </Text>
+  useEffect(() => {
+    if (!isOpen) {
+      reset({
+        country: "CA",
+        institutionNumber: "",
+        transitNumber: "",
+        accountNumber: "",
+        confirmAccountNumber: "",
+      });
+      setAccountType("");
+      setSubmitError(null);
+    }
+  }, [isOpen, reset]);
 
-                    {error && (
-                        <Alert status="error" mb={4} borderRadius="md">
-                            <AlertDescription>{error}</AlertDescription>
-                        </Alert>
-                    )}
+  const formValid =
+    accountType &&
+    institutionNumber?.trim() &&
+    transitNumber?.trim() &&
+    accountNumber?.trim() &&
+    confirmAccountNumber?.trim() === accountNumber?.trim();
 
-                    <FormControl mb={6}>
-                        <FormLabel color={labelColor}>Billing country/region</FormLabel>
-                        <Select
-                            value={country}
-                            onChange={(e) => setCountry(e.target.value)}
-                            placeholder="Billing country/region"
-                            borderColor={borderColor}
-                        >
-                            <option value="CA">Canada</option>
-                            <option value="US">United States</option>
-                        </Select>
-                        <Text fontSize="sm" color={bodyColor} mt={2}>
-                            This is where you opened your financial account.{" "}
-                            <Link href="#" color={linkColor}>
-                                More info
-                            </Link>
-                        </Text>
-                    </FormControl>
+  const onSubmit = async (data: BankAccountFormValues) => {
+    setSubmitError(null);
+    clearErrors();
 
-                    <FormControl>
-                        <FormLabel color={labelColor}>How would you like to get paid?</FormLabel>
-                        <RadioGroup value={method} onChange={setMethod} mt={2}>
-                            <Stack spacing={0} borderWidth="1px" borderColor={borderColor} borderRadius="lg" overflow="hidden">
-                                {PAYOUT_OPTIONS.map((opt) => (
-                                    <Box
-                                        key={opt.value}
-                                        p={4}
-                                        borderBottomWidth="1px"
-                                        borderColor={borderColor}
-                                        _last={{ borderBottomWidth: 0 }}
-                                    >
-                                        <Flex align="flex-start" gap={4}>
-                                            <Box flexShrink={0} w="40px" h="40px" bg="gray.100" borderRadius="md" />
-                                            <Box flex={1}>
-                                                <Text fontWeight="600" color={headingColor} fontSize="md">
-                                                    {opt.label}
-                                                </Text>
-                                                <VStack align="stretch" spacing={0} mt={1}>
-                                                    {opt.details.map((d) => (
-                                                        <Text key={d} fontSize="sm" color={bodyColor}>
-                                                            • {d}
-                                                        </Text>
-                                                    ))}
-                                                </VStack>
-                                            </Box>
-                                            <Radio value={opt.value} mt={1} />
-                                        </Flex>
-                                    </Box>
-                                ))}
-                            </Stack>
-                        </RadioGroup>
-                    </FormControl>
+    if (!data.institutionNumber?.trim()) {
+      setError("institutionNumber", { message: "Institution number is required" });
+    }
+    if (!data.transitNumber?.trim()) {
+      setError("transitNumber", { message: "Transit number is required" });
+    }
+    if (!data.accountNumber?.trim()) {
+      setError("accountNumber", { message: "Account number is required" });
+    }
+    if (!data.confirmAccountNumber?.trim()) {
+      setError("confirmAccountNumber", { message: "Account number is required" });
+    } else if (data.confirmAccountNumber.trim() !== data.accountNumber.trim()) {
+      setError("confirmAccountNumber", { message: "Account numbers must match" });
+    }
 
-                    <Button
-                        bg={primaryButtonBg}
-                        color={primaryButtonColor}
-                        _hover={{ bg: primaryButtonHover }}
-                        size="lg"
-                        w="full"
-                        mt={6}
-                        isDisabled={!method || isSubmitting}
-                        isLoading={isSubmitting}
-                        loadingText="Saving…"
-                        onClick={handleContinue}
-                    >
-                        {account ? "Save changes" : "Continue"}
-                    </Button>
-                </ModalBody>
-            </ModalContent>
-        </Modal>
-    );
+    if (!formValid || !providerId) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const countryCode = data.country === "US" ? "US" : "CA";
+      const defaultCurrency = data.country === "US" ? "usd" : "cad";
+      const payload: CreateProviderPayoutAccountRequest = {
+        provider_id: providerId,
+        stripe_connected_account_id: `bank_${providerId}_${Date.now()}`,
+        country_code: countryCode,
+        default_currency: defaultCurrency,
+        payout_method: "bank_account",
+        payout_schedule: "biweekly",
+        provider_bank_account: {
+          institution_number: data.institutionNumber.trim(),
+          transit_number: data.transitNumber.trim(),
+          account_number: data.accountNumber.trim(),
+          account_type: accountType as "chequing" | "savings",
+        },
+      };
+      await payoutAccountService.create(payload);
+      onSuccess?.();
+      onClose();
+    } catch (e) {
+      const msg =
+        e && typeof e === "object" && "message" in e
+          ? String((e as { message: string }).message)
+          : "Failed to add bank account";
+      setSubmitError(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader color={headingColor} fontWeight="bold" fontSize="xl">
+          Add bank account info
+        </ModalHeader>
+        <ModalCloseButton />
+        <ModalBody pb={6}>
+          {submitError && (
+            <Alert status="error" mb={4} borderRadius="md">
+              <AlertDescription>{submitError}</AlertDescription>
+            </Alert>
+          )}
+
+          <FormProvider {...methods}>
+            <form onSubmit={handleSubmit(onSubmit)} noValidate>
+              <Box mb={4}>
+                <CustomInputField
+                  type="select"
+                  label="Country"
+                  registerName="country"
+                  isRequired
+                  options={COUNTRY_OPTIONS}
+                  placeholder="Select country"
+                />
+              </Box>
+
+              <FormControl mb={4} isRequired>
+                <FormLabel color={labelColor}>
+                  Is this a chequing or savings account?
+                </FormLabel>
+                <RadioGroup
+                  value={accountType}
+                  onChange={(v) => setAccountType(v as BankAccountType)}
+                  mt={2}
+                >
+                  <Stack spacing={2}>
+                    <Radio value="chequing">Chequing</Radio>
+                    <Radio value="savings">Savings</Radio>
+                  </Stack>
+                </RadioGroup>
+              </FormControl>
+
+              <Box mb={4}>
+                <CustomInputField
+                  type="text"
+                  label="Institution number"
+                  registerName="institutionNumber"
+                isRequired
+                placeholder="Institution number"
+                description="The bank code or the financial institution number identifies your bank and should be located in your bank statement or account details."
+                isError={errors.institutionNumber}
+                />
+              </Box>
+
+              <Box mb={4}>
+                <CustomInputField
+                  type="text"
+                  label="Transit number"
+                  registerName="transitNumber"
+                isRequired
+                placeholder="Transit number"
+                description="The branch or transit number identifies a specific branch of your bank."
+                isError={errors.transitNumber}
+                />
+              </Box>
+
+              <Box mb={4}>
+                <CustomInputField
+                  type="text"
+                  label="Account number"
+                  registerName="accountNumber"
+                isRequired
+                placeholder="Account number"
+                isError={errors.accountNumber}
+                />
+              </Box>
+
+              <Box mb={4}>
+                <CustomInputField
+                  type="text"
+                  label="Confirm account number"
+                  registerName="confirmAccountNumber"
+                isRequired
+                placeholder="Confirm account number"
+                description="Enter the account number. This can usually be found within the account details."
+                isError={errors.confirmAccountNumber}
+                />
+              </Box>
+
+              <Button
+                type="submit"
+                bg={primaryButtonBg}
+                color={primaryButtonColor}
+                _hover={{ bg: primaryButtonHover }}
+                size="lg"
+                w="full"
+                mt={6}
+                isDisabled={!formValid || isSubmitting}
+                isLoading={isSubmitting}
+                loadingText="Saving…"
+              >
+                Add bank account
+              </Button>
+            </form>
+          </FormProvider>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
+  );
 }

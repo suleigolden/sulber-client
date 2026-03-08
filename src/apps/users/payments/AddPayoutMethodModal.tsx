@@ -15,17 +15,23 @@ import {
   Alert,
   AlertDescription,
   Box,
+  Text,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useSystemColor } from "~/hooks/use-system-color";
 import { CustomInputField } from "~/components/fields/CustomInputField";
-import { payoutAccountService } from "./payout-api";
-import type { CreateProviderPayoutAccountRequest } from "@suleigolden/sulber-api-client";
+import { api, type ProviderPayoutAccount, type CreateProviderPayoutAccountRequest, type UpdateProviderPayoutAccountRequest } from "@suleigolden/sulber-api-client";
 
 const COUNTRY_OPTIONS = [
   { label: "Canada", value: "CA" },
   { label: "United States", value: "US" },
+];
+
+const PAYOUT_SCHEDULE_OPTIONS = [
+  { label: "Weekly", value: "weekly" },
+  { label: "Biweekly", value: "biweekly" },
+  { label: "Monthly", value: "monthly" },
 ];
 
 // Max lengths (digits): institution 4, transit 6, routing 10, account 17
@@ -38,31 +44,46 @@ type BankAccountType = "chequing" | "savings";
 
 type BankAccountFormValues = {
   country: string;
+  payoutSchedule: string;
+  bankName: string;
   institutionNumber: string;
   transitNumber: string;
   routingNumber: string;
   accountNumber: string;
 };
 
+function maskAccountNumber(num: string | undefined): string {
+  if (!num || num.length < 4) return "****";
+  return "*".repeat(Math.max(0, num.length - 4)) + num.slice(-4);
+}
+
 export function AddPayoutMethodModal({
   isOpen,
   onClose,
   providerId,
+  account: existingAccount,
   onSuccess,
 }: {
   isOpen: boolean;
   onClose: () => void;
   providerId: string | undefined;
-  onSuccess?: () => void;
+  account?: ProviderPayoutAccount | null;
+  onSuccess?: (isUpdate: boolean) => void;
 }) {
-  const { headingColor, labelColor, modalBg } = useSystemColor();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  console.log("existingAccount", existingAccount);
+  const { headingColor, labelColor, bodyColor, mutedTextColor, modalBg } = useSystemColor();
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [accountType, setAccountType] = useState<BankAccountType | "">("");
+
+  const isEditMode = Boolean(existingAccount?.id);
+  const bank = existingAccount?.provider_bank_account;
 
   const methods = useForm<BankAccountFormValues>({
     defaultValues: {
       country: "CA",
+      payoutSchedule: "biweekly",
+      bankName: "",
       institutionNumber: "",
       transitNumber: "",
       routingNumber: "",
@@ -82,6 +103,8 @@ export function AddPayoutMethodModal({
   } = methods;
 
   const country = watch("country");
+  const payoutSchedule = watch("payoutSchedule");
+  const bankName = watch("bankName");
   const institutionNumber = watch("institutionNumber");
   const transitNumber = watch("transitNumber");
   const routingNumber = watch("routingNumber");
@@ -93,20 +116,52 @@ export function AddPayoutMethodModal({
   const primaryButtonBg = useColorModeValue("gray.800", "whiteAlpha.200");
   const primaryButtonColor = useColorModeValue("white", "white");
   const primaryButtonHover = useColorModeValue("gray.700", "whiteAlpha.300");
+  const summaryBoxBg = useColorModeValue("gray.50", "whiteAlpha.100");
+  const summaryBoxBorder = useColorModeValue("gray.200", "whiteAlpha.200");
 
+  // Populate form when modal opens or when existing account data (e.g. after refetch) is available
   useEffect(() => {
     if (!isOpen) {
+      setSubmitError(null);
+      return;
+    }
+    if (existingAccount?.id) {
+      const c = existingAccount.country_code === "US" ? "US" : "CA";
+      const bank = existingAccount.provider_bank_account;
+      const values = {
+        country: c,
+        payoutSchedule: existingAccount.payout_schedule ?? "biweekly",
+        bankName: bank?.bank_name ?? "",
+        institutionNumber: bank?.institution_number ?? "",
+        transitNumber: bank?.transit_number ?? "",
+        routingNumber: bank?.routing_number ?? "",
+        accountNumber: bank?.account_number ?? "",
+      };
+      reset(values, { keepDefaultValues: false });
+      setAccountType((bank?.account_type as BankAccountType) ?? "");
+    } else {
       reset({
         country: "CA",
+        payoutSchedule: "biweekly",
+        bankName: "",
         institutionNumber: "",
         transitNumber: "",
         routingNumber: "",
         accountNumber: "",
-      });
+      }, { keepDefaultValues: false });
       setAccountType("");
-      setSubmitError(null);
     }
-  }, [isOpen, reset]);
+  }, [
+    isOpen,
+    existingAccount?.id,
+    existingAccount?.country_code,
+    existingAccount?.payout_schedule,
+    // Re-run when bank data is available/updated (e.g. after refetch)
+    existingAccount?.provider_bank_account
+      ? JSON.stringify(existingAccount.provider_bank_account)
+      : null,
+    reset,
+  ]);
 
   const onCountryChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
     const newCountry = (e.target as HTMLSelectElement).value;
@@ -145,8 +200,47 @@ export function AddPayoutMethodModal({
       setError("accountNumber", { message: "Account number is required" });
     }
 
-    if (!formValid || !providerId) return;
+    if (!formValid) return;
 
+    if (isEditMode && existingAccount) {
+      if (!existingAccount.id) return;
+      setIsSubmitting(true);
+      try {
+        const provider_bank_account =
+          isCanada
+            ? {
+                bank_name: data.bankName.trim() || undefined,
+                institution_number: data.institutionNumber.trim(),
+                transit_number: data.transitNumber.trim(),
+                account_number: data.accountNumber.trim(),
+                account_type: accountType as "chequing" | "savings",
+              }
+            : {
+                bank_name: data.bankName.trim() || undefined,
+                routing_number: data.routingNumber.trim(),
+                account_number: data.accountNumber.trim(),
+                account_type: accountType as "chequing" | "savings",
+              };
+        const payload: UpdateProviderPayoutAccountRequest = {
+          payout_schedule: data.payoutSchedule as "weekly" | "biweekly" | "monthly",
+          provider_bank_account,
+        };
+        await (api.service("provider-payout-account") as { update: (id: string, data: UpdateProviderPayoutAccountRequest) => Promise<ProviderPayoutAccount> }).update(existingAccount.id, payload);
+        onSuccess?.(true);
+        onClose();
+      } catch (e) {
+        const msg =
+          e && typeof e === "object" && "message" in e
+            ? String((e as { message: string }).message)
+            : "Failed to update payout account";
+        setSubmitError(msg);
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    if (!providerId) return;
     setIsSubmitting(true);
 
     try {
@@ -155,12 +249,14 @@ export function AddPayoutMethodModal({
       const provider_bank_account =
         isCanada
           ? {
+              bank_name: data.bankName.trim() || undefined,
               institution_number: data.institutionNumber.trim(),
               transit_number: data.transitNumber.trim(),
               account_number: data.accountNumber.trim(),
               account_type: accountType as "chequing" | "savings",
             }
           : {
+              bank_name: data.bankName.trim() || undefined,
               routing_number: data.routingNumber.trim(),
               account_number: data.accountNumber.trim(),
               account_type: accountType as "chequing" | "savings",
@@ -172,11 +268,11 @@ export function AddPayoutMethodModal({
         country_code: countryCode,
         default_currency: defaultCurrency,
         payout_method: "bank_account",
-        payout_schedule: "biweekly",
+        payout_schedule: (data.payoutSchedule as "weekly" | "biweekly" | "monthly") || "biweekly",
         provider_bank_account,
       };
-      await payoutAccountService.create(payload);
-      onSuccess?.();
+      await (api.service("provider-payout-account") as { create: (data: CreateProviderPayoutAccountRequest) => Promise<ProviderPayoutAccount> }).create(payload);
+      onSuccess?.(false);
       onClose();
     } catch (e) {
       const msg =
@@ -194,7 +290,7 @@ export function AddPayoutMethodModal({
       <ModalOverlay />
       <ModalContent bg={modalBg}>
         <ModalHeader color={headingColor} fontWeight="bold" fontSize="xl">
-          Add bank account info
+          {isEditMode ? "Manage payout account" : "Add bank account info"}
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody pb={6}>
@@ -204,8 +300,65 @@ export function AddPayoutMethodModal({
             </Alert>
           )}
 
+          {isEditMode && existingAccount && (
+            <Box mb={4} p={3} borderRadius="md" bg={summaryBoxBg} borderWidth="1px" borderColor={summaryBoxBorder}>
+              <Text fontSize="sm" fontWeight="600" color={headingColor} mb={2}>
+                Current account details
+              </Text>
+              <Text fontSize="sm" color={bodyColor}>
+                Country: {existingAccount.country_code} · {existingAccount.payout_method.replace("_", " ")} · {existingAccount.default_currency.toUpperCase()}
+              </Text>
+              <Text fontSize="xs" color={mutedTextColor} mt={1}>
+                Schedule: {existingAccount.payout_schedule}
+                {bank?.bank_name && ` · Bank: ${bank.bank_name}`}
+                {bank?.institution_number && ` · Institution: ${bank.institution_number}`}
+                {bank?.transit_number && ` · Transit: ${bank.transit_number}`}
+                {bank?.routing_number && ` · Routing: ${bank.routing_number}`}
+                {bank?.account_number && ` · Account: ${maskAccountNumber(bank.account_number)}`}
+              </Text>
+            </Box>
+          )}
+
           <FormProvider {...methods}>
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
+              {isEditMode && (
+                <>
+                  <Box mb={4}>
+                    <CustomInputField
+                      type="select"
+                      label="Payout schedule"
+                      registerName="payoutSchedule"
+                      isRequired
+                      options={PAYOUT_SCHEDULE_OPTIONS}
+                      placeholder="Select schedule"
+                    />
+                  </Box>
+                  <Box mb={4}>
+                    <CustomInputField
+                      type="text"
+                      label="Bank name"
+                      registerName="bankName"
+                      placeholder="e.g. TD Canada Trust"
+                      description="Name of your bank or financial institution."
+                      isError={errors.bankName}
+                    />
+                  </Box>
+                </>
+              )}
+
+              {!isEditMode && (
+                <Box mb={4}>
+                  <CustomInputField
+                    type="select"
+                    label="Payout schedule"
+                    registerName="payoutSchedule"
+                    isRequired
+                    options={PAYOUT_SCHEDULE_OPTIONS}
+                    placeholder="Select schedule"
+                  />
+                </Box>
+              )}
+
               <Box mb={4}>
                 <CustomInputField
                   type="select"
@@ -234,6 +387,19 @@ export function AddPayoutMethodModal({
                 </RadioGroup>
               </FormControl>
 
+              {!isEditMode && (
+                <Box mb={4}>
+                  <CustomInputField
+                    type="text"
+                    label="Bank name"
+                    registerName="bankName"
+                    placeholder="e.g. TD Canada Trust"
+                    description="Name of your bank or financial institution."
+                    isError={errors.bankName}
+                  />
+                </Box>
+              )}
+
               {isCanada && (
                 <>
                   <Box mb={4}>
@@ -243,7 +409,7 @@ export function AddPayoutMethodModal({
                       registerName="institutionNumber"
                       isRequired
                       placeholder="e.g. 021"
-                      description="3 digits. Identifies the bank. Found in your bank statement or account details."
+                      description="3 digits. Identifies the bank."
                       isError={errors.institutionNumber}
                       maxLength={MAX_INSTITUTION}
                     />
@@ -255,7 +421,7 @@ export function AddPayoutMethodModal({
                       registerName="transitNumber"
                       isRequired
                       placeholder="e.g. 00021"
-                      description="5 digits. Identifies the branch of your bank."
+                      description="5 digits. Identifies the branch."
                       isError={errors.transitNumber}
                       maxLength={MAX_TRANSIT}
                     />
@@ -301,9 +467,9 @@ export function AddPayoutMethodModal({
                 mt={6}
                 isDisabled={!formValid || isSubmitting}
                 isLoading={isSubmitting}
-                loadingText="Saving…"
+                loadingText={isEditMode ? "Saving…" : "Adding…"}
               >
-                Add bank account
+                {isEditMode ? "Save changes" : "Add bank account"}
               </Button>
             </form>
           </FormProvider>

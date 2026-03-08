@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { payoutAccountService } from "~/apps/users/payments/payout-api";
-import type { ProviderPayoutAccount } from "@suleigolden/sulber-api-client";
+import { api, type ProviderPayoutAccount } from "@suleigolden/sulber-api-client";
 
 /**
  * Fetches the provider payout account for the given provider (user) id.
@@ -16,7 +15,7 @@ export function useProviderPayoutAccount(providerId: string | undefined) {
     queryKey: ["provider-payout-account", providerId],
     queryFn: async () => {
       if (!providerId) return null;
-      return payoutAccountService.findByProviderId(providerId);
+      return (api.service("provider-payout-account") as { findByProviderId: (id: string) => Promise<ProviderPayoutAccount | null> }).findByProviderId(providerId);
     },
     enabled: Boolean(providerId),
     staleTime: 60_000,

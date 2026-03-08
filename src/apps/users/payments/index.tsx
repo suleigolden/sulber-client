@@ -135,6 +135,11 @@ export const PaymentsSettings = () => {
   const primaryButtonColor = useColorModeValue("white", "white");
   const primaryButtonHover = useColorModeValue("gray.700", "whiteAlpha.300");
 
+  function maskAccountNumber(accountNumber: string): string {
+    if (!accountNumber || accountNumber.length < 4) return "****";
+    return "*".repeat(Math.max(0, accountNumber.length - 4)) + accountNumber.slice(-4);
+  }
+
   return (
     <Container maxW="1200px" px={{ base: 4, sm: 6, md: 8 }} py={{ base: 4, sm: 5, md: 8 }}>
       <VStack align="stretch" spacing={{ base: 4, md: 6 }} w="full">
@@ -292,6 +297,13 @@ export const PaymentsSettings = () => {
                           Country: {payoutAccount.country_code} · Schedule: {payoutAccount.payout_schedule}
                           {payoutAccount.status !== "pending" && ` · Status: ${payoutAccount.status}`}
                         </Text>
+                        <Text color={mutedTextColor} fontSize="xs" mt={1}>
+                          {payoutAccount.provider_bank_account?.bank_name && `Bank: ${payoutAccount.provider_bank_account.bank_name}`}
+                          {payoutAccount.provider_bank_account?.institution_number && ` · Institution: ${payoutAccount.provider_bank_account.institution_number}`}
+                          {payoutAccount.provider_bank_account?.transit_number && ` · Transit: ${payoutAccount.provider_bank_account.transit_number}`}
+                          {payoutAccount.provider_bank_account?.routing_number && ` · Routing: ${payoutAccount.provider_bank_account.routing_number}`}
+                          {payoutAccount.provider_bank_account?.account_number && ` · Account: ${maskAccountNumber(payoutAccount.provider_bank_account.account_number)}`}
+                        </Text>
                       </Box>
                       <Button
                         bg={primaryButtonBg}
@@ -381,9 +393,10 @@ export const PaymentsSettings = () => {
         isOpen={isPayoutModalOpen}
         onClose={onPayoutModalClose}
         providerId={isProvider ? user?.id : undefined}
-        onSuccess={() => {
+        account={payoutAccount ?? undefined}
+        onSuccess={(isUpdate) => {
           refetchPayoutAccount();
-          showToast("Success", "Payout account added", "success");
+          showToast("Success", isUpdate ? "Payout account updated" : "Payout account added", "success");
         }}
       />
 

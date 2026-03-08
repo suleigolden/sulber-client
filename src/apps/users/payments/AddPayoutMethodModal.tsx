@@ -55,7 +55,7 @@ export function AddPayoutMethodModal({
   providerId: string | undefined;
   onSuccess?: () => void;
 }) {
-  const { headingColor, labelColor } = useSystemColor();
+  const { headingColor, labelColor, modalBg } = useSystemColor();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [accountType, setAccountType] = useState<BankAccountType | "">("");
@@ -192,7 +192,7 @@ export function AddPayoutMethodModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent bg={modalBg}>
         <ModalHeader color={headingColor} fontWeight="bold" fontSize="xl">
           Add bank account info
         </ModalHeader>

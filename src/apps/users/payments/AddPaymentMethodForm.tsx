@@ -5,6 +5,7 @@ import {
   Spinner,
   Text,
   VStack,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
@@ -28,6 +29,7 @@ export function AddPaymentMethodForm({
 }: AddPaymentMethodFormProps) {
   const stripe = useStripe();
   const elements = useElements();
+  const cardElementColor = useColorModeValue(textColor, "white");
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
@@ -126,13 +128,13 @@ export function AddPaymentMethodForm({
           borderRadius="md"
           borderWidth="1px"
           borderColor="gray.200"
-          bg="white"
+          bg="transparent"
           _dark={{ bg: "gray.800", borderColor: "gray.600" }}
         >
           <CardElement
             options={{
               style: {
-                base: { fontSize: "16px", color: textColor },
+                base: { fontSize: "16px", color: cardElementColor },
                 invalid: { color: "#fa755a" },
               },
             }}

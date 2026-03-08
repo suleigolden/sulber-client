@@ -44,6 +44,15 @@ function App() {
               />
             }
           />
+          <Route
+            path="system-admin/*"
+            element={
+              <DashboardNavBar
+                theme={currentTheme}
+                setTheme={setCurrentTheme}
+              />
+            }
+          />
         </Routes>
       </Router>
     </ChakraProvider>

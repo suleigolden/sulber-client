@@ -6,7 +6,7 @@ import { useUser } from "~/hooks/use-user";
 import { useState } from "react";
 import { SidebarContext } from "../../contexts/SidebarContext";
 import { navBarRoutes } from "../../routes";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { ProviderOnboarding } from "~/apps/provider-onboard";
 import { UserProfileSettings } from "~/apps/users/UserProfileSettings";
 import { Dashboard } from "~/apps/dashboard/Dashboard";
@@ -18,6 +18,20 @@ import { CompleteProviderProfile } from "~/apps/users/provider/CompleteProviderP
 import { Payouts } from "~/apps/payouts";
 import { Messages } from "~/apps/messages";
 import { SendFirstMessage } from "~/apps/messages/SendFirstMessage";
+import { SystemAdminDashboard } from "~/apps/system-admin/dashboard";
+import { SystemAdminManagePayouts } from "~/apps/system-admin/manage-payouts";
+import { SystemAdminManageCustomers } from "~/apps/system-admin/manage-customers";
+import { SystemAdminManageProviders } from "~/apps/system-admin/manage-providers";
+import { superSystemAdminAuthRoutes } from "~/routes/system-admin-routes";
+
+/** Renders children only if the current user has role "system-admin"; otherwise redirects to "/". */
+const SystemAdminGuard = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useUser();
+  if (!user || user.role !== "system-admin") {
+    return <Navigate to="/" replace />;
+  }
+  return <>{children}</>;
+};
 
 // Add type definition at the top
 type RoutesType = {
@@ -150,6 +164,11 @@ export const DashboardNavBar = (props: Record<string, unknown>) => {
                 path={`/${user.id}/messages`}
                 element={<Messages />}
               />
+
+
+              {/* System Admin Routes - only accessible to role system-admin */}
+              {superSystemAdminAuthRoutes(user)}
+            
             </Routes>
 
           </Box>

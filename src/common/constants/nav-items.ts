@@ -99,10 +99,34 @@ export const getNavItems = (user: User) => {
       type: "button",
     },
   ];
+  const SYSTEM_ADMIN_NAV_ITEMS: Array<NavItem> = [
+    {
+      label: "Dashboard",
+      href: `/system-admin/${user?.id}/system-admin-dashboard`,
+      type: "link",
+    },
+    {
+      label: "Manage Customers",
+      href: `/system-admin/${user?.id}/manage-customers`,
+      type: "link",
+    },
+    {
+      label: "Manage Payouts",
+      href: `/system-admin/${user?.id}/manage-payouts`,
+      type: "link",
+    },
+    {
+      label: "Manage Providers",
+      href: `/system-admin/${user?.id}/manage-providers`,
+      type: "link",
+    },
+  ];
 
   return user?.role === "provider"
     ? PROVIDER_NAV_ITEMS
     : user?.role === "customer"
     ? CUSTOMER_NAV_ITEMS
+    : user?.role === "system-admin"
+    ? SYSTEM_ADMIN_NAV_ITEMS
     : PUBLIC_NAV_ITEMS;
 };

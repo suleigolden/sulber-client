@@ -37,6 +37,9 @@ export const useLogInNavigation = (type?: 'login' | 'signup') => {
             window.location.href = `/provider/${user.id}/dashboard`;
            }
           break;
+        case 'system-admin':
+          window.location.href = `/system-admin/${user.id}/system-admin-dashboard`;
+          break;
         default:
           break;
       }

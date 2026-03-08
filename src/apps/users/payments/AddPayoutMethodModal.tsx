@@ -25,8 +25,14 @@ import type { CreateProviderPayoutAccountRequest } from "@suleigolden/sulber-api
 
 const COUNTRY_OPTIONS = [
   { label: "Canada", value: "CA" },
-  { label: "USA", value: "US" },
+  { label: "United States", value: "US" },
 ];
+
+// Max lengths (digits): institution 4, transit 6, routing 10, account 17
+const MAX_INSTITUTION = 4;
+const MAX_TRANSIT = 6;
+const MAX_ROUTING = 10;
+const MAX_ACCOUNT = 17;
 
 type BankAccountType = "chequing" | "savings";
 
@@ -34,8 +40,8 @@ type BankAccountFormValues = {
   country: string;
   institutionNumber: string;
   transitNumber: string;
+  routingNumber: string;
   accountNumber: string;
-  confirmAccountNumber: string;
 };
 
 export function AddPayoutMethodModal({
@@ -59,8 +65,8 @@ export function AddPayoutMethodModal({
       country: "CA",
       institutionNumber: "",
       transitNumber: "",
+      routingNumber: "",
       accountNumber: "",
-      confirmAccountNumber: "",
     },
     mode: "onTouched",
   });
@@ -69,6 +75,7 @@ export function AddPayoutMethodModal({
     handleSubmit,
     reset,
     watch,
+    setValue,
     setError,
     clearErrors,
     formState: { errors },
@@ -77,8 +84,11 @@ export function AddPayoutMethodModal({
   const country = watch("country");
   const institutionNumber = watch("institutionNumber");
   const transitNumber = watch("transitNumber");
+  const routingNumber = watch("routingNumber");
   const accountNumber = watch("accountNumber");
-  const confirmAccountNumber = watch("confirmAccountNumber");
+
+  const isCanada = country === "CA";
+  const isUSA = country === "US";
 
   const primaryButtonBg = useColorModeValue("gray.800", "whiteAlpha.200");
   const primaryButtonColor = useColorModeValue("white", "white");
@@ -90,38 +100,49 @@ export function AddPayoutMethodModal({
         country: "CA",
         institutionNumber: "",
         transitNumber: "",
+        routingNumber: "",
         accountNumber: "",
-        confirmAccountNumber: "",
       });
       setAccountType("");
       setSubmitError(null);
     }
   }, [isOpen, reset]);
 
+  const onCountryChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
+    const newCountry = (e.target as HTMLSelectElement).value;
+    setValue("country", newCountry);
+    setValue("institutionNumber", "");
+    setValue("transitNumber", "");
+    setValue("routingNumber", "");
+    clearErrors();
+  };
+
   const formValid =
     accountType &&
-    institutionNumber?.trim() &&
-    transitNumber?.trim() &&
     accountNumber?.trim() &&
-    confirmAccountNumber?.trim() === accountNumber?.trim();
+    (isCanada
+      ? institutionNumber?.trim() && transitNumber?.trim()
+      : isUSA && routingNumber?.trim());
 
   const onSubmit = async (data: BankAccountFormValues) => {
     setSubmitError(null);
     clearErrors();
 
-    if (!data.institutionNumber?.trim()) {
-      setError("institutionNumber", { message: "Institution number is required" });
+    if (isCanada) {
+      if (!data.institutionNumber?.trim()) {
+        setError("institutionNumber", { message: "Institution number is required" });
+      }
+      if (!data.transitNumber?.trim()) {
+        setError("transitNumber", { message: "Transit number is required" });
+      }
+    } else if (isUSA) {
+      if (!data.routingNumber?.trim()) {
+        setError("routingNumber", { message: "Routing number is required" });
+      }
     }
-    if (!data.transitNumber?.trim()) {
-      setError("transitNumber", { message: "Transit number is required" });
-    }
+
     if (!data.accountNumber?.trim()) {
       setError("accountNumber", { message: "Account number is required" });
-    }
-    if (!data.confirmAccountNumber?.trim()) {
-      setError("confirmAccountNumber", { message: "Account number is required" });
-    } else if (data.confirmAccountNumber.trim() !== data.accountNumber.trim()) {
-      setError("confirmAccountNumber", { message: "Account numbers must match" });
     }
 
     if (!formValid || !providerId) return;
@@ -131,6 +152,20 @@ export function AddPayoutMethodModal({
     try {
       const countryCode = data.country === "US" ? "US" : "CA";
       const defaultCurrency = data.country === "US" ? "usd" : "cad";
+      const provider_bank_account =
+        isCanada
+          ? {
+              institution_number: data.institutionNumber.trim(),
+              transit_number: data.transitNumber.trim(),
+              account_number: data.accountNumber.trim(),
+              account_type: accountType as "chequing" | "savings",
+            }
+          : {
+              routing_number: data.routingNumber.trim(),
+              account_number: data.accountNumber.trim(),
+              account_type: accountType as "chequing" | "savings",
+            };
+
       const payload: CreateProviderPayoutAccountRequest = {
         provider_id: providerId,
         stripe_connected_account_id: `bank_${providerId}_${Date.now()}`,
@@ -138,12 +173,7 @@ export function AddPayoutMethodModal({
         default_currency: defaultCurrency,
         payout_method: "bank_account",
         payout_schedule: "biweekly",
-        provider_bank_account: {
-          institution_number: data.institutionNumber.trim(),
-          transit_number: data.transitNumber.trim(),
-          account_number: data.accountNumber.trim(),
-          account_type: accountType as "chequing" | "savings",
-        },
+        provider_bank_account,
       };
       await payoutAccountService.create(payload);
       onSuccess?.();
@@ -184,6 +214,7 @@ export function AddPayoutMethodModal({
                   isRequired
                   options={COUNTRY_OPTIONS}
                   placeholder="Select country"
+                  onChange={onCountryChange}
                 />
               </Box>
 
@@ -203,50 +234,60 @@ export function AddPayoutMethodModal({
                 </RadioGroup>
               </FormControl>
 
-              <Box mb={4}>
-                <CustomInputField
-                  type="text"
-                  label="Institution number"
-                  registerName="institutionNumber"
-                isRequired
-                placeholder="Institution number"
-                description="The bank code or the financial institution number identifies your bank and should be located in your bank statement or account details."
-                isError={errors.institutionNumber}
-                />
-              </Box>
+              {isCanada && (
+                <>
+                  <Box mb={4}>
+                    <CustomInputField
+                      type="text"
+                      label="Institution number"
+                      registerName="institutionNumber"
+                      isRequired
+                      placeholder="e.g. 021"
+                      description="3 digits. Identifies the bank. Found in your bank statement or account details."
+                      isError={errors.institutionNumber}
+                      maxLength={MAX_INSTITUTION}
+                    />
+                  </Box>
+                  <Box mb={4}>
+                    <CustomInputField
+                      type="text"
+                      label="Transit number"
+                      registerName="transitNumber"
+                      isRequired
+                      placeholder="e.g. 00021"
+                      description="5 digits. Identifies the branch of your bank."
+                      isError={errors.transitNumber}
+                      maxLength={MAX_TRANSIT}
+                    />
+                  </Box>
+                </>
+              )}
 
-              <Box mb={4}>
-                <CustomInputField
-                  type="text"
-                  label="Transit number"
-                  registerName="transitNumber"
-                isRequired
-                placeholder="Transit number"
-                description="The branch or transit number identifies a specific branch of your bank."
-                isError={errors.transitNumber}
-                />
-              </Box>
+              {isUSA && (
+                <Box mb={4}>
+                  <CustomInputField
+                    type="text"
+                    label="Routing number (ABA)"
+                    registerName="routingNumber"
+                    isRequired
+                    placeholder="e.g. 021000021"
+                    description="9 digits. Identifies your bank."
+                    isError={errors.routingNumber}
+                    maxLength={MAX_ROUTING}
+                  />
+                </Box>
+              )}
 
               <Box mb={4}>
                 <CustomInputField
                   type="text"
                   label="Account number"
                   registerName="accountNumber"
-                isRequired
-                placeholder="Account number"
-                isError={errors.accountNumber}
-                />
-              </Box>
-
-              <Box mb={4}>
-                <CustomInputField
-                  type="text"
-                  label="Confirm account number"
-                  registerName="confirmAccountNumber"
-                isRequired
-                placeholder="Confirm account number"
-                description="Enter the account number. This can usually be found within the account details."
-                isError={errors.confirmAccountNumber}
+                  isRequired
+                  placeholder="e.g. 123456789012"
+                  description="4–17 digits. Your customer account number."
+                  isError={errors.accountNumber}
+                  maxLength={MAX_ACCOUNT}
                 />
               </Box>
 

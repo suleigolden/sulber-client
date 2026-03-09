@@ -137,7 +137,7 @@ export const PaymentsSettings = () => {
 
   function maskAccountNumber(accountNumber: string): string {
     if (!accountNumber || accountNumber.length < 4) return "****";
-    return "*".repeat(Math.max(0, accountNumber.length - 4)) + accountNumber.slice(-4);
+    return "****" + accountNumber.slice(-4);
   }
 
   return (
@@ -298,11 +298,12 @@ export const PaymentsSettings = () => {
                           {payoutAccount.status !== "pending" && ` · Status: ${payoutAccount.status}`}
                         </Text>
                         <Text color={mutedTextColor} fontSize="xs" mt={1}>
-                          {payoutAccount.provider_bank_account?.bank_name && `Bank: ${payoutAccount.provider_bank_account.bank_name}`}
-                          {payoutAccount.provider_bank_account?.institution_number && ` · Institution: ${payoutAccount.provider_bank_account.institution_number}`}
-                          {payoutAccount.provider_bank_account?.transit_number && ` · Transit: ${payoutAccount.provider_bank_account.transit_number}`}
-                          {payoutAccount.provider_bank_account?.routing_number && ` · Routing: ${payoutAccount.provider_bank_account.routing_number}`}
-                          {payoutAccount.provider_bank_account?.account_number && ` · Account: ${maskAccountNumber(payoutAccount.provider_bank_account.account_number)}`}
+                          {payoutAccount.provider_bank_account?.bank_name &&
+                            `Bank: ${payoutAccount.provider_bank_account.bank_name}`}
+                          {(payoutAccount.provider_bank_account as any)?.last4 &&
+                            ` · Account: ${maskAccountNumber(
+                              String((payoutAccount.provider_bank_account as any).last4),
+                            )}`}
                         </Text>
                       </Box>
                       <Button

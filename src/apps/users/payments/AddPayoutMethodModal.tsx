@@ -6,27 +6,22 @@ import {
   ModalHeader,
   ModalCloseButton,
   ModalBody,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  Stack,
-  Radio,
   Button,
   Alert,
   AlertDescription,
   Box,
   Text,
+  FormControl,
+  FormLabel,
 } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useSystemColor } from "~/hooks/use-system-color";
 import { CustomInputField } from "~/components/fields/CustomInputField";
-import { api, type ProviderPayoutAccount, type CreateProviderPayoutAccountRequest, type UpdateProviderPayoutAccountRequest } from "@suleigolden/sulber-api-client";
-
-const COUNTRY_OPTIONS = [
-  { label: "Canada", value: "CA" },
-  { label: "United States", value: "US" },
-];
+import {
+  api,
+  type ProviderPayoutAccount,
+} from "@suleigolden/sulber-api-client";
 
 const PAYOUT_SCHEDULE_OPTIONS = [
   { label: "Weekly", value: "weekly" },
@@ -34,27 +29,21 @@ const PAYOUT_SCHEDULE_OPTIONS = [
   { label: "Monthly", value: "monthly" },
 ];
 
-// Max lengths (digits): institution 4, transit 6, routing 10, account 17
-const MAX_INSTITUTION = 4;
-const MAX_TRANSIT = 6;
-const MAX_ROUTING = 10;
-const MAX_ACCOUNT = 17;
-
-type BankAccountType = "chequing" | "savings";
-
-type BankAccountFormValues = {
-  country: string;
-  payoutSchedule: string;
-  bankName: string;
-  institutionNumber: string;
-  transitNumber: string;
-  routingNumber: string;
-  accountNumber: string;
+type PayoutFormValues = {
+  payoutSchedule: "weekly" | "biweekly" | "monthly";
 };
 
-function maskAccountNumber(num: string | undefined): string {
-  if (!num || num.length < 4) return "****";
-  return "*".repeat(Math.max(0, num.length - 4)) + num.slice(-4);
+function formatBankSummary(
+  account: ProviderPayoutAccount | null | undefined,
+): string | null {
+  if (!account?.provider_bank_account) return null;
+  const bank = account.provider_bank_account as any;
+  const pieces: string[] = [];
+  if (bank.bank_name) pieces.push(bank.bank_name);
+  if (bank.last4) pieces.push(`•••• ${bank.last4}`);
+  if (bank.country) pieces.push(bank.country);
+  if (bank.currency) pieces.push(bank.currency.toUpperCase());
+  return pieces.length ? pieces.join(" · ") : null;
 }
 
 export function AddPayoutMethodModal({
@@ -70,24 +59,19 @@ export function AddPayoutMethodModal({
   account?: ProviderPayoutAccount | null;
   onSuccess?: (isUpdate: boolean) => void;
 }) {
-  console.log("existingAccount", existingAccount);
   const { headingColor, labelColor, bodyColor, mutedTextColor, modalBg } = useSystemColor();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [accountType, setAccountType] = useState<BankAccountType | "">("");
 
   const isEditMode = Boolean(existingAccount?.id);
-  const bank = existingAccount?.provider_bank_account;
+  const bankSummary = useMemo(
+    () => formatBankSummary(existingAccount ?? null),
+    [existingAccount],
+  );
 
-  const methods = useForm<BankAccountFormValues>({
+  const methods = useForm<PayoutFormValues>({
     defaultValues: {
-      country: "CA",
       payoutSchedule: "biweekly",
-      bankName: "",
-      institutionNumber: "",
-      transitNumber: "",
-      routingNumber: "",
-      accountNumber: "",
     },
     mode: "onTouched",
   });
@@ -96,22 +80,9 @@ export function AddPayoutMethodModal({
     handleSubmit,
     reset,
     watch,
-    setValue,
-    setError,
-    clearErrors,
-    formState: { errors },
   } = methods;
 
-  const country = watch("country");
   const payoutSchedule = watch("payoutSchedule");
-  const bankName = watch("bankName");
-  const institutionNumber = watch("institutionNumber");
-  const transitNumber = watch("transitNumber");
-  const routingNumber = watch("routingNumber");
-  const accountNumber = watch("accountNumber");
-
-  const isCanada = country === "CA";
-  const isUSA = country === "US";
 
   const primaryButtonBg = useColorModeValue("gray.800", "whiteAlpha.200");
   const primaryButtonColor = useColorModeValue("white", "white");
@@ -119,166 +90,94 @@ export function AddPayoutMethodModal({
   const summaryBoxBg = useColorModeValue("gray.50", "whiteAlpha.100");
   const summaryBoxBorder = useColorModeValue("gray.200", "whiteAlpha.200");
 
-  // Populate form when modal opens or when existing account data (e.g. after refetch) is available
   useEffect(() => {
     if (!isOpen) {
       setSubmitError(null);
       return;
     }
     if (existingAccount?.id) {
-      const c = existingAccount.country_code === "US" ? "US" : "CA";
-      const bank = existingAccount.provider_bank_account;
       const values = {
-        country: c,
         payoutSchedule: existingAccount.payout_schedule ?? "biweekly",
-        bankName: bank?.bank_name ?? "",
-        institutionNumber: bank?.institution_number ?? "",
-        transitNumber: bank?.transit_number ?? "",
-        routingNumber: bank?.routing_number ?? "",
-        accountNumber: bank?.account_number ?? "",
       };
       reset(values, { keepDefaultValues: false });
-      setAccountType((bank?.account_type as BankAccountType) ?? "");
     } else {
       reset({
-        country: "CA",
         payoutSchedule: "biweekly",
-        bankName: "",
-        institutionNumber: "",
-        transitNumber: "",
-        routingNumber: "",
-        accountNumber: "",
       }, { keepDefaultValues: false });
-      setAccountType("");
     }
   }, [
     isOpen,
     existingAccount?.id,
-    existingAccount?.country_code,
     existingAccount?.payout_schedule,
-    // Re-run when bank data is available/updated (e.g. after refetch)
-    existingAccount?.provider_bank_account
-      ? JSON.stringify(existingAccount.provider_bank_account)
-      : null,
     reset,
   ]);
 
-  const onCountryChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-    const newCountry = (e.target as HTMLSelectElement).value;
-    setValue("country", newCountry);
-    setValue("institutionNumber", "");
-    setValue("transitNumber", "");
-    setValue("routingNumber", "");
-    clearErrors();
-  };
+  const hasStripeAccount = Boolean(existingAccount?.stripe_connected_account_id);
+  const payoutsEnabled = Boolean(existingAccount?.payouts_enabled);
+  const onboardingCompleted = Boolean(existingAccount?.onboarding_completed);
+  const hasRequirementsDue =
+    (((existingAccount as any)?.requirements_currently_due as string[] | undefined) ?? []).length >
+    0;
 
-  const formValid =
-    accountType &&
-    accountNumber?.trim() &&
-    (isCanada
-      ? institutionNumber?.trim() && transitNumber?.trim()
-      : isUSA && routingNumber?.trim());
+  const stripeCtaLabel = useMemo(() => {
+    if (!hasStripeAccount || !onboardingCompleted) {
+      return "Continue with Stripe";
+    }
+    if (hasRequirementsDue) {
+      return "Complete payout setup in Stripe";
+    }
+    return "Manage payout account in Stripe";
+  }, [hasStripeAccount, onboardingCompleted, hasRequirementsDue]);
 
-  const onSubmit = async (data: BankAccountFormValues) => {
+  const onSaveSchedule = async (data: PayoutFormValues) => {
     setSubmitError(null);
-    clearErrors();
-
-    if (isCanada) {
-      if (!data.institutionNumber?.trim()) {
-        setError("institutionNumber", { message: "Institution number is required" });
-      }
-      if (!data.transitNumber?.trim()) {
-        setError("transitNumber", { message: "Transit number is required" });
-      }
-    } else if (isUSA) {
-      if (!data.routingNumber?.trim()) {
-        setError("routingNumber", { message: "Routing number is required" });
-      }
-    }
-
-    if (!data.accountNumber?.trim()) {
-      setError("accountNumber", { message: "Account number is required" });
-    }
-
-    if (!formValid) return;
-
-    if (isEditMode && existingAccount) {
-      if (!existingAccount.id) return;
-      setIsSubmitting(true);
-      try {
-        const provider_bank_account =
-          isCanada
-            ? {
-                bank_name: data.bankName.trim() || undefined,
-                institution_number: data.institutionNumber.trim(),
-                transit_number: data.transitNumber.trim(),
-                account_number: data.accountNumber.trim(),
-                account_type: accountType as "chequing" | "savings",
-              }
-            : {
-                bank_name: data.bankName.trim() || undefined,
-                routing_number: data.routingNumber.trim(),
-                account_number: data.accountNumber.trim(),
-                account_type: accountType as "chequing" | "savings",
-              };
-        const payload: UpdateProviderPayoutAccountRequest = {
-          payout_schedule: data.payoutSchedule as "weekly" | "biweekly" | "monthly",
-          provider_bank_account,
-        };
-        await (api.service("provider-payout-account") as { update: (id: string, data: UpdateProviderPayoutAccountRequest) => Promise<ProviderPayoutAccount> }).update(existingAccount.id, payload);
-        onSuccess?.(true);
-        onClose();
-      } catch (e) {
-        const msg =
-          e && typeof e === "object" && "message" in e
-            ? String((e as { message: string }).message)
-            : "Failed to update payout account";
-        setSubmitError(msg);
-      } finally {
-        setIsSubmitting(false);
-      }
-      return;
-    }
-
-    if (!providerId) return;
     setIsSubmitting(true);
-
     try {
-      const countryCode = data.country === "US" ? "US" : "CA";
-      const defaultCurrency = data.country === "US" ? "usd" : "cad";
-      const provider_bank_account =
-        isCanada
-          ? {
-              bank_name: data.bankName.trim() || undefined,
-              institution_number: data.institutionNumber.trim(),
-              transit_number: data.transitNumber.trim(),
-              account_number: data.accountNumber.trim(),
-              account_type: accountType as "chequing" | "savings",
-            }
-          : {
-              bank_name: data.bankName.trim() || undefined,
-              routing_number: data.routingNumber.trim(),
-              account_number: data.accountNumber.trim(),
-              account_type: accountType as "chequing" | "savings",
-            };
-
-      const payload: CreateProviderPayoutAccountRequest = {
-        provider_id: providerId,
-        stripe_connected_account_id: `bank_${providerId}_${Date.now()}`,
-        country_code: countryCode,
-        default_currency: defaultCurrency,
-        payout_method: "bank_account",
-        payout_schedule: (data.payoutSchedule as "weekly" | "biweekly" | "monthly") || "biweekly",
-        provider_bank_account,
-      };
-      await (api.service("provider-payout-account") as { create: (data: CreateProviderPayoutAccountRequest) => Promise<ProviderPayoutAccount> }).create(payload);
-      onSuccess?.(false);
+      if (!providerId || !existingAccount?.id) {
+        return;
+      }
+      await (api.service("provider-payout-account") as unknown as {
+        updatePayoutSchedule: (data: {
+          payout_schedule: PayoutFormValues["payoutSchedule"];
+        }) => Promise<ProviderPayoutAccount>;
+      }).updatePayoutSchedule({
+        payout_schedule: data.payoutSchedule,
+      });
+      onSuccess?.(true);
       onClose();
     } catch (e) {
       const msg =
         e && typeof e === "object" && "message" in e
           ? String((e as { message: string }).message)
-          : "Failed to add bank account";
+          : "Failed to update payout schedule";
+      setSubmitError(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const onStripeCta = async () => {
+    setSubmitError(null);
+    if (!providerId) return;
+    setIsSubmitting(true);
+    try {
+      const service = api.service("provider-payout-account") as unknown as {
+        createStripeOnboardingLink: (data: {
+          payout_schedule?: "weekly" | "biweekly" | "monthly";
+          country_code?: string;
+        }) => Promise<{ url: string }>;
+      };
+      const res = await service.createStripeOnboardingLink({
+        payout_schedule: payoutSchedule || "biweekly",
+      });
+      if (res.url) {
+        window.location.href = res.url;
+      }
+    } catch (e) {
+      const msg =
+        e && typeof e === "object" && "message" in e
+          ? String((e as { message: string }).message)
+          : "Failed to start Stripe onboarding";
       setSubmitError(msg);
     } finally {
       setIsSubmitting(false);
@@ -303,159 +202,54 @@ export function AddPayoutMethodModal({
           {isEditMode && existingAccount && (
             <Box mb={4} p={3} borderRadius="md" bg={summaryBoxBg} borderWidth="1px" borderColor={summaryBoxBorder}>
               <Text fontSize="sm" fontWeight="600" color={headingColor} mb={2}>
-                Current account details
+                Current payout settings
               </Text>
               <Text fontSize="sm" color={bodyColor}>
                 Country: {existingAccount.country_code} · {existingAccount.payout_method.replace("_", " ")} · {existingAccount.default_currency.toUpperCase()}
               </Text>
               <Text fontSize="xs" color={mutedTextColor} mt={1}>
                 Schedule: {existingAccount.payout_schedule}
-                {bank?.bank_name && ` · Bank: ${bank.bank_name}`}
-                {bank?.institution_number && ` · Institution: ${bank.institution_number}`}
-                {bank?.transit_number && ` · Transit: ${bank.transit_number}`}
-                {bank?.routing_number && ` · Routing: ${bank.routing_number}`}
-                {bank?.account_number && ` · Account: ${maskAccountNumber(bank.account_number)}`}
+                {existingAccount.status && ` · Status: ${existingAccount.status}`}
               </Text>
+              {bankSummary && (
+                <Text fontSize="xs" color={mutedTextColor} mt={1}>
+                  Bank: {bankSummary}
+                </Text>
+              )}
+              {!payoutsEnabled && (
+                <Text fontSize="xs" color={mutedTextColor} mt={1}>
+                  Payouts are not yet enabled. You may need to finish setup in Stripe.
+                </Text>
+              )}
+              {hasRequirementsDue && (
+                <Text fontSize="xs" color={mutedTextColor} mt={1}>
+                  Stripe requires additional information to enable payouts.
+                </Text>
+              )}
             </Box>
           )}
 
           <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit)} noValidate>
-              {isEditMode && (
-                <>
-                  <Box mb={4}>
-                    <CustomInputField
-                      type="select"
-                      label="Payout schedule"
-                      registerName="payoutSchedule"
-                      isRequired
-                      options={PAYOUT_SCHEDULE_OPTIONS}
-                      placeholder="Select schedule"
-                    />
-                  </Box>
-                  <Box mb={4}>
-                    <CustomInputField
-                      type="text"
-                      label="Bank name"
-                      registerName="bankName"
-                      placeholder="e.g. TD Canada Trust"
-                      description="Name of your bank or financial institution."
-                      isError={errors.bankName}
-                    />
-                  </Box>
-                </>
-              )}
-
-              {!isEditMode && (
-                <Box mb={4}>
-                  <CustomInputField
-                    type="select"
-                    label="Payout schedule"
-                    registerName="payoutSchedule"
-                    isRequired
-                    options={PAYOUT_SCHEDULE_OPTIONS}
-                    placeholder="Select schedule"
-                  />
-                </Box>
-              )}
-
+            <form noValidate onSubmit={handleSubmit(onSaveSchedule)}>
               <Box mb={4}>
                 <CustomInputField
                   type="select"
-                  label="Country"
-                  registerName="country"
+                  label="Payout schedule"
+                  registerName="payoutSchedule"
                   isRequired
-                  options={COUNTRY_OPTIONS}
-                  placeholder="Select country"
-                  onChange={onCountryChange}
+                  options={PAYOUT_SCHEDULE_OPTIONS}
+                  placeholder="Select schedule"
                 />
               </Box>
 
-              <FormControl mb={4} isRequired>
+              <FormControl mb={4}>
                 <FormLabel color={labelColor}>
-                  Is this a chequing or savings account?
+                  Connect or manage your payout account with Stripe
                 </FormLabel>
-                <RadioGroup
-                  value={accountType}
-                  onChange={(v) => setAccountType(v as BankAccountType)}
-                  mt={2}
-                >
-                  <Stack spacing={2}>
-                    <Radio value="chequing">Chequing</Radio>
-                    <Radio value="savings">Savings</Radio>
-                  </Stack>
-                </RadioGroup>
+                <Text fontSize="sm" color={mutedTextColor}>
+                  You&apos;ll be redirected to Stripe&apos;s secure onboarding flow to add or update your payout bank account.
+                </Text>
               </FormControl>
-
-              {!isEditMode && (
-                <Box mb={4}>
-                  <CustomInputField
-                    type="text"
-                    label="Bank name"
-                    registerName="bankName"
-                    placeholder="e.g. TD Canada Trust"
-                    description="Name of your bank or financial institution."
-                    isError={errors.bankName}
-                  />
-                </Box>
-              )}
-
-              {isCanada && (
-                <>
-                  <Box mb={4}>
-                    <CustomInputField
-                      type="text"
-                      label="Institution number"
-                      registerName="institutionNumber"
-                      isRequired
-                      placeholder="e.g. 021"
-                      description="3 digits. Identifies the bank."
-                      isError={errors.institutionNumber}
-                      maxLength={MAX_INSTITUTION}
-                    />
-                  </Box>
-                  <Box mb={4}>
-                    <CustomInputField
-                      type="text"
-                      label="Transit number"
-                      registerName="transitNumber"
-                      isRequired
-                      placeholder="e.g. 00021"
-                      description="5 digits. Identifies the branch."
-                      isError={errors.transitNumber}
-                      maxLength={MAX_TRANSIT}
-                    />
-                  </Box>
-                </>
-              )}
-
-              {isUSA && (
-                <Box mb={4}>
-                  <CustomInputField
-                    type="text"
-                    label="Routing number (ABA)"
-                    registerName="routingNumber"
-                    isRequired
-                    placeholder="e.g. 021000021"
-                    description="9 digits. Identifies your bank."
-                    isError={errors.routingNumber}
-                    maxLength={MAX_ROUTING}
-                  />
-                </Box>
-              )}
-
-              <Box mb={4}>
-                <CustomInputField
-                  type="text"
-                  label="Account number"
-                  registerName="accountNumber"
-                  isRequired
-                  placeholder="e.g. 123456789012"
-                  description="4–17 digits. Your customer account number."
-                  isError={errors.accountNumber}
-                  maxLength={MAX_ACCOUNT}
-                />
-              </Box>
 
               <Button
                 type="submit"
@@ -465,11 +259,27 @@ export function AddPayoutMethodModal({
                 size="lg"
                 w="full"
                 mt={6}
-                isDisabled={!formValid || isSubmitting}
+                isDisabled={isSubmitting}
                 isLoading={isSubmitting}
-                loadingText={isEditMode ? "Saving…" : "Adding…"}
+                loadingText={isEditMode ? "Saving…" : "Saving…"}
               >
-                {isEditMode ? "Save changes" : "Add bank account"}
+                {isEditMode ? "Save schedule" : "Save schedule"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                borderColor={primaryButtonBg}
+                color={primaryButtonBg}
+                _hover={{ bg: "transparent", borderColor: primaryButtonHover, color: primaryButtonHover }}
+                size="lg"
+                w="full"
+                mt={4}
+                onClick={onStripeCta}
+                isDisabled={!providerId || isSubmitting}
+                isLoading={isSubmitting && !isEditMode}
+              >
+                {stripeCtaLabel}
               </Button>
             </form>
           </FormProvider>

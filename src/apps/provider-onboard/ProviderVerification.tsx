@@ -53,7 +53,7 @@ export const ProviderVerification = forwardRef<
           .service("identity-verification")
           .findByUserId(user.id);
         const stripeVerification = verifications.find(
-          (v) => v.provider_id === "STRIPE_IDENTITY"
+          (v) => (v as any).provider === "STRIPE_IDENTITY"
         );
        
         const sessionId = stripeVerification?.external_session_id;
@@ -103,7 +103,7 @@ export const ProviderVerification = forwardRef<
           .service("identity-verification")
           .findByUserId(user.id);
         const stripeVerification = verifications.find(
-          (v) => v.provider_id === "STRIPE_IDENTITY"
+          (v) => (v as any).provider === "STRIPE_IDENTITY"
         );
 
         if (stripeVerification) {

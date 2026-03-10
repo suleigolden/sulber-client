@@ -162,6 +162,9 @@ export const ProviderLocation = forwardRef(
             border="1px #333333 solid"
             borderRadius="0 0 8px 8px">
               <Text fontSize="md" color={mutedColor} mt={-7}>
+                Select City, State, and Country to get started.
+              </Text>
+              <Text fontSize="md" color={mutedColor} mt={-3}>
                 Primary earning location. Where do you want to offer your services?
               </Text>
 

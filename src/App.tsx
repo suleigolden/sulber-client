@@ -5,6 +5,7 @@ import { theme } from "./theme/theme";
 import { initAxios } from "@suleigolden/sulber-api-client";
 import { DashboardNavBar } from "./layouts/admin";
 import { useState } from "react";
+import { ContactUs } from "./apps/landing-page/contact-us";
 
 function App() {
   const [currentTheme, setCurrentTheme] = useState(theme);
@@ -16,6 +17,7 @@ function App() {
           {/* PublicRoutes */}
           <Route>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/contact-us" element={<ContactUs />} />
           </Route>
           <Route
             path="customer/*"

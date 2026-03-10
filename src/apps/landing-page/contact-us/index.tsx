@@ -14,6 +14,7 @@ import {
   VStack,
   Container,
   useColorModeValue,
+  useColorMode,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -30,12 +31,10 @@ export const ContactUs = () => {
   const theLastSpellingBeeReCaptchaKey = import.meta.env.VITE_THE_LAST_SPELLING_BEE_RE_CAPTCHA_KEY;
 
   // Color mode values
-  const bgColor = useColorModeValue("white", "gray.800");
+  const { colorMode } = useColorMode();
   const textColor = useColorModeValue("gray.700", "gray.200");
   const borderColor = useColorModeValue("gray.300", "gray.600");
-  const inputBg = useColorModeValue("white", "gray.700");
   const boxShadow = useColorModeValue("md", "dark-lg");
-  const pageBgColor = useColorModeValue("gray.50", "#0b1437");
 
   const {
     handleSubmit,
@@ -94,12 +93,12 @@ export const ContactUs = () => {
 
 
   return (
-    <Box bg={pageBgColor}>
+    <Box>
        <Navbar />
        <SystemThemeToggle />
       <Container maxW="6xl" py={30}>
         <VStack align="stretch" spacing={8} mt={20}>
-          <Box bg={bgColor} rounded="lg" p={8} shadow={boxShadow}>
+          <Box rounded="lg" p={8} shadow={boxShadow}>
             <Heading fontSize="4xl" textAlign="center" color={textColor} mb={4}>
               Contact Us
             </Heading>
@@ -115,7 +114,6 @@ export const ContactUs = () => {
           <VStack 
             align="stretch" 
             spacing={8} 
-            bg={bgColor} 
             mt={4} 
             rounded="lg" 
             p={8} 
@@ -131,7 +129,6 @@ export const ContactUs = () => {
                   <Select
                     {...register("subject")}
                     placeholder="Select a topic"
-                    bg={inputBg}
                     color={textColor}
                     borderColor={borderColor}
                     {...(errors.subject && { borderColor: "red.500" })}
@@ -149,7 +146,6 @@ export const ContactUs = () => {
                   <Input
                     {...register("fullName")}
                     placeholder="Enter your full name"
-                    bg={inputBg}
                     color={textColor}
                     borderColor={borderColor}
                     {...(errors.fullName && { borderColor: "red.500" })}
@@ -163,7 +159,6 @@ export const ContactUs = () => {
                     {...register("email")}
                     type="email"
                     placeholder="Enter your email address"
-                    bg={inputBg}
                     color={textColor}
                     borderColor={borderColor}
                     {...(errors.email && { borderColor: "red.500" })}
@@ -177,7 +172,6 @@ export const ContactUs = () => {
                     {...register("message")}
                     placeholder="Type your message here..."
                     rows={5}
-                    bg={inputBg}
                     color={textColor}
                     borderColor={borderColor}
                     {...(errors.message && { borderColor: "red.500" })}
@@ -189,6 +183,7 @@ export const ContactUs = () => {
                   <TheLastSpellingBeeReCaptcha
                     reCaptchaKey={theLastSpellingBeeReCaptchaKey}
                     questionType="RANDOM"
+                    isDarkMode={colorMode === "dark"}
                     onVerifyCaptcha={(result: any) => {
                       setIsCaptchaVerify(!result);
                     }}

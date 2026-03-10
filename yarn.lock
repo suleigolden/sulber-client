@@ -3278,10 +3278,10 @@ tailwindcss@^4.2.0:
   resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-4.2.0.tgz#fe0a67ddebe0c383096f68d22c677ae8af428ded"
   integrity sha512-yYzTZ4++b7fNYxFfpnberEEKu43w44aqDMNM9MHMmcKuCH7lL8jJ4yJ7LGHv7rSwiqM0nkiobF9I6cLlpS2P7Q==
 
-the-last-spelling-bee-re-captcha@^3.0.22:
-  version "3.0.22"
-  resolved "https://registry.yarnpkg.com/the-last-spelling-bee-re-captcha/-/the-last-spelling-bee-re-captcha-3.0.22.tgz#5fe3529d9c771ca82b84bbf45368f754a2d656d1"
-  integrity sha512-lfzZ83YpKXzoFURMoJRZG8KEX64xuQdRiQttNsg2RhaS9ifWr37mPUxuZ5M9iPK6sWp01/liNVyj3ewdN9Rfgg==
+the-last-spelling-bee-re-captcha@^3.0.23:
+  version "3.0.23"
+  resolved "https://registry.yarnpkg.com/the-last-spelling-bee-re-captcha/-/the-last-spelling-bee-re-captcha-3.0.23.tgz#d986f74487957f8f62e54fcf51ac675efbeba6a7"
+  integrity sha512-aFeWRUqaWd38nS3TiyE7DGp83tKozBTg6T44u/mfD7FSITOfVylIMPQ6NMDJmq/SLDGc5M/HV08sZ87+Ziq4JA==
   dependencies:
     "@chakra-ui/icons" "^2.1.1"
     "@chakra-ui/react" "^2.8.2"

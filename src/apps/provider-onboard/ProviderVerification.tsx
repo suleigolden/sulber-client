@@ -169,11 +169,11 @@ export const ProviderVerification = forwardRef<
           documentType: "driver_license" as DocumentType,
         });
 
-      setVerificationUrl(response.verification_session.url);
-      setVerificationSessionId(response.verification_session.id);
+      setVerificationUrl(response.verificationSession.url);
+      setVerificationSessionId(response.verificationSession.id);
 
       // Open Stripe verification in a new window
-      window.open(response.verification_session.url, "_blank", "width=800,height=600");
+      window.open(response.verificationSession.url, "_blank", "width=800,height=600");
 
       showToast(
         "Verification Started",

@@ -86,24 +86,25 @@ export const UserInformation = forwardRef<
   // Watch required fields to determine if user info is valid
   const firstName = watch("first_name");
   const lastName = watch("last_name");
-  const avatarUrl = watch("avatar_url");
   const dateOfBirth = watch("date_of_birth");
   const phoneNumber = watch("phone_number");
   const gender = watch("gender");
+  const avatarUrl = watch("avatar_url");
 
   const isUserInfoValid = !!(
     firstName?.trim() &&
     lastName?.trim() &&
-    avatarUrl &&
     dateOfBirth &&
     phoneNumber &&
-    gender
+    gender &&
+    avatarUrl
   );
 
   // Notify parent component about validation state
   useEffect(() => {
+    console.log("isUserInfoValid******", isUserInfoValid);
     onUserInfoValidChange?.(isUserInfoValid);
-  }, [isUserInfoValid, onUserInfoValidChange]);
+  }, [isUserInfoValid, onUserInfoValidChange, firstName, lastName, dateOfBirth, phoneNumber, gender]);
 
   // Initialize form with existing user profile data
   useEffect(() => {
@@ -197,6 +198,10 @@ export const UserInformation = forwardRef<
               options={Gender.map((gender) => ({ label: gender, value: gender }))}
               isError={errors?.gender}
               placeholder="Select your gender"
+              onChange={(e) => {
+                console.log("e******", e);
+                setValue("gender", e.target.value);
+              }}
             />
 
             <CustomInputField
